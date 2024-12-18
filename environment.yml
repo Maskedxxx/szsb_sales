@@ -1,0 +1,23 @@
+name: semantic-router
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+  - python=3.11
+  - pip
+  - conda-forge::python-dotenv
+  - conda-forge::langchain
+  - conda-forge::pandas
+  - conda-forge::fastapi
+  - conda-forge::transformers
+  - conda-forge::pyarrow
+  - pytorch::pytorch
+  - pytorch::pytorch-cuda=12.4
+  - pytorch::torchaudio
+  - pytorch::torchvision
+  - pip:
+    - semantic-router
+    - langchain-ollama
+    - langchain-huggingface
