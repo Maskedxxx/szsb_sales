@@ -10,7 +10,14 @@ class Query(BaseModel):
     question: str
     subsectorId: str
 
+class Metadata(BaseModel):
+    selected_keys: List[str]
+    selected_files: List[str]
+    app_version: str
+    key_selection_model: str
+    rerank_model: str
+    generation_model: str
+
 class Response(BaseModel):
     answer: str
-    selected_files: List[str]
-    selected_keys: List[str]
+    meta: Metadata
