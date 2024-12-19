@@ -8,9 +8,11 @@ from core.engine import handle_query
 
 router = APIRouter()
 
+
 @router.get("/health")
 async def health():
     return {"status": "ok"}
+
 
 @router.get("/subsectors", response_model=List[Subsector])
 async def get_subsectors() -> List[Subsector]:
@@ -30,9 +32,9 @@ async def process_query(query: Query) -> Response:
     """
     try:
         return await handle_query(query)
+
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500,
-                            detail=str(e))
-    
+                            detail=str(e)) from e

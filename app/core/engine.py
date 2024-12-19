@@ -17,7 +17,7 @@ from langsmith import traceable, Client
 from core.prompts import PROMPT_SELECT_KEY, PROMPT_FINAL_ANSWER
 from core.semantic_search import run as semantic_search
 from data.subsectors import SUBSECTOR_ROUTES
-from api.models import Response, Query
+from api.models import Metadata, Response, Query
 from config import ROUTES_PATH, UTTERANCES_PATH
 from utils.logger import logger
 from utils.file_utils import (
@@ -223,37 +223,37 @@ def process_json_and_answer(json_path: Union[Path, str], selected_files: List[st
         return "Произошла ошибка при обработке запроса."
 
 
-async def handle_query(query: Query):
+async def handle_query(query: Query) -> tuple[str, dict[str,any]]:
     logger.info(
-        f"Получен вопрос: {query.question}, subsectorId: {query.subsectorId}")
-
-    try:
-        # Проверяем существование отрасли
-        if query.subsectorId not in SUBSECTOR_ROUTES:
-            raise ValueError(f"Неверный ID отрасли: {query.subsectorId}")
-
-        # Шаг 1 находим релевантный файл с помощью модуля "semantic_search"
-        selected_files = semantic_search(
-            ROUTES_PATH, UTTERANCES_PATH, query.question, query.subsectorId)
-        logger.info(f"Пути к выбранным файлам: {selected_files}")
-
-        # Шаг 2 Получаем полный путь к выбранной папке в которой оказался релевантный файл
-        selected_folder = os.path.dirname(selected_files[0])
-        folder_path_for_answer: Path = Path(ROUTES_PATH) / selected_folder
-
-        # Шаг 3 находим релевантную информацию (ключи) и генерируем ответ в заключительном модуле "process_json_and_answer"
-        response_text, selected_keys = process_json_and_answer(
-            folder_path_for_answer,
-            [os.path.basename(f) for f in selected_files],
-            query.question)
-
-        logger.info("Успешно сформирован ответ.")
-        return Response(answer=response_text,
-                        selected_files=selected_files,
-                        selected_keys=selected_keys)
+        "Получен вопрос: %s, subsectorId: %s" ,query.question ,query.subsectorId)
     
-    except Exception as e:
-        logger.info(f"Ошибка при обработке запроса: {str(e)}")
-        return Response(answer="Произошла ошибка при обработке запроса.",
-                        selected_files=[],
-                        selected_keys=[])
+    # Проверяем существование отрасли
+    if query.subsectorId not in SUBSECTOR_ROUTES:
+        raise ValueError(f"Неверный ID отрасли: {query.subsectorId}")
+
+    # Шаг 1 находим релевантный файл с помощью модуля "semantic_search"
+    selected_files = semantic_search(
+        ROUTES_PATH, UTTERANCES_PATH, query.question, query.subsectorId)
+    logger.info(f"Пути к выбранным файлам: {selected_files}")
+
+    # Шаг 2 Получаем полный путь к выбранной папке в которой оказался релевантный файл
+    selected_folder = os.path.dirname(selected_files[0])
+    folder_path_for_answer: Path = Path(ROUTES_PATH) / selected_folder
+
+    # Шаг 3 находим релевантную информацию (ключи) и генерируем ответ в заключительном модуле "process_json_and_answer"
+    answer, selected_keys = process_json_and_answer(
+        folder_path_for_answer,
+        [os.path.basename(f) for f in selected_files],
+        query.question)
+    
+    metadata = Metadata(
+        selected_keys=selected_keys,
+        selected_files=selected_files,
+        app_version=os.getenv('APP_VERSION'),
+        key_selection_model=os.getenv('KEY_SELECTION_MODEL'),
+        rerank_model=os.getenv('RERANK_MODEL'),
+        generation_model=os.getenv('GENERATION_MODEL')
+    )
+
+    logger.info("Успешно сформирован ответ.")
+    return Response(answer=answer, meta=metadata)
