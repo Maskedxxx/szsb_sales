@@ -8,4 +8,4 @@ WORKDIR /app
 
 COPY . .
 
-ENTRYPOINT [ "conda", "run", "-p", "/env",  "python", "app/main.py"]
+ENTRYPOINT [ "conda", "run", "--no-capture-output", "-p", "/env",  "python", "-u", "app/main.py"]

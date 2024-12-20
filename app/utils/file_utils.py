@@ -93,7 +93,7 @@ def setup_encoder_and_layer(routes: List[Route]) -> HybridRouteLayer:
     """
 
     logger.info("Начало создания HybridRouteLayer из роутеров")
-    dense_encoder = HuggingFaceEncoder(score_threshold=0.7)
+    dense_encoder = HuggingFaceEncoder(name='TatonkaHF/bge-m3_en_ru',score_threshold=0.7)
     sparse_encoder = TfidfEncoder(score_threshold=0.75)
 
     alpha = 0.59  # Вес плотного энкодера в гибридном слое 0.59 default
