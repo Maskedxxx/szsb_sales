@@ -1,4 +1,4 @@
-# data.py
+# subsectors.py
 
 # Список доступных отраслей для фронтенда
 SUBSECTORS = [
