@@ -1,10 +1,11 @@
-# api_service.py
+# main.py
+
+from dotenv import load_dotenv
+load_dotenv('.env.docker', override=True)
 
 import os
 from fastapi import FastAPI
-from dotenv import load_dotenv
 from api.endpoints import router as api_router
-load_dotenv('.env', override=True)
 
 app = FastAPI()
 app.include_router(api_router)
