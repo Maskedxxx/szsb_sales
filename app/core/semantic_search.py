@@ -20,12 +20,11 @@ from utils.file_utils import (
     setup_encoder_and_layer
 )
 
-ollama_api_key = os.getenv("OLLAMA_API_KEY")
 # Оборачиваем OpenAI клиента для LangSmith
 ls_client = Client(api_key = os.getenv("LANGCHAIN_API_KEY"))
 client = wrap_openai(
     OpenAI(
-        base_url=os.getenv("OLLAMA_BASE_URL"),
+        base_url=os.path.join(os.getenv("OLLAMA_BASE_URL"), 'v1'),
         api_key=os.getenv("OLLAMA_API_KEY")
         )
     )

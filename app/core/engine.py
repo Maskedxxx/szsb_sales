@@ -28,8 +28,10 @@ from utils.file_utils import (
 )
 
 ls_client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
-client = wrap_openai(OpenAI(base_url=os.getenv(
-    "OLLAMA_BASE_URL"), api_key=os.getenv("OLLAMA_API_KEY")))
+client = wrap_openai(
+    OpenAI(base_url=os.path.join(os.getenv("OLLAMA_BASE_URL"), 'v1'),
+            api_key=os.getenv("OLLAMA_API_KEY"))
+    )
 
 # Установите кодировщик для используемой модели
 enc = tiktoken.encoding_for_model("gpt-4")
@@ -175,6 +177,7 @@ def process_json_and_answer(json_path: Union[Path, str], selected_files: List[st
             top_p=0.95,
             top_k=50,
             model=os.getenv('GENERATION_MODEL'),
+            base_url=os.getenv('OLLAMA_BASE_URL'),
             format='json'
         )
 
@@ -218,9 +221,13 @@ def process_json_and_answer(json_path: Union[Path, str], selected_files: List[st
 
         return final_response, selected_keys
 
+    except ConnectionError as e:
+        logger.info(f"Ошибка при обработке запроса: {str(e)}")
+        raise ConnectionError(e)
+    
     except Exception as e:
         logger.info(f"Ошибка при обработке запроса: {str(e)}")
-        return "Произошла ошибка при обработке запроса."
+        raise Exception(e)
 
 
 async def handle_query(query: Query) -> tuple[str, dict[str,any]]:
