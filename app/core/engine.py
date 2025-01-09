@@ -233,15 +233,15 @@ def process_json_and_answer(json_path: Union[Path, str], selected_files: List[st
 
 async def handle_query(query: Query) -> tuple[str, dict[str,any]]:
     logger.info(
-        "Получен вопрос: %s, subsectorId: %s" ,query.question ,query.subsectorId)
+        "Получен вопрос: %s, subsector_id: %s" ,query.question, query.subsector_id)
     
     # Проверяем существование отрасли
-    if query.subsectorId not in SUBSECTOR_ROUTES:
-        raise ValueError(f"Неверный ID отрасли: {query.subsectorId}")
+    if query.subsector_id not in SUBSECTOR_ROUTES:
+        raise ValueError(f"Неверный ID отрасли: {query.subsector_id}")
 
     # Шаг 1 находим релевантный файл с помощью модуля "semantic_search"
     selected_files = semantic_search(
-        ROUTES_PATH, UTTERANCES_PATH, query.question, query.subsectorId)
+        ROUTES_PATH, UTTERANCES_PATH, query.question, query.subsector_id)
     logger.info(f"Пути к выбранным файлам: {selected_files}")
 
     # Шаг 2 Получаем полный путь к выбранной папке в которой оказался релевантный файл
