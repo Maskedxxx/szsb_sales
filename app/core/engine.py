@@ -24,7 +24,8 @@ from utils.file_utils import (
     extract_key_descriptions,
     read_and_merge_json,
     clean_text,
-    get_nested_data
+    get_nested_data,
+    clean_string
 )
 
 ls_client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
@@ -206,12 +207,12 @@ def process_json_and_answer(json_path: Union[Path, str], selected_files: List[st
             response, 'content') else str(response)
 
         # Формирование финального ответа с префиксом
-        file_list = ", ".join(selected_files)
-        prefix = f"\n\nЕсли ответ не полный перейдите в соответствующие документы --> {file_list}\n\n"
-        final_response = f"{content} {prefix}"
+        # file_list = ", ".join(selected_files)
+        # prefix = f"\n\nЕсли ответ не полный перейдите в соответствующие документы --> {file_list}\n\n"
+        # final_response = f"{content} {prefix}"
 
         # Подсчет и вывод метрик
-        response_tokens = float(count_tokens(final_response))
+        response_tokens = float(count_tokens(content))
         tokens_per_second = response_tokens / elapsed_time if elapsed_time > 0 else 0.0
 
         logger.info(f"Время генерации ответа: {elapsed_time:.2f} секунд")
@@ -219,7 +220,7 @@ def process_json_and_answer(json_path: Union[Path, str], selected_files: List[st
         logger.info(
             f"Скорость генерации токенов: {tokens_per_second:.2f} токенов/секунду")
 
-        return final_response, selected_keys
+        return clean_string(content), selected_keys
 
     except ConnectionError as e:
         logger.info(f"Ошибка при обработке запроса: {str(e)}")
