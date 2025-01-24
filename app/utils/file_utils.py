@@ -329,3 +329,16 @@ def get_nested_data(data: Dict[str, Any], keys: List[str]) -> Any:
             # Если ключ не найден или текущие данные не являются словарем, возвращаем текущие данные
             return data
     return data
+
+
+def clean_string(text):
+    # First, replace double line breaks with a unique marker
+    text = text.replace('\n\n', '<DOUBLE_BREAK>')
+    
+    # Clean the string, keeping single '\n' as is
+    cleaned = ''.join(char for char in text if char.isalnum() or char.isspace() or char in ['-', ':', '\n', '"'])
+    
+    # Restore double line breaks
+    cleaned = cleaned.replace('<DOUBLE_BREAK>', '\n\n')
+    
+    return cleaned

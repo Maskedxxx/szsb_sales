@@ -1,13 +1,17 @@
 # main.py
 
 from dotenv import load_dotenv
-load_dotenv('.env.docker', override=True)
+load_dotenv('.env.local', override=True)
 
 import os
 from fastapi import FastAPI
 from api.endpoints import router as api_router
 
-app = FastAPI()
+app = FastAPI(
+    title="AI-Assistant API",
+    description="API for the sales department ai-assistant.",
+    version="0.1.0"
+)
 app.include_router(api_router)
 
 if __name__ == "__main__":
