@@ -30,8 +30,8 @@ from utils.file_utils import (
 
 ls_client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
 client = wrap_openai(
-    OpenAI(base_url=os.path.join(os.getenv("OLLAMA_BASE_URL"), 'v1'),
-            api_key=os.getenv("OLLAMA_API_KEY"))
+    OpenAI(base_url=os.path.join(os.getenv("PROVIDER_BASE_URL"), 'v1'),
+            api_key=os.getenv("PROVIDER_API_KEY"))
     )
 
 # Установите кодировщик для используемой модели
@@ -178,7 +178,7 @@ def process_json_and_answer(json_path: Union[Path, str], selected_files: List[st
             top_p=0.95,
             top_k=50,
             model=os.getenv('GENERATION_MODEL'),
-            base_url=os.getenv('OLLAMA_BASE_URL'),
+            base_url=os.getenv('PROVIDER_BASE_URL'),
             format='json'
         )
 

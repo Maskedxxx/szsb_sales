@@ -24,8 +24,8 @@ from utils.file_utils import (
 ls_client = Client(api_key = os.getenv("LANGCHAIN_API_KEY"))
 client = wrap_openai(
     OpenAI(
-        base_url=os.path.join(os.getenv("OLLAMA_BASE_URL"), 'v1'),
-        api_key=os.getenv("OLLAMA_API_KEY")
+        base_url=os.path.join(os.getenv("PROVIDER_BASE_URL"), 'v1'),
+        api_key=os.getenv("PROVIDER_API_KEY")
         )
     )
 
