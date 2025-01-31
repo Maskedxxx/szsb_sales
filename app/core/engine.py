@@ -4,17 +4,16 @@ import os
 import json
 import time
 from pathlib import Path
-from typing import List, Dict, Literal, Union, Optional
+from typing import List, Dict, Union, Optional
 
 import tiktoken
-from pydantic import BaseModel, Field, ValidationError
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from openai import OpenAI
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable, Client
 
-from core.models import KeySelectionParseModel, KeySelectionValidationModel
+from app.core.key_selector import KeySelectionConfig, KeySelectionPromptTemplate, KeySelectionService
 from core.prompts import PROMPT_SELECT_KEY, PROMPT_FINAL_ANSWER
 from core.semantic_search import run as semantic_search
 from data.subsectors import SUBSECTOR_ROUTES
@@ -65,64 +64,17 @@ def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[s
     Returns:
         List[str]: Список выбранных ключей, релевантных запросу пользователя.
     """
-
-    logger.info("Переданные ключи с описанием:\n" + "\n".join(
-        f"\t{k}: {v[:50] + '...' if len(v) > 50 else v}"
-        for k, v in key_descriptions.items()
-    ))
-
-    all_keys = list(key_descriptions.keys())  # Берем все ключи
-
-    # Подготовка ключей с описаниями для промпта
-    keys_with_descriptions = "\n".join(
-        [f"{key}: {desc}" for key, desc in key_descriptions.items()])
-
-    # Формируем сообщения для модели
-    messages = [
-        {"role": "system", "content": PROMPT_SELECT_KEY["system"]},
-        {"role": "user", "content": PROMPT_SELECT_KEY["user"].format(
-            query=query,
-            keys=keys_with_descriptions
-        )}
-    ]
-
-    try:
-        # Запрос к модели с указанием схемы ответа
-        logger.info("ЗАПУСКАЕМ МОДЕЛЬ ВЫБОРА КЛЮЧЕЙ : %s", os.getenv('KEY_SELECTION_MODEL'))
-        parsed_response = client.beta.chat.completions.parse(
-            temperature=0,
-            model=os.getenv('KEY_SELECTION_MODEL'),
-            messages=messages,
-            response_format=KeySelectionParseModel,  # Передаем схему
-        )
-
-        route_response = parsed_response.choices[0].message
-        logger.info("Ответ получен...")
-        logger.info(
-            f"**Содержимое обьекта ответа `message`**: \n {route_response}")
-
-        # Если парсинг успешен
-        if route_response.parsed:
-            # Validate using the refactored model with runtime constraints
-            try:
-                validated_data = KeySelectionValidationModel.model_validate(
-                    obj=route_response.parsed.model_dump(),
-                    context={"allowed_keys": all_keys}  # Pass runtime keys
-                )
-            except ValidationError as e:
-                logger.error(f"Ошибка валидации ответа модели: {e}")
-                return []
-            
-            logger.info(f"Выбранные ключи: {validated_data.keys}")
-            return validated_data.keys
-
-        elif route_response.refusal:
-            raise ValueError(
-                f"Модель отказалась делать выбор: {route_response.refusal}")
-
-    except Exception as e:
-        logger.info(f"Ошибка при выборе ключей с помощью LLM: {e}")
-        return []
+    config = KeySelectionConfig(
+        model_name=os.getenv('KEY_SELECTION_MODEL')
+    )
+    
+    prompt_template = KeySelectionPromptTemplate(
+        system=PROMPT_SELECT_KEY["system"],
+        user=PROMPT_SELECT_KEY["user"]
+    )
+    
+    key_selector = KeySelectionService(client, config, prompt_template)
+    return key_selector.select_relevant_keys(query, key_descriptions)
 
 
 def process_json_and_answer(json_path: Union[Path, str], selected_files: List[str], user_query: str, nested_keys: Optional[List[str]] = ['product_list']):
