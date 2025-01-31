@@ -13,7 +13,8 @@ from openai import OpenAI
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable, Client
 
-from app.core.key_selector import KeySelectionConfig, KeySelectionPromptTemplate, KeySelectionService
+from core.key_selection_service import KeySelectionConfig, KeySelectionPromptTemplate, KeySelectionService
+from core.final_generation_service import FinalGenerationConfig, FinalGenerationPromptTemplate, FinalGenerationService
 from core.prompts import PROMPT_SELECT_KEY, PROMPT_FINAL_ANSWER
 from core.semantic_search import run as semantic_search
 from data.subsectors import SUBSECTOR_ROUTES
@@ -113,45 +114,32 @@ def process_json_and_answer(json_path: Union[Path, str], selected_files: List[st
             if key in json_contents
         }
 
-        # Шаг 5: Генерация ответа
-        llm = ChatOllama(
-            temperature=0.1,
-            min_tokens=500,
-            top_p=0.95,
-            top_k=50,
-            model=os.getenv('GENERATION_MODEL'),
-            base_url=os.getenv('PROVIDER_BASE_URL'),
-            format='json'
-        )
-
         formatted_content = json.dumps(
             relevant_data, indent=2, ensure_ascii=False)
         cleaned_content = clean_text(formatted_content)
+        
+        config = FinalGenerationConfig(
+            model_name=os.getenv('GENERATION_MODEL')
+        )
 
-        prompt_template = ChatPromptTemplate.from_messages([
-            ("system", PROMPT_FINAL_ANSWER["system"]),
-            ("user", PROMPT_FINAL_ANSWER["user"]),
-        ])
+        prompt_template = FinalGenerationPromptTemplate(
+            system=PROMPT_FINAL_ANSWER["system"],
+            user=PROMPT_FINAL_ANSWER["user"]
+        )
 
-        logger.info("ЗАПУСК МОДЕЛИ ДЛЯ ФИНАЛЬНОГО ОТВЕТА : %s", os.getenv('GENERATION_MODEL'))
-        chain = prompt_template | llm
+        final_answer_generator = FinalGenerationService(
+            client=client,
+            config=config,
+            prompt_template=prompt_template
+        )
 
-        # Замер времени и генерация ответа
         start_time = time.time()
-        response = chain.invoke({
-            "question": user_query,
-            "content": cleaned_content,
-        })
+        response = final_answer_generator.generate_final_answer(user_query, cleaned_content)
         elapsed_time = time.time() - start_time
 
         # Обработка ответа
         content = response.content if hasattr(
             response, 'content') else str(response)
-
-        # Формирование финального ответа с префиксом
-        # file_list = ", ".join(selected_files)
-        # prefix = f"\n\nЕсли ответ не полный перейдите в соответствующие документы --> {file_list}\n\n"
-        # final_response = f"{content} {prefix}"
 
         # Подсчет и вывод метрик
         response_tokens = float(count_tokens(content))
@@ -162,7 +150,7 @@ def process_json_and_answer(json_path: Union[Path, str], selected_files: List[st
         logger.info(
             f"Скорость генерации токенов: {tokens_per_second:.2f} токенов/секунду")
 
-        return clean_string(content), selected_keys
+        return content, selected_keys
 
     except ConnectionError as e:
         logger.info(f"Ошибка при обработке запроса: {str(e)}")
