@@ -2,7 +2,7 @@ from typing import List
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 MIN_KEYS=1
-MAX_KEYS=1
+MAX_KEYS=3
 MIN_REASONING_STEPS=1
 MAX_REASONING_STEPS=3
 
