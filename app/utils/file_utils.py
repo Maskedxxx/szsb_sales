@@ -1,25 +1,66 @@
 # utils/file_utils.py
 
+import glob
 import json
+import os
 import re
 from pathlib import Path
 from typing import Dict, Any, List, Union, Tuple, Set
-from semantic_router.route import Route
-from semantic_router.encoders import TfidfEncoder, HuggingFaceEncoder
-from semantic_router.hybrid_layer import HybridRouteLayer
-from config import ROUTES_PATH
 from utils.logger import logger
 
+def get_valid_routing_table(dir_path: str, routing_table_path: str) -> Dict[str, Dict[str,Dict[str, Any]]]:
+    with open(routing_table_path, 'r', encoding='utf-8') as file:  # Читаем данные из JSON файла
+        routing_table = json.load(file)
+    
+    subsector_dirs = [os.path.basename(f.path) for f in os.scandir(dir_path) if f.is_dir()]
+    existing_subsectors = {}
+    for subsector, routes in routing_table.items():
+        if subsector not in subsector_dirs:
+            logger.warning("Subsector %s has no corresponding directory in %s", subsector, dir_path)
+            continue
 
+        existing_routes = get_existing_routes(
+            subsector = subsector,
+            path = os.path.join(dir_path, subsector),
+            routes = routes 
+        )
+
+        existing_subsectors[subsector] = existing_routes
+    
+    return existing_subsectors
+
+def get_existing_routes(subsector: str, path: str, routes: Dict[str, List[str]]) -> Dict[str, Dict[str,Any]]:
+    subsector_paths = [path for path in glob.glob(path + '/*.json')]
+    subsector_filenames = [Path(file_path).stem for file_path in subsector_paths]
+    subsector_filepaths = dict(zip(subsector_filenames, subsector_paths))
+
+    existing_routes = {}
+    for route_key, utterances in routes.items():
+        if route_key not in subsector_filenames:
+            logger.warning("Route %s for subsector %s has no corresponding file", route_key, subsector)
+            continue
+        
+        description = get_route_description(subsector_filepaths[route_key])
+        if not description:
+            logger.warning("Route %s has no file description!", route_key)
+            continue
+
+        existing_routes[route_key] = {
+            "description": description,
+            "utterances": utterances
+        }
+    
+    return existing_routes
+    
 def get_json_filenames(directory: str) -> List[str]:
     """
-    Возвращает список имен файлов с расширением ".json" в указанной директории.
+    Returns ".json" filenames from given directory path.
 
     Args:
-        directory (str): Путь к директории для поиска файлов.
+        directory (str): Path to directory.
 
     Returns:
-        List[str]: Список имен файлов с расширением ".json".
+        List[str]: Files with ".json" extension.
     """
     path = Path(directory)
     json_files = [file.name for file in path.glob('*.json')]
@@ -28,124 +69,24 @@ def get_json_filenames(directory: str) -> List[str]:
 
     return json_files
 
-
-def create_routes(file_names: List[str], json_path: str) -> Tuple[List[Route], int]:
+def get_route_description(path: str) -> str | None:
     """
-    Создает список объектов Route и возвращает их вместе с общим количеством.
+    Получает описание маршрута из JSON файла.
 
     Args:
-        file_names (List[str]): список имён файлов.
-        json_path (str): путь к JSON файлу с utterances.
+        path: path to file with description
 
     Returns:
-        Tuple[List[Route], int]: список маршрутов и их общее количество.
+        str: описание маршрута
     """
+    data = json.loads(Path(path).read_text(encoding='utf-8'))
+    description = data.get('description')
+    if description:
+        return description
+    
+    return None
 
-    # Начало создания маршрутов/роутеров из файлов
-    with open(json_path, 'r', encoding='utf-8') as file:  # Читаем данные из JSON файла
-        utterances_data = json.load(file)
-
-    routes = []  # Создаем список объектов Route
-    for file_name in file_names:
-        route_name = Path(file_name).stem  # Получаем имя файла без расширения
-        # Проверяем существование роутера
-        if route_name not in utterances_data or 'route' not in utterances_data[route_name]:
-            logger.warning(
-                "Предупреждение: для файла '%s' не найден соответствующий роутер", file_name)
-            continue
-
-        route_info = utterances_data[route_name]['route']
-        # Извлекаем имя роутера или используем имя файла
-        route_name = route_info.get('name', route_name)
-        # Извлекаем utterances роутера
-        utterances = route_info.get('utterances', [])
-        routes.append(Route(name=route_name, utterances=utterances))
-
-    total_routes = len(routes)
-    # Проверяем, что для всех файлов найдены роутеры
-    if total_routes == len(file_names):
-        logger.info(
-            f"Для всех файлов JSON найдены роутеры с utterances. Всего создано {total_routes} маршрутов.")
-    else:
-        logger.info(
-            f"Создано {total_routes} маршрутов из {len(file_names)} файлов JSON.")
-
-    return routes, total_routes
-
-
-def setup_encoder_and_layer(routes: List[Route]) -> HybridRouteLayer:
-    """
-    Настраивает энкодеры и слой маршрутизации.
-
-    Эта функция инициализирует два типа энкодеров:
-      - `HuggingFaceEncoder`: плотный энкодер на основе модели Hugging Face.
-      - `TfidfEncoder`: разреженный энкодер, использующий TF-IDF.
-
-    Затем создается гибридный слой маршрутизации `HybridRouteLayer`, который комбинирует 
-    результаты обоих энкодеров для повышения точности поиска.
-
-    Args:
-        routes (List[Route]): Список объектов маршрутов для слоя маршрутизации.
-
-    Returns:
-        HybridRouteLayer: Инициализированный слой маршрутизации, готовый 
-                          для выполнения гибридного поиска.
-    """
-
-    logger.info("Начало создания HybridRouteLayer из роутеров")
-    dense_encoder = HuggingFaceEncoder(name='TatonkaHF/bge-m3_en_ru',score_threshold=0.7)
-    sparse_encoder = TfidfEncoder(score_threshold=0.75)
-
-    alpha = 0.59  # Вес плотного энкодера в гибридном слое 0.59 default
-    top_k = 5
-    aggregation = "max"
-
-    dl = HybridRouteLayer(
-        encoder=dense_encoder,
-        sparse_encoder=sparse_encoder,
-        routes=routes,
-        alpha=alpha,
-        top_k=top_k,
-        aggregation=aggregation
-    )
-    logger.info(
-        f"HybridRouteLayer готов. Параметры: alpha={alpha}, aggregation={aggregation}")
-    return dl
-
-
-def get_top_routes_utils(dl: HybridRouteLayer, text_query: str, top_k: int) -> List[Dict[str, Any]]:
-    """
-    Возвращает список топ-N маршрутов вместе с их оценками для заданного текста,
-    группируя результаты по уникальным маршрутам.
-
-    :param dl: Экземпляр HybridRouteLayer
-    :param text_query: Текстовый запрос
-    :param top_k: Количество возвращаемых маршрутов
-    :return: Список словарей с именами маршрутов и их агрегированными оценками.
-             Каждый словарь имеет структуру {"route": str, "score": float}.
-    """
-    # Здесь мы вызываем приватный метод _query
-    query_results = dl._query(text_query, top_k * 2)
-    route_scores = {}
-
-    for result in query_results:
-        route_name = result['route']
-        score = result['score']
-        # Агрегируем по максимуму
-        if route_name in route_scores:
-            route_scores[route_name] = max(route_scores[route_name], score)
-        else:
-            route_scores[route_name] = score
-
-    # Сортируем маршруты по убыванию оценок
-    sorted_routes = sorted(route_scores.items(),
-                           key=lambda item: item[1], reverse=True)
-
-    # Возвращаем только топ-N маршрутов
-    return [{"route": name, "score": score} for name, score in sorted_routes]
-
-
-def get_route_description(route_name: str, selected_folder: str) -> str:
+def get_route_description_by_subsector(route_name: str, selected_folder: str) -> str:
     """
     Получает описание маршрута из JSON файла.
 
@@ -156,8 +97,8 @@ def get_route_description(route_name: str, selected_folder: str) -> str:
     Returns:
         str: описание маршрута
     """
-    file_path = Path(ROUTES_PATH) / selected_folder / f"{route_name}.json"
-    data = json.loads(file_path.read_text(encoding='utf-8'))
+    file_path = os.path.join(selected_folder, f"{route_name}.json") 
+    data = json.loads(Path(file_path).read_text(encoding='utf-8'))
     description = data.get('description')
     if description:
         return description
@@ -165,100 +106,115 @@ def get_route_description(route_name: str, selected_folder: str) -> str:
     raise ValueError(f"Отсутствует описание для маршрута {route_name}")
 
 
-def read_and_merge_json(json_path: Path, selected_files: List[str]) -> Dict[str, Any]:
+def read_and_merge(paths: List[str]) -> Dict[str, Any]:
     """
-    Читает JSON файлы из указанной папки и объединяет их содержимое в один словарь.
+    Reads JSON files from given paths and merges them to a single JSON
 
     Args:
-        json_path (Path): Путь к директории с JSON файлами
-        selected_files (List[str]): Список имен файлов для чтения
+        paths (List[str]): JSON paths to merge
 
     Returns:
-        Dict[str, Any]: Объединенный словарь с содержимым всех JSON файлов
+        Dict[str, Any]: Dict with merged JSONs
 
     Raises:
-        FileNotFoundError: Если указанный путь или файлы не существуют
-        JSONDecodeError: При ошибке парсинга JSON файлов
+        FileNotFoundError: File on path does not exist
+        JSONDecodeError: JSON decoding issues
     """
-    json_contents = {}
+    merged = {}
 
-    logger.info("ЧИтаем содержимое JSON файлов...")
-    for file_name in selected_files:
-        file_path = json_path / file_name
+    logger.info("Reading json files...")
+    for p in paths:
         try:
-            content = json.loads(file_path.read_text(encoding='utf-8'))
-            json_contents.update(content)
-        except FileNotFoundError:
-            logger.info(f"Файл не найден: {file_path}")
-        except json.JSONDecodeError:
-            logger.info(f"Ошибка при парсинге JSON файла: {file_name}")
+            with open(p, encoding='utf-8') as f:
+                d = json.load(f)
+            merged.update(d)
+
+        except FileNotFoundError as e:
+            logger.info(f"File not found: {p}")
+        except json.JSONDecodeError as e:
+            logger.info(f"JSON Decoding failed: {p}")
         except Exception as e:
-            logger.info(f"Ошибка при чтении файла {file_name}: {str(e)}")
+            logger.info(f"Error while reading {p}: {str(e)}")
 
-    return json_contents
+    return merged
 
 
-def extract_key_descriptions(json_content: Dict[str, Any], description_key: str = 'description', exclude_keys: Set[str] = {'description', 'keywords'}
+def normalize_dict_descriptions(source: Dict[str, Any],
+                             description_key: str = 'description', 
+                             exclude_keys: Set[str] = {'description', 'keywords'}
                              ) -> Dict[str, str]:
     """
-    Извлекает описания для каждого ключа из JSON-содержимого.
+    The function takes descriptions stored in various formats within a dictionary (nested dictionaries, lists, or direct strings)
+    and normalizes them into a consistent structure where each key maps directly to its description as a string.
 
-    Функция обрабатывает три случая:
-    1. Значение — словарь с ключом описания
-    2. Значение — список, где первый элемент содержит описание
-    3. Значение — строка
+    3 cases are being processed, where the description-value:
+    1. is a Dict with 'description' as a key and the de-facto description-value as value
+    2. is a List, where the first item contains the description-value
+    3. directly maps to the key
 
     Args:
-        json_content: JSON-данные в виде словаря
-        description_key: Имя ключа с описанием, это подключ всех вернеуровневых ключей кроме ключей исключения `exclude_keys` (по умолчанию 'description')
-        exclude_keys: Множество ключей для исключения, эти исключения являются ключами верхнего уровня (по умолчанию {'description', 'keywords'})
+        source: Source Dict to be normalized
+        description_key: Keyname mapping the description-value
+        exclude_keys: Set of keys constrained to the document itself rather to one of the subjects in the document (default {'description', 'keywords'})
 
     Returns:
-        Словарь, где ключи — из исходного JSON (кроме исключенных),
-        а значения — соответствующие описания
+        Uniform Dict[str,str], where the key maps directly the description value
 
     Example:
-        >>> data = {
+        >>> source = {
         ...     "item1": {"description": "desc1"},
         ...     "item2": ["Description: desc2"],
-        ...     "item3": "simple string"
+        ...     "item3": "desc3"
         ... }
-        >>> extract_key_descriptions(data)
-        {'item1': 'desc1', 'item2': 'desc2', 'item3': 'simple string'}
+        >>> extract_key_descriptions(source)
+
+        returns 
+
+        >>> {
+        ...    'item1': 'desc1',
+        ...    'item2': 'desc2',
+        ...    'item3': 'desc3'
+        >>> }
     """
     logger.info(
-        "Извлекаем содержимое description (описания) всех выбранных ключей...")
-    key_descriptions: Dict[str, str] = {}
+        "Normalizing dict with descriptions...")
+    
+    if not isinstance(source, dict):
+        raise TypeError("json_content must be a dictionary")
+    
+    if not isinstance(description_key, str):
+        raise TypeError("description_key must be a string")
+    
+    normalized = {}
     desc_marker = f"{description_key}:"
+    desc_marker_lower = desc_marker.lower()
 
-    for key, value in json_content.items():
+    for key, value in source.items():
         if key in exclude_keys:
             continue
 
-        description = ""
-
         # Случай 1: Словарь с ключом описания
         if isinstance(value, dict):
-            description = value.get(description_key, "")
+            if description := value.get(description_key):
+                normalized[key] = description
 
         # Случай 2: Список с описанием в первом элементе
-        elif isinstance(value, list) and value:
-            first_item = value[0]
-            if isinstance(first_item, str):
-                # Проверяем наличие маркера описания
-                if desc_marker.lower() in first_item.lower():
-                    description = first_item.split(desc_marker, 1)[1].strip()
-                else:
-                    description = first_item.strip()
+        elif isinstance(value, list) and value and isinstance(value[0], str):
+            first_item = value[0].strip()
+            # Проверяем наличие маркера описания
+            if desc_marker_lower in first_item.lower():
+                description = first_item.split(desc_marker, 1)[1].strip()
+            else:
+                description = first_item.strip()
 
         # Случай 3: Строковое значение
         elif isinstance(value, str):
             description = value.split('\n')[0].strip()
 
         if description:  # Добавляем только непустые описания
-            key_descriptions[key] = description
+            normalized[key] = description
 
-    return key_descriptions
+    return normalized
 
 
 def clean_text(json_text: str) -> str:
@@ -330,15 +286,6 @@ def get_nested_data(data: Dict[str, Any], keys: List[str]) -> Any:
             return data
     return data
 
-
-def clean_string(text):
-    # First, replace double line breaks with a unique marker
-    text = text.replace('\n\n', '<DOUBLE_BREAK>')
-    
-    # Clean the string, keeping single '\n' as is
-    cleaned = ''.join(char for char in text if char.isalnum() or char.isspace() or char in ['-', ':', '\n', '"'])
-    
-    # Restore double line breaks
-    cleaned = cleaned.replace('<DOUBLE_BREAK>', '\n\n')
-    
-    return cleaned
+def remove_think_tags(text):
+    pattern = r'<think>.*?</think>'
+    return re.sub(pattern, '', text, flags=re.DOTALL)
