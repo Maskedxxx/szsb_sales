@@ -20,6 +20,7 @@ semantic/
 .vscode/
 .idea/
 
+app/utils/logs/
 # Исключаем файлы конфигурации и учетных данных
 #.env
 

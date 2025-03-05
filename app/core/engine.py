@@ -3,53 +3,94 @@
 import os
 import json
 import time
-from pathlib import Path
-from typing import List, Dict, Literal, Union, Optional
+from typing import Any, List, Dict
 
-import tiktoken
-from pydantic import BaseModel, Field
-from langchain_ollama import ChatOllama
-from langchain_core.prompts import ChatPromptTemplate
 from openai import OpenAI
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable, Client
+from semantic_router import HybridRouteLayer
 
-from core.prompts import PROMPT_SELECT_KEY, PROMPT_FINAL_ANSWER
-from core.semantic_search import run as semantic_search
+from core.services.reranking_service import RerankingConfig, RerankingPromptTemplate, RerankingService
+from core.services.key_selection_service import KeySelectionConfig, KeySelectionPromptTemplate, KeySelectionService
+from core.services.final_generation_service import FinalGenerationConfig, FinalGenerationPromptTemplate, FinalGenerationService
+from core.services.semantic_routing_service import SemanticRoutingConfig, SemanticRoutingService
+from core.prompts import PROMPT_RERANK_ROU, PROMPT_SELECT_KEY, PROMPT_FINAL_ANSWER
 from data.subsectors import SUBSECTOR_ROUTES
 from api.models import Metadata, Response, Query
-from config import ROUTES_PATH, UTTERANCES_PATH
+from config import ROUTES_PATH, ROUTING_TABLE_PATH
 from utils.logger import logger
 from utils.file_utils import (
-    extract_key_descriptions,
-    read_and_merge_json,
+    normalize_dict_descriptions,
+    read_and_merge,
     clean_text,
     get_nested_data,
-    clean_string
+    remove_think_tags,
 )
 
 ls_client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
 client = wrap_openai(
-    OpenAI(base_url=os.path.join(os.getenv("OLLAMA_BASE_URL"), 'v1'),
-            api_key=os.getenv("OLLAMA_API_KEY"))
+    OpenAI(base_url=os.path.join(os.getenv("PROVIDER_BASE_URL"), 'v1'),
+            api_key=os.getenv("PROVIDER_API_KEY"))
     )
 
-# Установите кодировщик для используемой модели
-enc = tiktoken.encoding_for_model("gpt-4")
+routing_config = SemanticRoutingConfig(
+    routes_path=ROUTES_PATH,
+    routing_table_path=ROUTING_TABLE_PATH,
+    dense_encoder_name = os.getenv("DENSE_ENCODER_MODEL"),
+    dense_encoder_device = os.getenv("DENSE_ENCODER_DEVICE")
+)
 
+routing_service = SemanticRoutingService(
+        config = routing_config
+)
+routing_service.add_routers()
 
-def count_tokens(s: str) -> int:
+@traceable(client=ls_client, project_name="llamaindex_test", run_type = "retriever")
+def rerank_routes(query_text: str, top_routes: Dict[str, str]) -> List[str]:
     """
-    Подсчитывает количество токенов в строке.
-
+    Переранжирует маршруты на основе вопроса пользователя.
     Args:
-        s: Входная строка
-
+        query_text: Текст запроса пользователя
+        top_routes: Список словарей с маршрутами, где каждый содержит 'route' и 'description'
     Returns:
-        Количество токенов
+        Словарь с ключами:
+            - selected_route: List[str] - список выбранных маршрутов
+            - reasoning_step_by_step: List[str] - шаги рассуждения
+            - reason: str - причина выбора
     """
-    return len(enc.encode(s))
+    try:
+        config = RerankingConfig(
+            model_name=os.getenv('RERANK_MODEL')
+        )
 
+        prompt_template = RerankingPromptTemplate(
+            system=PROMPT_RERANK_ROU["system"],
+            user=PROMPT_RERANK_ROU["user"]
+        )
+
+        routes_reranker = RerankingService(
+            client=client,
+            config=config,
+            prompt_template=prompt_template
+        )
+
+        logger.info(f"Reranking routes...\n")
+        start_time = time.time()
+        reranked_routes = routes_reranker.rerank_routes(query=query_text, routes=top_routes)
+        elapsed_time = time.time() - start_time
+
+        # Подсчет и вывод метрик
+        logger.info(f"RERANKING handling time: {elapsed_time:.2f} seconds\n")
+       
+        return reranked_routes
+
+    except ConnectionError as e:
+        logger.info(f"Сonnection error on reranking: {str(e)}")
+        raise ConnectionError(e)
+    
+    except Exception as e:
+        logger.info(f"Error on reranking: {str(e)}")
+        raise Exception(e)
 
 @traceable(client=ls_client, project_name="llamaindex_test", run_type="retriever")
 def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[str]:
@@ -64,204 +105,148 @@ def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[s
     Returns:
         List[str]: Список выбранных ключей, релевантных запросу пользователя.
     """
+    config = KeySelectionConfig(
+        model_name=os.getenv('KEY_SELECTION_MODEL')
+    )
+    
+    prompt_template = KeySelectionPromptTemplate(
+        system=PROMPT_SELECT_KEY["system"],
+        user=PROMPT_SELECT_KEY["user"]
+    )
+    
+    key_selector = KeySelectionService(client, config, prompt_template)
 
-    logger.info("Переданные ключи с описанием:\n" + "\n".join(
-        f"\t{k}: {v[:50] + '...' if len(v) > 50 else v}"
-        for k, v in key_descriptions.items()
-    ))
+    logger.info(f"Selecting relevant keys...\n")
+    start_time = time.time()
+    selected_keys = key_selector.select_relevant_keys(query, key_descriptions)
+    elapsed_time = time.time() - start_time
 
-    all_keys = list(key_descriptions.keys())  # Берем все ключи
+    logger.info(f"KEYSELECTION handling time: {elapsed_time:.2f} seconds\n")
 
-    # Динамически формируем Pydantic модель на основе доступных ключей
-    KeyType = Literal[tuple(all_keys)]
+    return selected_keys
 
-    class KeySelection(BaseModel):
-        keys: List[KeyType] = Field(
-            ...,
-            max_items=1,
-            description="Полное название / имя выбранного маршрута/ключа без его описания!"
-        )
-        reasoning_step_by_step: List[str] = Field(
-            ...,
-            min_items=1,
-            max_items=3,
-            description="Массив строк с пошаговым рассуждением. Каждый элемент должен быть полным предложением"
-        )
-
-    # Подготовка ключей с описаниями для промпта
-    keys_with_descriptions = "\n".join(
-        [f"{key}: {desc}" for key, desc in key_descriptions.items()])
-
-    # Формируем сообщения для модели
-    messages = [
-        {"role": "system", "content": PROMPT_SELECT_KEY["system"]},
-        {"role": "user", "content": PROMPT_SELECT_KEY["user"].format(
-            query=query,
-            keys=keys_with_descriptions
-        )}
-    ]
-
-    try:
-        # Запрос к модели с указанием схемы ответа
-        logger.info("ЗАПУСКАЕМ МОДЕЛЬ ВЫБОРА КЛЮЧЕЙ : %s", os.getenv('KEY_SELECTION_MODEL'))
-        completion = client.beta.chat.completions.parse(
-            temperature=0,
-            model=os.getenv('KEY_SELECTION_MODEL'),
-            messages=messages,
-            response_format=KeySelection,  # Передаем схему Pydantic
-        )
-
-        route_response = completion.choices[0].message
-        logger.info("Ответ получен...")
-        logger.info(
-            f"**Содержимое обьекта ответа `message`**: \n {route_response}")
-
-        # Если парсинг успешен
-        if route_response.parsed:
-            result = route_response.parsed.model_dump()
-            logger.info(
-                f"**Распарсенные аргументы JSON из ответа модели**: \n {result}")
-
-            # Вывод результатов
-            logger.info(f"Выбранные ключи: {result['keys']}")
-
-            return result["keys"]
-        elif route_response.refusal:
-            raise ValueError(
-                f"Модель отказалась делать выбор: {route_response.refusal}")
-
-    except Exception as e:
-        logger.info(f"Ошибка при выборе ключей с помощью LLM: {e}")
-        return []
-
-
-def process_json_and_answer(json_path: Union[Path, str], selected_files: List[str], user_query: str, nested_keys: Optional[List[str]] = ['product_list']):
+@traceable(client=ls_client, project_name="llamaindex_test", run_type = "retriever")
+def generate_final_answer(user_query: str, context : str):
     """
-    Обрабатывает JSON файлы и генерирует ответ на вопрос пользователя.
+    Генерирует ответ на вопрос пользователя.
 
     Args:
-        json_path (Path): Путь к директории с JSON файлами для обработки
-        selected_files (List[str]): Список имен файлов, которые нужно обработать
-        user_query (str): Вопрос пользователя для генерации ответа
-        nested_keys: Optional[List[str]]: Имя вложенного ключа или ключей в JSON, содержащего данные для ответа.
-                                    По умолчанию 'product_list'
+        user_query (str): user's question in the query
+        context (str): Context for answer generation
 
     Returns:
-        str: Сгенерированный ответ с префиксом имен использованных файлов
-
-    Raises:
-        FileNotFoundError: Если указанный путь или файлы не существуют
-        JSONDecodeError: При ошибке парсинга JSON файлов
-        Exception: При других ошибках обработки запроса
+        str: generated answer
     """
 
-    # Преобразуем json_path в Path, если это строка
-    if isinstance(json_path, str):
-        json_path = Path(json_path)
-
     try:
-        # Шаги 1-4: Подготовка данных
-        json_contents = read_and_merge_json(json_path, selected_files)
-        key_descriptions = extract_key_descriptions(json_contents)
-
-        selected_keys = select_relevant_keys(user_query, key_descriptions)
-        relevant_data = {
-            key: get_nested_data(json_contents[key], nested_keys)
-            for key in selected_keys
-            if key in json_contents
-        }
-
-        # Шаг 5: Генерация ответа
-        llm = ChatOllama(
-            temperature=0.1,
-            min_tokens=500,
-            top_p=0.95,
-            top_k=50,
-            model=os.getenv('GENERATION_MODEL'),
-            base_url=os.getenv('OLLAMA_BASE_URL'),
-            format='json'
+        config = FinalGenerationConfig(
+            model_name=os.getenv('GENERATION_MODEL')
         )
 
-        formatted_content = json.dumps(
-            relevant_data, indent=2, ensure_ascii=False)
-        cleaned_content = clean_text(formatted_content)
+        prompt_template = FinalGenerationPromptTemplate(
+            system=PROMPT_FINAL_ANSWER["system"],
+            user=PROMPT_FINAL_ANSWER["user"]
+        )
 
-        prompt_template = ChatPromptTemplate.from_messages([
-            ("system", PROMPT_FINAL_ANSWER["system"]),
-            ("user", PROMPT_FINAL_ANSWER["user"]),
-        ])
+        final_answer_generator = FinalGenerationService(
+            client=client,
+            config=config,
+            prompt_template=prompt_template
+        )
 
-        logger.info("ЗАПУСК МОДЕЛИ ДЛЯ ФИНАЛЬНОГО ОТВЕТА : %s", os.getenv('GENERATION_MODEL'))
-        chain = prompt_template | llm
-
-        # Замер времени и генерация ответа
         start_time = time.time()
-        response = chain.invoke({
-            "question": user_query,
-            "content": cleaned_content,
-        })
+        response = final_answer_generator.generate_final_answer(user_query, context)
         elapsed_time = time.time() - start_time
 
         # Обработка ответа
-        content = response.content if hasattr(
+        answer = response.content if hasattr(
             response, 'content') else str(response)
+        
+        logger.info(f"FINAL GENERATION handling time: {elapsed_time:.2f} seconds\n")
 
-        # Формирование финального ответа с префиксом
-        # file_list = ", ".join(selected_files)
-        # prefix = f"\n\nЕсли ответ не полный перейдите в соответствующие документы --> {file_list}\n\n"
-        # final_response = f"{content} {prefix}"
-
-        # Подсчет и вывод метрик
-        response_tokens = float(count_tokens(content))
-        tokens_per_second = response_tokens / elapsed_time if elapsed_time > 0 else 0.0
-
-        logger.info(f"Время генерации ответа: {elapsed_time:.2f} секунд")
-        logger.info(f"Всего сгенерировано токенов: {response_tokens}")
-        logger.info(
-            f"Скорость генерации токенов: {tokens_per_second:.2f} токенов/секунду")
-
-        return clean_string(content), selected_keys
+        return answer
 
     except ConnectionError as e:
-        logger.info(f"Ошибка при обработке запроса: {str(e)}")
+        logger.info(f"Error while generating answer: {str(e)}")
         raise ConnectionError(e)
     
     except Exception as e:
-        logger.info(f"Ошибка при обработке запроса: {str(e)}")
+        logger.info(f"Error while generating answer: {str(e)}")
         raise Exception(e)
 
 
-async def handle_query(query: Query) -> tuple[str, dict[str,any]]:
+async def handle_query(query: Query) -> Response:
     logger.info(
-        "Получен вопрос: %s, subsector_id: %s" ,query.question, query.subsector_id)
+        "REQUEST USER QUERY: %s, SUBSECTOR_ID: %s", query.question, query.subsector_id)
     
     # Проверяем существование отрасли
     if query.subsector_id not in SUBSECTOR_ROUTES:
-        raise ValueError(f"Неверный ID отрасли: {query.subsector_id}")
+        raise ValueError(f"INVALID SUBSECTOR_ID: {query.subsector_id}")
 
-    # Шаг 1 находим релевантный файл с помощью модуля "semantic_search"
-    selected_files = semantic_search(
-        ROUTES_PATH, UTTERANCES_PATH, query.question, query.subsector_id)
-    logger.info(f"Пути к выбранным файлам: {selected_files}")
+    selected_subsector = SUBSECTOR_ROUTES[query.subsector_id]
+    logger.info(f"Subsector selected: {selected_subsector}")
 
-    # Шаг 2 Получаем полный путь к выбранной папке в которой оказался релевантный файл
-    selected_folder = os.path.dirname(selected_files[0])
-    folder_path_for_answer: Path = Path(ROUTES_PATH) / selected_folder
+    # Шаг 1 находим релевантные файлы
+    start_time = time.time()
+    relevant_routes = routing_service.top_routes(
+        subsector = selected_subsector,
+        text = query.question,
+        top_n = 5
+    )
+    elapsed_time = time.time() - start_time
+    logger.info(f"SEMANTIC SEARCH handling time: {elapsed_time} seconds\n")
+
+    # повторное ранжирование найденных топ маршрутов
+    reranked_routes = rerank_routes(query.question, relevant_routes)
+    logger.info(f"Reranked routes: {reranked_routes}")
+
+    # Путь к выбранной папке
+    subsector_dir = os.path.join(ROUTES_PATH, selected_subsector)
+
+    # Проверяем существование папки
+    if not os.path.exists(subsector_dir):
+        logger.error("Subsector dir not found: %s", subsector_dir)
+        raise ValueError(f"Subesctor dir for {selected_subsector} not found")
+    
+    # возврат полного пути к выбранным файлам/маршруту
+    if reranked_routes:
+        reranked_routes_paths = [os.path.join(subsector_dir, r + '.json') for r in reranked_routes]
+    else:
+        logger.info(f"Reranking failed; Falling back to semantic top_routes:\n {relevant_routes}")
+        reranked_routes_paths = [os.path.join(subsector_dir, r + '.json') for r in relevant_routes.keys()]
+
+    # Шаги 1-4: Подготовка данных
+    merged_files : Dict[str, Any] = read_and_merge(reranked_routes_paths)
+
+    key_descriptions = normalize_dict_descriptions(merged_files)
+
+    relevant_keys = select_relevant_keys(query.question, key_descriptions)
+    relevant_data = {
+        key: get_nested_data(merged_files[key], ['product_list'])
+        for key in relevant_keys
+        if key in merged_files
+    }
+
+    formatted_content = json.dumps(
+        relevant_data, indent=2, ensure_ascii=False)
+    cleaned_content = clean_text(formatted_content)
 
     # Шаг 3 находим релевантную информацию (ключи) и генерируем ответ в заключительном модуле "process_json_and_answer"
-    answer, selected_keys = process_json_and_answer(
-        folder_path_for_answer,
-        [os.path.basename(f) for f in selected_files],
-        query.question)
+    answer = generate_final_answer(
+        user_query=query.question,
+        context=cleaned_content
+    )
     
     metadata = Metadata(
-        selected_keys=selected_keys,
-        selected_files=selected_files,
+        selected_keys=relevant_keys,
+        selected_files=reranked_routes_paths,
         app_version=os.getenv('APP_VERSION'),
         key_selection_model=os.getenv('KEY_SELECTION_MODEL'),
         rerank_model=os.getenv('RERANK_MODEL'),
         generation_model=os.getenv('GENERATION_MODEL')
     )
 
-    logger.info("Успешно сформирован ответ.")
+    answer = remove_think_tags(answer)
+
+    logger.info("Answer formed successfully.")
     return Response(answer=answer, meta=metadata)

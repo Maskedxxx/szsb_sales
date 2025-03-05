@@ -3,7 +3,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
 import os
-from pathlib import Path
 
 def setup_logger(name: str = 'app') -> logging.Logger:
     """
