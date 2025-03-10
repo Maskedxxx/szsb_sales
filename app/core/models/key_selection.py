@@ -7,18 +7,24 @@ MIN_REASONING_STEPS=1
 MAX_REASONING_STEPS=3
 
 class KeySelectionParseModel(BaseModel):
+    reasoning_step_by_step: List[str] = Field(
+    ..., 
+    min_items=MIN_REASONING_STEPS, 
+    max_items=MAX_REASONING_STEPS, 
+    description="Массив строк с пошаговым рассуждением. Каждый элемент должен быть полным предложением."
+    )
+    reason: str = Field(
+    ...,
+    description="Краткая причина выбора таких ключей и почему их содержания релевантно для создания ответа пользователю"
+    )
     keys: List[str] = Field(
         ..., 
         min_items=MIN_KEYS,
         max_items=MAX_KEYS,
-        description="Полное название / имя выбранного ключа без его описания! Должен содержать ровно один элемент."
+        description="""Полное название / имя выбранного ключа без его описания!
+        Названия разделенные `_` (подчеркиванием) не делить на состовляющие!"""
     )
-    reasoning_step_by_step: List[str] = Field(
-        ..., 
-        min_items=MIN_REASONING_STEPS, 
-        max_items=MAX_REASONING_STEPS, 
-        description="Массив строк с пошаговым рассуждением. Каждый элемент должен быть полным предложением."
-    )
+
 
 class KeySelectionValidationModel(BaseModel):
     keys: List[str]
