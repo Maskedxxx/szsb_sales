@@ -7,21 +7,22 @@ MIN_REASONING_STEPS=1
 MAX_REASONING_STEPS=3
 
 class RouteRerankingParseModel(BaseModel):
-    reranked_routes: List[str] = Field(
-        ...,
-        max_items=MAX_ROUTES,
-        description="Полное название / имя выбранного маршрута без его описания!"
-    )
     reasoning_step_by_step: List[str] = Field(
-        ...,
-        min_items=MIN_REASONING_STEPS,
-        max_items=MAX_REASONING_STEPS,
-        description="Массив строк с пошаговым рассуждением. Каждый элемент должен быть полным предложением."
+    ...,
+    min_items=MIN_REASONING_STEPS,
+    max_items=MAX_REASONING_STEPS,
+    description="Массив строк с пошаговым рассуждением. Каждый элемент должен быть полным предложением."
     )
     reason: str = Field(
         ...,
         description="Краткая причина выбора такого ранжирования маршрутов"
     )
+    reranked_routes: List[str] = Field(
+        ...,
+        max_items=MAX_ROUTES,
+        description="Полное название / имя выбранного маршрута без его описания!"
+    )
+
 
 class RouteRerankingValidationModel(BaseModel):
     reranked_routes: List[str]
