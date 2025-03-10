@@ -27,6 +27,8 @@ from utils.file_utils import (
     remove_think_tags,
 )
 
+TOP_N_ROUTES = 5
+
 ls_client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
 client = wrap_openai(
     OpenAI(base_url=os.path.join(os.getenv("PROVIDER_BASE_URL"), 'v1'),
@@ -191,7 +193,7 @@ async def handle_query(query: Query) -> Response:
     relevant_routes = routing_service.top_routes(
         subsector = selected_subsector,
         text = query.question,
-        top_n = 5
+        top_n = TOP_N_ROUTES
     )
     elapsed_time = time.time() - start_time
     logger.info(f"SEMANTIC SEARCH handling time: {elapsed_time} seconds\n")
@@ -213,7 +215,7 @@ async def handle_query(query: Query) -> Response:
         reranked_routes_paths = [os.path.join(subsector_dir, r + '.json') for r in reranked_routes]
     else:
         logger.info(f"Reranking failed; Falling back to semantic top_routes:\n {relevant_routes}")
-        reranked_routes_paths = [os.path.join(subsector_dir, r + '.json') for r in relevant_routes.keys()]
+        reranked_routes_paths = [os.path.join(subsector_dir, r + '.json') for r in relevant_routes.keys()][:TOP_N_ROUTES]
 
     # Шаги 1-4: Подготовка данных
     merged_files : Dict[str, Any] = read_and_merge(reranked_routes_paths)
