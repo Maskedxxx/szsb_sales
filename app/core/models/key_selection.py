@@ -1,5 +1,6 @@
 from typing import List
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
+from utils.logger import logger
 
 MIN_KEYS=1
 MAX_KEYS=3
@@ -17,7 +18,7 @@ class KeySelectionParseModel(BaseModel):
     ...,
     description="Краткая причина выбора таких ключей и почему их содержания релевантно для создания ответа пользователю"
     )
-    keys: List[str] = Field(
+    selected_keys: List[str] = Field(
         ..., 
         min_items=MIN_KEYS,
         max_items=MAX_KEYS,
@@ -27,13 +28,21 @@ class KeySelectionParseModel(BaseModel):
 
 
 class KeySelectionValidationModel(BaseModel):
-    keys: List[str]
+    selected_keys: List[str]
     reasoning_step_by_step: List[str]
 
-    @field_validator('keys')
+    @field_validator('selected_keys')
     @classmethod
     def validate_selected_key(cls, value: List[str], info: ValidationInfo):
-        allowed_keys = info.context.get("allowed_keys", []) if info.context else []
-        if not value or value[0] not in allowed_keys:
-            raise ValueError(f"Invalid key: {value}. Must be one of {allowed_keys}")
-        return value
+        allowed_keys = info.context.get("allowed_routes", []) if info.context else []
+        if not value:
+            raise ValueError(f"KeySelectionModel returned no routes")
+            
+        common_elements = list(set(value) & set(allowed_keys))
+        if not common_elements:
+            raise ValueError(f"No common allowed keys!\nReranked: {value}.\nAllowed: {allowed_keys}")
+
+        if len(common_elements) != len(value):
+            logger.info(f"Not all retrieved keys are allowed!\nRetrieved: {value}\nAllowed: {allowed_keys}")
+
+        return common_elements

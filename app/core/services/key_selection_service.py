@@ -113,8 +113,8 @@ class KeySelectionService:
                 obj=response.parsed.model_dump(),
                 context={"allowed_keys": allowed_keys}
             )
-            logger.info(f"Selected keys: {validated.keys}")
-            return validated.keys
+            logger.info(f"Selected keys: {validated.selected_keys}")
+            return validated.selected_keys
         except ValidationError as e:
             logger.error(f"Response validation failed: {e}")
             return []
