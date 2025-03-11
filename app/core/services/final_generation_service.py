@@ -9,7 +9,8 @@ class FinalGenerationConfig:
     model_name: str
     temperature: float = 0.1
     top_p: float = 0.95,
-    max_retries: int = 2
+    max_retries: int = 2,
+    max_tokens: int = 4096
 
 @dataclass
 class FinalGenerationPromptTemplate:
@@ -57,7 +58,8 @@ class FinalGenerationService:
         response = self.client.beta.chat.completions.parse(
             model=self.config.model_name,
             messages=messages,
-            temperature=self.config.temperature, 
+            temperature=self.config.temperature,
+            max_tokens=self.config.max_tokens
         )
 
         return response

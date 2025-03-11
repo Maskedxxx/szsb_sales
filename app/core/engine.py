@@ -32,7 +32,8 @@ TOP_N_ROUTES = 5
 ls_client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
 client = wrap_openai(
     OpenAI(base_url=os.path.join(os.getenv("PROVIDER_BASE_URL"), 'v1'),
-            api_key=os.getenv("PROVIDER_API_KEY"))
+            api_key=os.getenv("PROVIDER_API_KEY"),
+            timeout=60.0)
     )
 
 routing_config = SemanticRoutingConfig(
@@ -62,7 +63,8 @@ def rerank_routes(query_text: str, top_routes: Dict[str, str]) -> List[str]:
     """
     try:
         config = RerankingConfig(
-            model_name=os.getenv('RERANK_MODEL')
+            model_name=os.getenv('RERANK_MODEL'),
+            max_tokens=2048
         )
 
         prompt_template = RerankingPromptTemplate(
@@ -108,7 +110,8 @@ def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[s
         List[str]: Список выбранных ключей, релевантных запросу пользователя.
     """
     config = KeySelectionConfig(
-        model_name=os.getenv('KEY_SELECTION_MODEL')
+        model_name=os.getenv('KEY_SELECTION_MODEL'),
+        max_tokens=4096
     )
     
     prompt_template = KeySelectionPromptTemplate(
@@ -142,7 +145,8 @@ def generate_final_answer(user_query: str, context : str):
 
     try:
         config = FinalGenerationConfig(
-            model_name=os.getenv('GENERATION_MODEL')
+            model_name=os.getenv('GENERATION_MODEL'),
+            max_tokens=4096
         )
 
         prompt_template = FinalGenerationPromptTemplate(
@@ -200,7 +204,6 @@ async def handle_query(query: Query) -> Response:
 
     # повторное ранжирование найденных топ маршрутов
     reranked_routes = rerank_routes(query.question, relevant_routes)
-    logger.info(f"Reranked routes: {reranked_routes}")
 
     # Путь к выбранной папке
     subsector_dir = os.path.join(ROUTES_PATH, selected_subsector)
@@ -223,22 +226,29 @@ async def handle_query(query: Query) -> Response:
     key_descriptions = normalize_dict_descriptions(merged_files)
 
     relevant_keys = select_relevant_keys(query.question, key_descriptions)
-    relevant_data = {
-        key: get_nested_data(merged_files[key], ['product_list'])
-        for key in relevant_keys
-        if key in merged_files
-    }
 
-    formatted_content = json.dumps(
-        relevant_data, indent=2, ensure_ascii=False)
-    cleaned_content = clean_text(formatted_content)
+    if not relevant_keys:
+        answer = 'К сожалению не удалось сформировать ответ. Попробуйте переформулировать и уточнить вопрос.'
+        logger.info('No relevant_keys found, cannot generate final answer!')
+    else:
+        relevant_data = {
+            key: get_nested_data(merged_files[key], ['product_list'])
+            for key in relevant_keys
+            if key in merged_files
+        }
 
-    # Шаг 3 находим релевантную информацию (ключи) и генерируем ответ в заключительном модуле "process_json_and_answer"
-    answer = generate_final_answer(
-        user_query=query.question,
-        context=cleaned_content
-    )
-    
+        formatted_content = json.dumps(
+            relevant_data, indent=2, ensure_ascii=False)
+        cleaned_content = clean_text(formatted_content)
+
+        # Шаг 3 находим релевантную информацию (ключи) и генерируем ответ в заключительном модуле "process_json_and_answer"
+        answer = generate_final_answer(
+            user_query=query.question,
+            context=cleaned_content
+        )
+        answer = remove_think_tags(answer)
+        logger.info("Answer formed successfully.")
+        
     metadata = Metadata(
         selected_keys=relevant_keys,
         selected_files=reranked_routes_paths,
@@ -248,7 +258,4 @@ async def handle_query(query: Query) -> Response:
         generation_model=os.getenv('GENERATION_MODEL')
     )
 
-    answer = remove_think_tags(answer)
-
-    logger.info("Answer formed successfully.")
     return Response(answer=answer, meta=metadata)
