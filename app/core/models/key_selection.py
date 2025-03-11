@@ -34,7 +34,7 @@ class KeySelectionValidationModel(BaseModel):
     @field_validator('selected_keys')
     @classmethod
     def validate_selected_key(cls, value: List[str], info: ValidationInfo):
-        allowed_keys = info.context.get("allowed_routes", []) if info.context else []
+        allowed_keys = info.context.get("allowed_keys", []) if info.context else []
         if not value:
             raise ValueError(f"KeySelectionModel returned no routes")
             
