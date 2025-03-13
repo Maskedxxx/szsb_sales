@@ -14,6 +14,7 @@ class RerankingConfig:
     model_name: str
     temperature: float = 0
     max_retries: int = 2
+    max_tokens: int = 4096
 
 @dataclass
 class RerankingPromptTemplate:
@@ -70,6 +71,7 @@ class RerankingService:
             model=self.config.model_name,
             messages=messages,
             response_format=RouteRerankingParseModel,
+            max_tokens=self.config.max_tokens
         )
 
         if response.choices and response.choices[0].message:

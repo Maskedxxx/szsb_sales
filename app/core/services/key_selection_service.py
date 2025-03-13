@@ -11,6 +11,7 @@ class KeySelectionConfig:
     model_name: str
     temperature: float = 0
     max_retries: int = 2
+    max_tokens: int = 4096
 
 @dataclass
 class KeySelectionPromptTemplate:
@@ -86,6 +87,7 @@ class KeySelectionService:
             model=self.config.model_name,
             messages=messages,
             response_format=KeySelectionParseModel,
+            max_tokens=self.config.max_tokens
         )
         
         if response.choices and response.choices[0].message:
@@ -113,8 +115,8 @@ class KeySelectionService:
                 obj=response.parsed.model_dump(),
                 context={"allowed_keys": allowed_keys}
             )
-            logger.info(f"Selected keys: {validated.keys}")
-            return validated.keys
+            logger.info(f"Selected keys: {validated.selected_keys}")
+            return validated.selected_keys
         except ValidationError as e:
             logger.error(f"Response validation failed: {e}")
             return []
