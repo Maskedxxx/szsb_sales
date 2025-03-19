@@ -1,4 +1,4 @@
-# core/engine.py
+# core/services/engine.py
 
 import os
 import json
@@ -11,9 +11,11 @@ from langsmith import traceable, Client
 from semantic_router import HybridRouteLayer
 
 from core.services.reranking_service import RerankingConfig, RerankingPromptTemplate, RerankingService
+from core.services.expanded_query_router_service import ExpandedQueryRouterService
 from core.services.key_selection_service import KeySelectionConfig, KeySelectionPromptTemplate, KeySelectionService
 from core.services.final_generation_service import FinalGenerationConfig, FinalGenerationPromptTemplate, FinalGenerationService
 from core.services.semantic_routing_service import SemanticRoutingConfig, SemanticRoutingService
+from core.services.query_expansion_service import QueryExpansionService
 from core.prompts import PROMPT_RERANK_ROU, PROMPT_SELECT_KEY, PROMPT_FINAL_ANSWER
 from data.subsectors import SUBSECTOR_ROUTES
 from api.models import Metadata, Response, Query
@@ -192,18 +194,43 @@ async def handle_query(query: Query) -> Response:
     selected_subsector = SUBSECTOR_ROUTES[query.subsector_id]
     logger.info(f"Subsector selected: {selected_subsector}")
 
-    # Шаг 1 находим релевантные файлы
-    start_time = time.time()
-    relevant_routes = routing_service.top_routes(
-        subsector = selected_subsector,
-        text = query.question,
-        top_n = TOP_N_ROUTES
-    )
-    elapsed_time = time.time() - start_time
-    logger.info(f"SEMANTIC SEARCH handling time: {elapsed_time} seconds\n")
-
-    # повторное ранжирование найденных топ маршрутов
-    reranked_routes = rerank_routes(query.question, relevant_routes)
+    if selected_subsector == "drinks":
+        # Вызов метода расширения запроса
+        query_expansion_service = QueryExpansionService()
+        expanded_queries = query_expansion_service.expand_query(query.question)
+        logger.info("Query expanded using QueryExpansionService.")
+        
+        # Используем уже сконфигурированный routing_service (глобальная переменная)
+        expanded_query_router_service = ExpandedQueryRouterService(routing_service)
+        
+        # Получаем объединённый словарь маршрутов по расширенным запросам
+        merged_routes = expanded_query_router_service.route_expanded_queries(selected_subsector, expanded_queries)
+        
+        # Выбираем топ-1 маршрут из объединённых результатов
+        if merged_routes:
+            top_route = next(iter(merged_routes))
+            relevant_routes = {top_route: merged_routes[top_route]}
+            logger.info(f"Selected top route: {top_route}")
+        else:
+            logger.warning("No routes found via expanded query routing, falling back to dummy routes.")
+            relevant_routes = {q: 1 for q in expanded_queries}
+            
+        # Для drinks пропускаем повторное ранжирование
+        reranked_routes = relevant_routes
+            
+    else:
+        # Исходный блок для семантического поиска релевантных файлов
+        start_time = time.time()
+        relevant_routes = routing_service.top_routes(
+            subsector=selected_subsector,
+            text=query.question,
+            top_n=TOP_N_ROUTES
+        )
+        elapsed_time = time.time() - start_time
+        logger.info(f"SEMANTIC SEARCH handling time: {elapsed_time} seconds\n")
+        
+        # Повторное ранжирование найденных маршрутов
+        reranked_routes = rerank_routes(query.question, relevant_routes)
 
     # Путь к выбранной папке
     subsector_dir = os.path.join(ROUTES_PATH, selected_subsector)

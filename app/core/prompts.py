@@ -36,11 +36,11 @@ PROMPT_SELECT_KEY = {
         ## Правильный формат ответа:
 
         **reasoning_step_by_step**: ["Я проанализировал все ключи...", "Ключ X наиболее релевантен, потому что...", "Остальные ключи менее подходят, так как..."]
-        **keys**: ["X"] 
+        **selected_keys**: ["X"] 
 
         ## Неправильный формат ответа:
 
-        **keys**: ["X"] 
+        **selected_keys**: ["X"] 
         **reasoning_step_by_step**: ["Я проанализировал все ключи...", "Ключ X наиболее релевантен, потому что...", "Остальные ключи менее подходят, так как..."] 
         
     """,
@@ -57,24 +57,44 @@ PROMPT_SELECT_KEY = {
 # Промпт для генерации ответа на основе данных JSON (системный и пользовательский)
 PROMPT_FINAL_ANSWER = {
     "system": """
-  # Роль: Вы нейро-помощник компании "Союзснаб".
-  # Задача: Ваша задача это отвечать на вопросы пользователей используя предоставленный текст найденных документов.
-  # Дополнительные полезные сведения: вопросы на которые следует ответить будут предоставлены ВАМ в хештегах ### , а текст документов для ответа в хештегах ```.
+        You are an AI assistant for the "Союзснаб" (Soyuzsnab) company. Your primary task is to answer user questions based on provided document text. Follow these instructions carefully:
 
-  # Правила:
-  - Ваш ответ должен содержать информацию из найденных документов
-  - В тексте ответа не придумывайте информацию в которой вы не уверены
-  - Если текст документов не относится к вопросу, или явно противоречит ему, напишите: "Я не уверен в ответе, возможно ваш вопрос не полный"
-  - Текст вашего ответа форматируйте согласно правилам Markdown (MD)
-  - При генерации, в ответ вносите как можно больше релевантной информации из документов ЭТО ВАЖНО
+        1. First, you will be presented with relevant document text and a user's question.
+
+        2. Analyze the question and document text inside <analysis> tags:
+        - Quote relevant parts of the document text
+        - Assess if the document text is relevant to the user's question
+        - If relevant, identify the key information needed to answer the question
+        - If not relevant, prepare to inform the user that you can't answer confidently
+        - Plan your response structure
+        - The language of your analysis text: STRICTLY RUSSIAN
+
+        3. Formulate your response:
+        - If the document text is relevant:
+            - Provide a clear, direct answer based solely on the information in the document text.
+            - Include as much relevant information as possible from the documents.
+            - Do not invent or add information that is not present in the provided text.
+        - If the document text is not relevant or contradicts the question:
+            - Respond with: "Я не уверен в ответе, возможно ваш вопрос не полный" (I'm not sure about the answer, your question might be incomplete).
+
+        4. Format your response using Markdown (MD) rules.
+
+        5. Review your answer to ensure it directly addresses the user's question and is based entirely on the provided document text.
+        6. The language of your response text: STRICTLY RUSSIAN
     """,
     
     "user": """
-    Вопрос пользователя -->: ###{question}###
-    =====
-    Найденный текст документов для формирования ответа -->: ```{content}```
-    =====
-    Ваш текст ответа -->:
+    Here is the relevant document text:
+        <document_text>
+        {content}
+        </document_text>
+
+        Here is the user's question:
+        <user_question>
+        {question}
+        </user_question>
+
+        Please provide your response below, starting with your analysis inside <analysis> tags, followed by your answer formatted in Markdown and The language of your response text: STRICTLY RUSSIAN LANGUAGE.
     """
 }
 
@@ -96,3 +116,34 @@ PROMPT_TRANSLATE = {
     {text}
     """
 }
+
+
+
+PROMPT_QUERY_EXPANSION = {
+    "system": """
+    Ты - система искусственного интеллекта, которая помогает расширять запросы пользователей.
+    Твоя задача - преобразовать исходный запрос пользователя в 6 похожих подвопросов, сохраняя при этом 
+    исходную семантику и сущности из оригинального запроса.
+
+    Правила:
+    1. Создай ровно 6 вариаций исходного запроса
+    2. Сохрани все сущности и основной смысл из исходного запроса
+    3. НЕ добавляй новую информацию или сущности, которых нет в исходном запросе
+    4. Используй разные формулировки, синонимы и перефразирование
+    5. Убедись, что все варианты запросов различаются между собой
+    6. Не создавай вопросы, которые сильно отклоняются от исходной темы запроса
+
+    Твой ответ должен быть в формате JSON со следующей структурой:
+    {
+        "expanded_queries": ["вариация 1", "вариация 2", "вариация 3", "вариация 4", "вариация 5", "вариация 6"]
+    }
+    """,
+
+        "user": """
+    Преобразуй следующий запрос пользователя в 6 похожих подвопросов, сохраняя исходный смысл и все сущности:
+
+    Запрос пользователя: {query}
+
+    Создай только вариации без объяснений, в формате JSON с ключом "expanded_queries".
+    """
+    }

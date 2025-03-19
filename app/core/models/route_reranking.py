@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from utils.logger import logger
 
 MIN_ROUTES=1
-MAX_ROUTES=2
+MAX_ROUTES=1
 MIN_REASONING_STEPS=1
 MAX_REASONING_STEPS=3
 
