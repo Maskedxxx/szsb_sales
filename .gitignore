@@ -3,6 +3,9 @@ files_legacy/
 files_list_json_v2/
 files_list_json_v2_rem/
 
+# Щит-файлы
+shit-tests/
+
 # Исключаем временные файлы и каталоги
 *.tmp
 *.log

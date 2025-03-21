@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from utils.logger import logger
 
 MIN_KEYS=1
-MAX_KEYS=2
+MAX_KEYS=1
 MIN_REASONING_STEPS=1
 MAX_REASONING_STEPS=3
 
@@ -12,7 +12,7 @@ class KeySelectionParseModel(BaseModel):
     ..., 
     min_items=MIN_REASONING_STEPS, 
     max_items=MAX_REASONING_STEPS, 
-    description="Массив строк с пошаговым рассуждением. Каждый элемент должен быть полным предложением."
+    description="Массив строк с пошаговым лаконичным рассуждением. Каждый элемент должен быть одним предложением предложением."
     )
     reason: str = Field(
     ...,

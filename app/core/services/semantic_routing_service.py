@@ -1,11 +1,15 @@
+# app/core/services/semantic_routing_service.py
+
 from dataclasses import dataclass
 import json
+import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-from semantic_router import HybridRouteLayer, Route
-from semantic_router.encoders import TfidfEncoder, HuggingFaceEncoder, BaseEncoder
+from typing import Any, Dict, List, Optional, Set
+from semantic_router import RouteLayer, Route
+from semantic_router.encoders import HuggingFaceEncoder, BaseEncoder
 from utils.file_utils import get_valid_routing_table
 from utils.logger import logger
+from utils.stop_words import clean_text, clean_utterances
 
 @dataclass
 class SemanticRoutingConfig:
@@ -16,18 +20,12 @@ class SemanticRoutingConfig:
         dense_encoder_name (str): Huggingface `dense_encoder` name.
         dense_encoder_device (str): Device for Huggingface `dense_encoder`.
         dense_score_threshold (float): A threshold value used for filtering or processing the embeddings of the `dense_encoder`.
-        sparse_score_threshold (float): A threshold value used for filtering or processing the embeddings of the `sparse_encoder`.
-        alpha (float): `dense_encoder` to `sparse_encoder` weight ratio.
-        aggregation (str): aggregation method.
     """
     routes_path: str
     routing_table_path: str
-    dense_encoder_name: Optional[str] = "TatonkaHF/bge-m3_en_ru"
-    dense_encoder_device: Optional[str] = "cpu"
+    dense_encoder_name: Optional[str] = "jinaai/jina-embeddings-v3"
+    dense_encoder_device: Optional[str] = "cuda"
     dense_score_threshold: Optional[float] = 0.7
-    sparse_score_threshold: Optional[float] = 0.75
-    alpha : float = 0.59
-    aggregation : str = "max"
 
 class SemanticRoutingService:
 
@@ -35,18 +33,15 @@ class SemanticRoutingService:
             self,
             config: SemanticRoutingConfig,
             dense_encoder: Optional[HuggingFaceEncoder] = None,
-            sparse_encoder: Optional[TfidfEncoder] = None,
     ):
         self.dense_encoder = dense_encoder if dense_encoder else HuggingFaceEncoder(
             name = config.dense_encoder_name,
             score_threshold = config.dense_score_threshold,
-            device = config.dense_encoder_device
-        )
-        self.sparse_encoder = sparse_encoder if sparse_encoder else TfidfEncoder(
-            score_threshold=config.sparse_score_threshold
+            device = config.dense_encoder_device,
+            model_kwargs={"trust_remote_code": True}
         )
         self.config: SemanticRoutingConfig = config
-        self.routers: HybridRouteLayer = {}
+        self.routers: Dict[str, RouteLayer] = {}
         self.routing_table = get_valid_routing_table(dir_path=config.routes_path,
                             routing_table_path=config.routing_table_path)
 
@@ -62,16 +57,18 @@ class SemanticRoutingService:
         """
         route_objs = []
         for route_key, value in routes.items():
+            # Изменение: очищаем примеры перед созданием маршрута, используя функцию из utils
+            cleaned_utterances = clean_utterances(value["utterances"])
             route_objs.append(
                 Route(
                     name=route_key,
-                    utterances=value["utterances"]
+                    utterances=cleaned_utterances
                 )
             )
 
         return route_objs
 
-    def _create_router(self, route_objs: List[Route]) -> HybridRouteLayer:
+    def _create_router(self, route_objs: List[Route]) -> RouteLayer:
         """
         Creates and returns a `Router` object.
 
@@ -84,20 +81,14 @@ class SemanticRoutingService:
         dense_encoder = HuggingFaceEncoder(
             name = self.config.dense_encoder_name,
             score_threshold = self.config.dense_score_threshold,
-            device = self.config.dense_encoder_device
-        )
+            device = self.config.dense_encoder_device,
+            model_kwargs={"trust_remote_code": True}
+            )
         
-        sparse_encoder = TfidfEncoder(
-            score_threshold=self.config.sparse_score_threshold
-        )
-
-        return HybridRouteLayer(
-            encoder=self.dense_encoder,
-            sparse_encoder=sparse_encoder,
+        return RouteLayer(
+            encoder=dense_encoder,
             routes=route_objs,
-            alpha=self.config.alpha,
-            top_k=len(route_objs)*2,
-            aggregation=self.config.aggregation
+            top_k=len(route_objs)*2
         )
     
     def add_routers(self):
@@ -125,7 +116,6 @@ class SemanticRoutingService:
 
 
     def _aggregate(self, routes: List[Dict[str, Any]]):
-
         aggregated_routes = {}    
         for r in routes:
             route_name = r['route']
@@ -140,13 +130,21 @@ class SemanticRoutingService:
         return aggregated_routes
 
     def top_routes(self, subsector: str, text: str, top_n: int = 5) -> List[Dict[str, Any]]:
-        dl : HybridRouteLayer = self.routers[subsector]
-        routes_with_scores = dl._query(text=text, top_k=dl.top_k)
-
+        # Изменение: очищаем входящий запрос перед обработкой, используя функцию из utils
+        cleaned_text = clean_text(text)
+        
+        dl: RouteLayer = self.routers[subsector]
+        
+        # Используем метод _encode для получения вектора из очищенного текста
+        xq = dl._encode(text=cleaned_text)
+        
+        # Используем метод _retrieve для получения результатов запроса
+        routes_with_scores = dl._retrieve(xq=xq, top_k=dl.top_k)
+        
         aggregated_routes = self._aggregate(routes_with_scores)
         sorted_routes = self._sort_routes(aggregated_routes)
 
-        routes_with_description : Dict[str, str] = {}
+        routes_with_description: Dict[str, str] = {}
         for route in list(sorted_routes.keys())[:top_n]:
             description = self.routing_table[subsector][route]["description"]
             routes_with_description[route] = description

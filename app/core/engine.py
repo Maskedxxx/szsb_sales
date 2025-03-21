@@ -1,9 +1,9 @@
-# core/engine.py
+# core/services/engine.py
 
 import os
 import json
 import time
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Tuple
 
 from openai import OpenAI
 from langsmith.wrappers import wrap_openai
@@ -11,9 +11,11 @@ from langsmith import traceable, Client
 from semantic_router import HybridRouteLayer
 
 from core.services.reranking_service import RerankingConfig, RerankingPromptTemplate, RerankingService
+from core.services.expanded_query_router_service import ExpandedQueryRouterService
 from core.services.key_selection_service import KeySelectionConfig, KeySelectionPromptTemplate, KeySelectionService
 from core.services.final_generation_service import FinalGenerationConfig, FinalGenerationPromptTemplate, FinalGenerationService
 from core.services.semantic_routing_service import SemanticRoutingConfig, SemanticRoutingService
+from core.services.query_expansion_service import QueryExpansionService
 from core.prompts import PROMPT_RERANK_ROU, PROMPT_SELECT_KEY, PROMPT_FINAL_ANSWER
 from data.subsectors import SUBSECTOR_ROUTES
 from api.models import Metadata, Response, Query
@@ -51,15 +53,15 @@ routing_service.add_routers()
 @traceable(client=ls_client, project_name="llamaindex_test", run_type = "retriever")
 def rerank_routes(query_text: str, top_routes: Dict[str, str]) -> List[str]:
     """
-    Переранжирует маршруты на основе вопроса пользователя.
+    Reranks routes based on the user query.
     Args:
-        query_text: Текст запроса пользователя
-        top_routes: Список словарей с маршрутами, где каждый содержит 'route' и 'description'
+        query_text: User query text
+        top_routes: List of dictionaries with routes, where each contains 'route' and 'description'
     Returns:
-        Словарь с ключами:
-            - selected_route: List[str] - список выбранных маршрутов
-            - reasoning_step_by_step: List[str] - шаги рассуждения
-            - reason: str - причина выбора
+        Dictionary with keys:
+            - selected_route: List[str] - list of selected routes
+            - reasoning_step_by_step: List[str] - reasoning steps
+            - reason: str - selection reason
     """
     try:
         config = RerankingConfig(
@@ -99,15 +101,15 @@ def rerank_routes(query_text: str, top_routes: Dict[str, str]) -> List[str]:
 @traceable(client=ls_client, project_name="llamaindex_test", run_type="retriever")
 def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[str]:
     """
-    Использует LLM для выбора наиболее релевантных ключей на основе запроса пользователя.
+    Uses LLM to select the most relevant keys based on the user query.
 
     Args:
-        query (str): Текст запроса пользователя.
-        key_descriptions (Dict[str, str]): Словарь, где ключи — имена ключей,
-            а значения — их описания.
+        query (str): User query text.
+        key_descriptions (Dict[str, str]): Dictionary where keys are key names,
+            and values are their descriptions.
 
     Returns:
-        List[str]: Список выбранных ключей, релевантных запросу пользователя.
+        List[str]: List of selected keys relevant to the user query.
     """
     config = KeySelectionConfig(
         model_name=os.getenv('KEY_SELECTION_MODEL'),
@@ -133,7 +135,7 @@ def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[s
 @traceable(client=ls_client, project_name="llamaindex_test", run_type = "retriever")
 def generate_final_answer(user_query: str, context : str):
     """
-    Генерирует ответ на вопрос пользователя.
+    Generates an answer to the user's question.
 
     Args:
         user_query (str): user's question in the query
@@ -180,6 +182,42 @@ def generate_final_answer(user_query: str, context : str):
         logger.info(f"Error while generating answer: {str(e)}")
         raise Exception(e)
 
+def process_drinks_subsector(question: str, selected_subsector: str) -> Tuple[Dict[str, str], Dict[str, str]]:
+    """
+    Processes requests for the "drinks" subsector using query expansion.
+    
+    Args:
+        question (str): User question
+        selected_subsector (str): Selected subsector
+        
+    Returns:
+        Tuple[Dict[str, str], Dict[str, str]]: Tuple of relevant_routes and reranked_routes
+    """
+    # Вызов метода расширения запроса
+    query_expansion_service = QueryExpansionService()
+    expanded_queries = query_expansion_service.expand_query(question)
+    logger.info("Query expanded using QueryExpansionService.")
+    
+    # Используем уже сконфигурированный routing_service (глобальная переменная)
+    expanded_query_router_service = ExpandedQueryRouterService(routing_service)
+    
+    # Получаем объединённый словарь маршрутов по расширенным запросам
+    merged_routes = expanded_query_router_service.route_expanded_queries(selected_subsector, expanded_queries)
+    
+    # Выбираем топ-1 маршрут из объединённых результатов
+    if merged_routes:
+        top_route = next(iter(merged_routes))
+        relevant_routes = {top_route: merged_routes[top_route]}
+        logger.info(f"Selected top route: {top_route}")
+    else:
+        logger.warning("No routes found via expanded query routing, falling back to dummy routes.")
+        relevant_routes = {q: 1 for q in expanded_queries}
+        
+    # Для drinks пропускаем повторное ранжирование
+    reranked_routes = relevant_routes
+    
+    return relevant_routes, reranked_routes
+
 
 async def handle_query(query: Query) -> Response:
     logger.info(
@@ -192,18 +230,23 @@ async def handle_query(query: Query) -> Response:
     selected_subsector = SUBSECTOR_ROUTES[query.subsector_id]
     logger.info(f"Subsector selected: {selected_subsector}")
 
-    # Шаг 1 находим релевантные файлы
-    start_time = time.time()
-    relevant_routes = routing_service.top_routes(
-        subsector = selected_subsector,
-        text = query.question,
-        top_n = TOP_N_ROUTES
-    )
-    elapsed_time = time.time() - start_time
-    logger.info(f"SEMANTIC SEARCH handling time: {elapsed_time} seconds\n")
-
-    # повторное ранжирование найденных топ маршрутов
-    reranked_routes = rerank_routes(query.question, relevant_routes)
+    if selected_subsector == "drinks":
+        # Обработка для подсектора "drinks" вынесена в отдельную функцию
+        relevant_routes, reranked_routes = process_drinks_subsector(query.question, selected_subsector)
+            
+    else:
+        # Исходный блок для семантического поиска релевантных файлов
+        start_time = time.time()
+        relevant_routes = routing_service.top_routes(
+            subsector=selected_subsector,
+            text=query.question,
+            top_n=TOP_N_ROUTES
+        )
+        elapsed_time = time.time() - start_time
+        logger.info(f"SEMANTIC SEARCH handling time: {elapsed_time} seconds\n")
+        
+        # Повторное ранжирование найденных маршрутов
+        reranked_routes = rerank_routes(query.question, relevant_routes)
 
     # Путь к выбранной папке
     subsector_dir = os.path.join(ROUTES_PATH, selected_subsector)
