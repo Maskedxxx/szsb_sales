@@ -9,6 +9,7 @@ from semantic_router import RouteLayer, Route
 from semantic_router.encoders import HuggingFaceEncoder, BaseEncoder
 from utils.file_utils import get_valid_routing_table
 from utils.logger import logger
+from utils.stop_words import clean_text, clean_utterances
 
 @dataclass
 class SemanticRoutingConfig:
@@ -28,27 +29,6 @@ class SemanticRoutingConfig:
 
 class SemanticRoutingService:
 
-    # Словарь стоп-слов для русского языка
-    RUSSIAN_STOP_WORDS: Set[str] = {
-        'а', 'без', 'более', 'бы', 'был', 'была', 'были', 'было', 'быть', 'в', 
-        'вам', 'вас', 'весь', 'во', 'вот', 'все', 'всего', 'всех', 'вы', 'где', 
-        'да', 'даже', 'для', 'до', 'его', 'ее', 'если', 'есть', 'ещё', 'же', 
-        'за', 'здесь', 'и', 'из', 'или', 'им', 'их', 'к', 'как', 'ко', 'когда', 
-        'кто', 'ли', 'либо', 'мне', 'может', 'мы', 'на', 'надо', 'наш', 'не', 
-        'него', 'неё', 'нет', 'ни', 'них', 'но', 'ну', 'о', 'об', 'однако', 
-        'он', 'она', 'они', 'оно', 'от', 'очень', 'по', 'под', 'при', 'с', 
-        'со', 'так', 'также', 'такой', 'там', 'те', 'тем', 'то', 'того', 
-        'тоже', 'той', 'только', 'том', 'ты', 'у', 'уже', 'хотя', 'чего', 
-        'чей', 'чем', 'что', 'чтобы', 'чьё', 'чья', 'эта', 'эти', 'это', 
-        'я', 'мне', 'мой', 'моя', 'моё', 'мои'
-    }
-    
-    # Дополнительные слова, специфичные для предметной области напитков
-    DOMAIN_STOP_WORDS: Set[str] = {
-        'мне', 'надо', 'нужно', 'хочу', 'есть', 'ли', 'пожалуйста',
-        'скажите', 'подскажите', 'помогите', 'посоветуйте'
-    }
-
     def __init__(
             self,
             config: SemanticRoutingConfig,
@@ -65,46 +45,6 @@ class SemanticRoutingService:
         self.routing_table = get_valid_routing_table(dir_path=config.routes_path,
                             routing_table_path=config.routing_table_path)
 
-    def clean_text(self, text: str) -> str:
-        """
-        Очищает текст от стоп-слов и других элементов, не несущих семантической ценности.
-        
-        Args:
-            text (str): Текст для очистки
-            
-        Returns:
-            str: Очищенный текст
-        """
-        # Приводим к нижнему регистру
-        text = text.lower()
-        
-        # Удаляем пунктуацию и лишние пробелы
-        text = re.sub(r'[^\w\s]', ' ', text)
-        text = re.sub(r'\s+', ' ', text).strip()
-        
-        # Удаляем стоп-слова
-        words = text.split()
-        cleaned_words = [word for word in words if word not in self.RUSSIAN_STOP_WORDS 
-                         and word not in self.DOMAIN_STOP_WORDS 
-                         and len(word) > 1]  # Игнорируем односимвольные слова
-        
-        # Собираем очищенный текст
-        cleaned_text = ' '.join(cleaned_words)
-        
-        return cleaned_text
-
-    def clean_utterances(self, utterances: List[str]) -> List[str]:
-        """
-        Очищает список примеров от стоп-слов.
-        
-        Args:
-            utterances (List[str]): Список примеров
-            
-        Returns:
-            List[str]: Список очищенных примеров
-        """
-        return [self.clean_text(utterance) for utterance in utterances]
-
     def _create_routes(self, routes: Dict[str, List[str]]) -> List[Route]:
         """
         Creates and returns a list of Route objects.
@@ -117,8 +57,8 @@ class SemanticRoutingService:
         """
         route_objs = []
         for route_key, value in routes.items():
-            # Изменение: очищаем примеры перед созданием маршрута
-            cleaned_utterances = self.clean_utterances(value["utterances"])
+            # Изменение: очищаем примеры перед созданием маршрута, используя функцию из utils
+            cleaned_utterances = clean_utterances(value["utterances"])
             route_objs.append(
                 Route(
                     name=route_key,
@@ -190,8 +130,8 @@ class SemanticRoutingService:
         return aggregated_routes
 
     def top_routes(self, subsector: str, text: str, top_n: int = 5) -> List[Dict[str, Any]]:
-        # Изменение: очищаем входящий запрос перед обработкой
-        cleaned_text = self.clean_text(text)
+        # Изменение: очищаем входящий запрос перед обработкой, используя функцию из utils
+        cleaned_text = clean_text(text)
         
         dl: RouteLayer = self.routers[subsector]
         
