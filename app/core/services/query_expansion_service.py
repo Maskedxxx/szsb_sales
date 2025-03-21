@@ -1,7 +1,7 @@
 # app/core/services/query_expansion_service.py
 
 """
-Сервис для расширения запроса пользователя в набор похожих подвопросов.
+Service for expanding user query into a set of similar sub-questions.
 """
 
 from dataclasses import dataclass
@@ -16,7 +16,7 @@ from utils.logger import logger
 
 @dataclass
 class QueryExpansionConfig:
-    """Конфигурация для сервиса расширения запросов."""
+    """Configuration for query expansion service."""
     model_name: str = os.getenv("QUERY_EXPANSION_MODEL")
     temperature=0.2
     max_retries=2
@@ -25,20 +25,20 @@ class QueryExpansionConfig:
 
 @dataclass
 class QueryExpansionPromptTemplate:
-    """Шаблон промпта для LLM."""
+    """Prompt template for LLM."""
     system=PROMPT_QUERY_EXPANSION["system"]
     user=PROMPT_QUERY_EXPANSION["user"]
 
 
 class QueryExpansionParseModel(BaseModel):
-    """Модель для парсинга ответа от LLM."""
+    """Model for parsing LLM response."""
     expanded_queries: List[str]
 
 
 class QueryExpansionService:
     """
-    Сервис для расширения пользовательского запроса в набор похожих подвопросов,
-    сохраняющих семантику исходного запроса.
+    Service for expanding user query into a set of similar sub-questions,
+    preserving the semantics of the original query.
     """
     
     def __init__(
@@ -48,23 +48,26 @@ class QueryExpansionService:
         prompt_template=None
     ):
         """
-        Инициализация сервиса расширения запросов.
+        Initialize query expansion service.
         
         Args:
-            client: Клиент для работы с LLM API
-            config: Конфигурация для запросов к модели
-            prompt_template: Шаблон промпта для LLM
+            client: Client for LLM API
+            config: Configuration for model requests
+            prompt_template: Prompt template for LLM
         """
-        self.client = client or OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+        self.client = client or OpenAI(base_url=os.path.join(os.getenv("PROVIDER_BASE_URL"), 'v1'),
+            api_key=os.getenv("PROVIDER_API_KEY"),
+            timeout=60.0)
+        
         self.config = config or QueryExpansionConfig()
         self.prompt_template = prompt_template or QueryExpansionPromptTemplate()
     
     def _log_response(self, response_content: str) -> None:
         """
-        Логирует ответ модели.
+        Log model response.
         
         Args:
-            response_content: Содержимое ответа от модели
+            response_content: Content of model response
         """
         try:
             parsed_content = json.loads(response_content)
@@ -74,13 +77,13 @@ class QueryExpansionService:
     
     def _prepare_messages(self, query: str) -> List[Dict[str, str]]:
         """
-        Подготавливает сообщения для LLM промпта.
+        Prepare messages for LLM prompt.
         
         Args:
-            query: Исходный запрос пользователя
+            query: Original user query
             
         Returns:
-            Список сообщений для запроса к LLM
+            List of messages for LLM request
         """
         return [
             {"role": "system", "content": self.prompt_template.system},
@@ -89,13 +92,13 @@ class QueryExpansionService:
     
     def _get_model_response(self, messages: List[Dict[str, str]]) -> Optional[Dict]:
         """
-        Получает и парсит ответ от LLM.
+        Get and parse response from LLM.
         
         Args:
-            messages: Список сообщений для запроса к LLM
+            messages: List of messages for LLM request
             
         Returns:
-            Ответ от модели или None в случае ошибки
+            Model response or None in case of error
         """
         logger.info(f"Running query expansion with model: {self.config.model_name}")
         
@@ -120,13 +123,13 @@ class QueryExpansionService:
     
     def _process_response(self, response: Optional[Dict]) -> List[str]:
         """
-        Обрабатывает ответ от модели.
+        Process model response.
         
         Args:
-            response: Ответ от модели
+            response: Model response
             
         Returns:
-            Список расширенных запросов
+            List of expanded queries
         """
         if not response:
             logger.warning("No response to process")
@@ -137,7 +140,7 @@ class QueryExpansionService:
             return []
         
         try:
-            # Извлекаем и возвращаем список расширенных запросов
+            # Extract and return list of expanded queries
             if hasattr(response, 'parsed') and hasattr(response.parsed, 'expanded_queries'):
                 return response.parsed.expanded_queries
             else:
@@ -149,13 +152,13 @@ class QueryExpansionService:
     
     def expand_query(self, query: str) -> List[str]:
         """
-        Расширяет пользовательский запрос в набор похожих подвопросов.
+        Expand user query into a set of similar sub-questions.
         
         Args:
-            query: Исходный запрос пользователя
+            query: Original user query
             
         Returns:
-            Список расширенных запросов
+            List of expanded queries
         """
         try:
             logger.info(f"Expanding query: {query}")
@@ -164,12 +167,12 @@ class QueryExpansionService:
             response = self._get_model_response(messages)
             expanded_queries = self._process_response(response)
             
-            # Если не удалось получить расширенные запросы, вернем исходный запрос
+            # If expanded queries could not be obtained, return original query
             if not expanded_queries:
                 logger.warning("Failed to expand query, returning original query")
                 return [query]
             
-            # Проверяем, что получили ровно 6 подвопросов
+            # Check that we got exactly 6 sub-questions
             if len(expanded_queries) != 6:
                 logger.warning(f"Expected 6 expanded queries, got {len(expanded_queries)}")
             
@@ -178,4 +181,4 @@ class QueryExpansionService:
             
         except Exception as e:
             logger.error(f"Error expanding query: {str(e)}")
-            return [query]  # В случае ошибки возвращаем исходный запрос
+            return [query]  # Return original query in case of error
