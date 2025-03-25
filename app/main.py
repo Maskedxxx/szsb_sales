@@ -18,6 +18,8 @@ import os
 from fastapi import FastAPI
 from api.endpoints import router as api_router
 
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
 app = FastAPI(
     title="AI-Assistant API",
     description="API for the sales department ai-assistant.", 

@@ -2,11 +2,10 @@
 
 from dataclasses import dataclass
 import json
-import re
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+
+from typing import Any, Dict, List, Optional
 from semantic_router import RouteLayer, Route
-from semantic_router.encoders import HuggingFaceEncoder, BaseEncoder
+from semantic_router.encoders import HuggingFaceEncoder
 from utils.file_utils import get_valid_routing_table
 from utils.logger import logger
 from utils.stop_words import clean_text, clean_utterances
