@@ -6,6 +6,6 @@ RUN conda env create -p /env --file environment.yml && conda clean -afy
 
 WORKDIR /app
 
-COPY . .
+COPY ./app .
 
-ENTRYPOINT [ "conda", "run", "--no-capture-output", "-p", "/env",  "python", "-u", "app/main.py"]
+ENTRYPOINT [ "conda", "run", "--no-capture-output", "-p", "/env",  "python", "-u", "main.py"]

@@ -18,6 +18,6 @@ dependencies:
   - pytorch::torchaudio
   - pytorch::torchvision
   - pip:
-    - semantic-router
-    - langchain-ollama
-    - langchain-huggingface
+    - semantic-router==0.0.72
+    - einops
+    - debugpy

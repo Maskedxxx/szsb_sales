@@ -8,7 +8,6 @@ from typing import Any, List, Dict, Tuple
 from openai import OpenAI
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable, Client
-from semantic_router import HybridRouteLayer
 
 from core.services.reranking_service import RerankingConfig, RerankingPromptTemplate, RerankingService
 from core.services.expanded_query_router_service import ExpandedQueryRouterService

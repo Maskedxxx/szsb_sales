@@ -1,0 +1,19 @@
+services:
+  api:
+    build: .
+    entrypoint: ["conda", "run", "--no-capture-output", "-p", "/env", "python", "-m", "main"]
+    container_name: "api-prod"
+    env_file:
+      - ./envs/.env.prod.docker
+    volumes:
+      - /opt/huggingface:/app/hf
+    ports:
+    - 8000:8000
+    - 5678:5678
+    networks:
+      - snabik
+
+networks:
+  snabik:
+    driver: bridge
+    external: true
