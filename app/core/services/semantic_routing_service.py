@@ -2,13 +2,11 @@
 
 from dataclasses import dataclass
 import json
-
+import logging
 from typing import Any, Dict, List, Optional
 from semantic_router import RouteLayer, Route
 from semantic_router.encoders import HuggingFaceEncoder
-from utils.file_utils import get_valid_routing_table
-from utils.logger import logger
-from utils.stop_words import clean_text, clean_utterances
+from app.utils import get_valid_routing_table, clean_text, clean_utterances
 
 @dataclass
 class SemanticRoutingConfig:
@@ -23,7 +21,7 @@ class SemanticRoutingConfig:
     routes_path: str
     routing_table_path: str
     dense_encoder_name: Optional[str] = "jinaai/jina-embeddings-v3"
-    dense_encoder_device: Optional[str] = "cuda"
+    dense_encoder_device: Optional[str] = "cpu"
     dense_score_threshold: Optional[float] = 0.7
 
 class SemanticRoutingService:
@@ -31,6 +29,7 @@ class SemanticRoutingService:
     def __init__(
             self,
             config: SemanticRoutingConfig,
+            logger,
             dense_encoder: Optional[HuggingFaceEncoder] = None,
     ):
         self.dense_encoder = dense_encoder if dense_encoder else HuggingFaceEncoder(
@@ -43,6 +42,7 @@ class SemanticRoutingService:
         self.routers: Dict[str, RouteLayer] = {}
         self.routing_table = get_valid_routing_table(dir_path=config.routes_path,
                             routing_table_path=config.routing_table_path)
+        self.logger = logger or logging.getLogger(__name__)
 
     def _create_routes(self, routes: Dict[str, List[str]]) -> List[Route]:
         """
@@ -81,6 +81,7 @@ class SemanticRoutingService:
             name = self.config.dense_encoder_name,
             score_threshold = self.config.dense_score_threshold,
             device = self.config.dense_encoder_device,
+            tokenizer_kwargs={"reference_compile":False},
             model_kwargs={"trust_remote_code": True}
             )
         
@@ -101,7 +102,7 @@ class SemanticRoutingService:
             route_objs = self._create_routes(routes=routes)
             router = self._create_router(route_objs=route_objs)
             self.routers[subsector]=router
-            logger.info(f"Router for {subsector} created.")
+            self.logger.info(f"Router for {subsector} created.")
 
 
     def _sort_routes(self, routes: Dict[str, Any]):
@@ -109,7 +110,7 @@ class SemanticRoutingService:
         sorted_routes = sorted(routes.items(),
                            key=lambda item: item[1], reverse=True)
         
-        logger.info(json.dumps(sorted_routes, indent=4, sort_keys=True))
+        self.logger.info(json.dumps(sorted_routes, indent=4, sort_keys=True))
 
         return dict(sorted_routes)
 

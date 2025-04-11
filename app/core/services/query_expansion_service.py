@@ -5,13 +5,13 @@ Service for expanding user query into a set of similar sub-questions.
 """
 
 from dataclasses import dataclass
+import logging
 import os
 import json
 from openai import OpenAI
 from typing import Dict, List, Optional
-from core.prompts import PROMPT_QUERY_EXPANSION
+from app.data import PROMPT_QUERY_EXPANSION
 from pydantic import BaseModel
-from utils.logger import logger
 
 
 @dataclass
@@ -45,7 +45,8 @@ class QueryExpansionService:
         self,
         client=None,
         config=None,
-        prompt_template=None
+        prompt_template=None,
+        logger=None
     ):
         """
         Initialize query expansion service.
@@ -61,6 +62,7 @@ class QueryExpansionService:
         
         self.config = config or QueryExpansionConfig()
         self.prompt_template = prompt_template or QueryExpansionPromptTemplate()
+        self.logger = logger or logging.getLogger(__name__)
     
     def _log_response(self, response_content: str) -> None:
         """
@@ -71,9 +73,9 @@ class QueryExpansionService:
         """
         try:
             parsed_content = json.loads(response_content)
-            logger.info(f"QueryExpansion response: \n{json.dumps(parsed_content, indent=4, ensure_ascii=False)}")
+            self.logger.info(f"QueryExpansion response: \n{json.dumps(parsed_content, indent=4, ensure_ascii=False)}")
         except json.JSONDecodeError:
-            logger.warning(f"Could not parse response as JSON: {response_content}")
+            self.logger.warning(f"Could not parse response as JSON: {response_content}")
     
     def _prepare_messages(self, query: str) -> List[Dict[str, str]]:
         """
@@ -100,7 +102,7 @@ class QueryExpansionService:
         Returns:
             Model response or None in case of error
         """
-        logger.info(f"Running query expansion with model: {self.config.model_name}")
+        self.logger.info(f"Running query expansion with model: {self.config.model_name}")
         
         try:
             response = self.client.beta.chat.completions.parse(
@@ -115,10 +117,10 @@ class QueryExpansionService:
                 self._log_response(response.choices[0].message.content)
                 return response.choices[0].message
             else:
-                logger.warning("Empty response from LLM")
+                self.logger.warning("Empty response from LLM")
                 return None
         except Exception as e:
-            logger.error(f"Error getting model response: {str(e)}")
+            self.logger.error(f"Error getting model response: {str(e)}")
             return None
     
     def _process_response(self, response: Optional[Dict]) -> List[str]:
@@ -132,11 +134,11 @@ class QueryExpansionService:
             List of expanded queries
         """
         if not response:
-            logger.warning("No response to process")
+            self.logger.warning("No response to process")
             return []
         
         if hasattr(response, 'refusal') and response.refusal:
-            logger.warning(f"Model refused to expand query: {response.refusal}")
+            self.logger.warning(f"Model refused to expand query: {response.refusal}")
             return []
         
         try:
@@ -144,10 +146,10 @@ class QueryExpansionService:
             if hasattr(response, 'parsed') and hasattr(response.parsed, 'expanded_queries'):
                 return response.parsed.expanded_queries
             else:
-                logger.warning("Response format does not contain expanded_queries")
+                self.logger.warning("Response format does not contain expanded_queries")
                 return []
         except Exception as e:
-            logger.error(f"Error processing response: {str(e)}")
+            self.logger.error(f"Error processing response: {str(e)}")
             return []
     
     def expand_query(self, query: str) -> List[str]:
@@ -161,7 +163,7 @@ class QueryExpansionService:
             List of expanded queries
         """
         try:
-            logger.info(f"Expanding query: {query}")
+            self.logger.info(f"Expanding query: {query}")
             
             messages = self._prepare_messages(query)
             response = self._get_model_response(messages)
@@ -169,16 +171,16 @@ class QueryExpansionService:
             
             # If expanded queries could not be obtained, return original query
             if not expanded_queries:
-                logger.warning("Failed to expand query, returning original query")
+                self.logger.warning("Failed to expand query, returning original query")
                 return [query]
             
             # Check that we got exactly 6 sub-questions
             if len(expanded_queries) != 6:
-                logger.warning(f"Expected 6 expanded queries, got {len(expanded_queries)}")
+                self.logger.warning(f"Expected 6 expanded queries, got {len(expanded_queries)}")
             
-            logger.info(f"Query expanded into {len(expanded_queries)} variations")
+            self.logger.info(f"Query expanded into {len(expanded_queries)} variations")
             return expanded_queries
             
         except Exception as e:
-            logger.error(f"Error expanding query: {str(e)}")
+            self.logger.error(f"Error expanding query: {str(e)}")
             return [query]  # Return original query in case of error

@@ -2,9 +2,9 @@
 """
 Service for routing expanded queries.
 """
-from typing import Dict, List, Optional
-from utils.logger import logger
-from core.services.semantic_routing_service import SemanticRoutingService
+from typing import Dict, List
+from app.utils import logger
+from app.core.services import SemanticRoutingService
 
 class ExpandedQueryRouterService:
     """

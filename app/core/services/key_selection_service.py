@@ -1,10 +1,13 @@
 # app/core/services/key_selection_service.py
 
 import json
+import logging
 from typing import Dict, List, Optional
 from dataclasses import dataclass
-from core.models.key_selection import KeySelectionParseModel, KeySelectionValidationModel
-from utils.logger import logger
+
+import openai
+import openai.resources
+from app.core.service_models import KeySelectionParseModel, KeySelectionValidationModel
 from pydantic import ValidationError
 
 @dataclass
@@ -28,11 +31,13 @@ class KeySelectionService:
         self,
         client,
         config: KeySelectionConfig,
-        prompt_template: KeySelectionPromptTemplate
+        prompt_template: KeySelectionPromptTemplate,
+        logger
     ):
-        self.client = client
+        self.client : openai.OpenAI = client
         self.config = config
         self.prompt_template = prompt_template
+        self.logger = logger or logging.getLogger(__name__)
         
     @staticmethod
     def _format_keys_with_descriptions(
@@ -50,11 +55,11 @@ class KeySelectionService:
             f"\t{k}: {v[:50] + '...' if len(v) > 50 else v}"
             for k, v in key_descriptions.items()
         ]
-        logger.info("Input keys with descriptions:\n" + "\n".join(key_logs))
+        self.logger.info("Input keys with descriptions:\n" + "\n".join(key_logs))
 
     def _log_response_obj(self, obj_str: str):
         """Log the fields of the response model object"""
-        logger.info(f"KeySelection response: \n {json.dumps(json.loads(obj_str), indent=4, ensure_ascii=False)}")
+        self.logger.info(f"KeySelection response: \n {json.dumps(json.loads(obj_str), indent=4, ensure_ascii=False)}")
         
 
     def _prepare_messages(
@@ -80,7 +85,7 @@ class KeySelectionService:
         messages: List[Dict[str, str]]
     ) -> Optional[Dict]:
         """Get and parse response from LLM."""
-        logger.info(
+        self.logger.info(
             f"Running key selection model: {self.config.model_name}"
         )
         
@@ -109,7 +114,7 @@ class KeySelectionService:
             return []
 
         if response.refusal:
-            logger.warning(f"Model refused to select: {response.refusal}")
+            self.logger.warning(f"Model refused to select: {response.refusal}")
             return []
 
         try:
@@ -117,10 +122,10 @@ class KeySelectionService:
                 obj=response.parsed.model_dump(),
                 context={"allowed_keys": allowed_keys}
             )
-            logger.info(f"Selected keys: {validated.selected_keys}")
+            self.logger.info(f"Selected keys: {validated.selected_keys}")
             return validated.selected_keys
         except ValidationError as e:
-            logger.error(f"Response validation failed: {e}")
+            self.logger.error(f"Response validation failed: {e}")
             return []
         
 
@@ -146,5 +151,5 @@ class KeySelectionService:
             response = self._get_model_response(messages)
             return self._process_response(response, list(key_descriptions.keys()))
         except Exception as e:
-            logger.error(f"Failed to select keys: {e}")
+            self.logger.error(f"Failed to select keys: {e}")
             return []
