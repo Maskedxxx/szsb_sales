@@ -1,6 +1,6 @@
 from typing import List
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
-from utils.logger import logger
+from app.utils import logger
 
 MIN_KEYS=1
 MAX_KEYS=1
@@ -10,8 +10,8 @@ MAX_REASONING_STEPS=3
 class KeySelectionParseModel(BaseModel):
     reasoning_step_by_step: List[str] = Field(
     ..., 
-    min_items=MIN_REASONING_STEPS, 
-    max_items=MAX_REASONING_STEPS, 
+    min_length=MIN_REASONING_STEPS, 
+    max_length=MAX_REASONING_STEPS, 
     description="Массив строк с пошаговым лаконичным рассуждением. Каждый элемент должен быть одним предложением предложением."
     )
     reason: str = Field(
@@ -20,8 +20,8 @@ class KeySelectionParseModel(BaseModel):
     )
     selected_keys: List[str] = Field(
         ..., 
-        min_items=MIN_KEYS,
-        max_items=MAX_KEYS,
+        min_length=MIN_KEYS,
+        max_length=MAX_KEYS,
         description="""Полное название / имя выбранного ключа без его описания!
         Названия разделенные `_` (подчеркиванием) не делить на состовляющие!"""
     )

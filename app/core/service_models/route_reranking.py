@@ -1,6 +1,6 @@
 from typing import List
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
-from utils.logger import logger
+from app.utils import logger
 
 MIN_ROUTES=1
 MAX_ROUTES=1
@@ -10,8 +10,8 @@ MAX_REASONING_STEPS=3
 class RouteRerankingParseModel(BaseModel):
     reasoning_step_by_step: List[str] = Field(
     ...,
-    min_items=MIN_REASONING_STEPS,
-    max_items=MAX_REASONING_STEPS,
+    min_length=MIN_REASONING_STEPS,
+    max_length=MAX_REASONING_STEPS,
     description="Массив строк с пошаговым рассуждением. Каждый элемент должен быть полным предложением."
     )
     reason: str = Field(
@@ -20,7 +20,7 @@ class RouteRerankingParseModel(BaseModel):
     )
     reranked_routes: List[str] = Field(
         ...,
-        max_items=MAX_ROUTES,
+        max_length=MAX_ROUTES,
         description="""Полное название / имя выбранного маршрута без его описания!
         Названия разделенные `_` (подчеркиванием) не делить на состовляющие!"""
     )
