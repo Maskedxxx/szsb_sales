@@ -1,6 +1,6 @@
-# models.py
-import datetime
-from typing import Annotated, List, Optional
+# app/api/models/models.py
+
+from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator
 
 class Subsector(BaseModel):
