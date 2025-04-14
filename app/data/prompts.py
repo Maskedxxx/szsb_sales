@@ -1,4 +1,4 @@
-# core/prompts.py
+# app/data/prompts.py
 
 # Промпт для ранжирования маршрутов (системный и пользовательский)
 PROMPT_RERANK_ROU = {
