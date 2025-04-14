@@ -6,7 +6,7 @@ import os
 import re
 from pathlib import Path
 from typing import Dict, Any, List, Union, Tuple, Set
-from utils.logger import logger
+from .logger import logger
 
 def get_valid_routing_table(dir_path: str, routing_table_path: str) -> Dict[str, Dict[str,Dict[str, Any]]]:
     with open(routing_table_path, 'r', encoding='utf-8') as file:  # Читаем данные из JSON файла
@@ -217,7 +217,7 @@ def normalize_dict_descriptions(source: Dict[str, Any],
     return normalized
 
 
-def clean_text(json_text: str) -> str:
+def clean_json_text(json_text: str) -> str:
     """
     Очищает текст из JSON строки от специальных символов и форматирует его.
 
