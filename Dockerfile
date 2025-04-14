@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:25.1.1-2
 
 COPY environment.yml .
 

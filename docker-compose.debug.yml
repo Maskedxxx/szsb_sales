@@ -1,14 +1,16 @@
 services:
-  api:
-    build: .
-    entrypoint: ["conda", "run", "--no-capture-output", "-p", "/env", "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", "-m", "main"]
+  debug-api:
+    build:
+      context: .
+      dockerfile: debug.Dockerfile
+    entrypoint: ["conda", "run", "--no-capture-output", "-p", "/env", "python", "-m", "main"]
     container_name: "api-debug"
     env_file:
-      - ./envs/.env.prod.docker
+      - ./envs/.env.dev.docker
     volumes:
       - /opt/huggingface:/app/hf
     ports:
-    - 8000:8000
+    - 8001:8000
     - 5678:5678
     networks:
       - snabik

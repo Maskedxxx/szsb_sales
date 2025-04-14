@@ -18,3 +18,7 @@ Dockerfile
 **/__pycache__/
 **/*.py[cod]
 
+# Testing
+.pytest_cache
+tests
+

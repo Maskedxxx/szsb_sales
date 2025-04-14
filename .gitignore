@@ -1,10 +1,5 @@
-# старые\временные файлы
-files_legacy/
-files_list_json_v2/
-files_list_json_v2_rem/
-
-# Щит-файлы
-shit-tests/
+# test coverage
+.coverage
 
 # Исключаем временные файлы и каталоги
 *.tmp
@@ -29,5 +24,3 @@ app/utils/logs/
 
 # Исключаем системные файлы
 .DS_Store
-Thumbs.db
-test_llama_temperature.py
