@@ -9,23 +9,31 @@ from openai import OpenAI
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable, Client
 
-from core.services.reranking_service import RerankingConfig, RerankingPromptTemplate, RerankingService
-from core.services.expanded_query_router_service import ExpandedQueryRouterService
-from core.services.key_selection_service import KeySelectionConfig, KeySelectionPromptTemplate, KeySelectionService
-from core.services.final_generation_service import FinalGenerationConfig, FinalGenerationPromptTemplate, FinalGenerationService
-from core.services.semantic_routing_service import SemanticRoutingConfig, SemanticRoutingService
-from core.services.query_expansion_service import QueryExpansionService
-from core.prompts import PROMPT_RERANK_ROU, PROMPT_SELECT_KEY, PROMPT_FINAL_ANSWER
-from data.subsectors import SUBSECTOR_ROUTES
-from api.models import Metadata, Response, Query
-from config import ROUTES_PATH, ROUTING_TABLE_PATH
-from utils.logger import logger
-from utils.file_utils import (
+from app.data import SUBSECTOR_ROUTES, PROMPT_RERANK_ROU, PROMPT_SELECT_KEY, PROMPT_FINAL_ANSWER
+from app.api.api_models import Metadata, Response, Query
+from app.config import ROUTES_PATH, ROUTING_TABLE_PATH
+from app.core.services import (
+    SemanticRoutingConfig,
+    SemanticRoutingService,
+    RerankingConfig,
+    RerankingPromptTemplate,
+    RerankingService,
+    KeySelectionConfig,
+    KeySelectionPromptTemplate,
+    KeySelectionService,
+    QueryExpansionService,
+    ExpandedQueryRouterService,
+    FinalGenerationConfig,
+    FinalGenerationPromptTemplate,
+    FinalGenerationService
+)
+from app.utils import (
     normalize_dict_descriptions,
     read_and_merge,
-    clean_text,
+    clean_json_text,
     get_nested_data,
     remove_think_tags,
+    logger
 )
 
 TOP_N_ROUTES = 5
@@ -45,7 +53,8 @@ routing_config = SemanticRoutingConfig(
 )
 
 routing_service = SemanticRoutingService(
-        config = routing_config
+        config = routing_config,
+        logger=logger
 )
 routing_service.add_routers()
 
@@ -76,7 +85,8 @@ def rerank_routes(query_text: str, top_routes: Dict[str, str]) -> List[str]:
         routes_reranker = RerankingService(
             client=client,
             config=config,
-            prompt_template=prompt_template
+            prompt_template=prompt_template,
+            logger=logger
         )
 
         logger.info(f"Reranking routes...\n")
@@ -120,7 +130,12 @@ def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[s
         user=PROMPT_SELECT_KEY["user"]
     )
     
-    key_selector = KeySelectionService(client, config, prompt_template)
+    key_selector = KeySelectionService(
+        client=client,
+        config=config,
+        prompt_template=prompt_template,
+        logger=logger
+        )
 
     logger.info(f"Selecting relevant keys...\n")
     start_time = time.time()
@@ -158,7 +173,8 @@ def generate_final_answer(user_query: str, context : str):
         final_answer_generator = FinalGenerationService(
             client=client,
             config=config,
-            prompt_template=prompt_template
+            prompt_template=prompt_template,
+            logger=logger
         )
 
         start_time = time.time()
@@ -193,12 +209,16 @@ def process_drinks_subsector(question: str, selected_subsector: str) -> Tuple[Di
         Tuple[Dict[str, str], Dict[str, str]]: Tuple of relevant_routes and reranked_routes
     """
     # Вызов метода расширения запроса
-    query_expansion_service = QueryExpansionService()
+    query_expansion_service = QueryExpansionService(
+        logger=logger
+    )
     expanded_queries = query_expansion_service.expand_query(question)
     logger.info("Query expanded using QueryExpansionService.")
     
     # Используем уже сконфигурированный routing_service (глобальная переменная)
-    expanded_query_router_service = ExpandedQueryRouterService(routing_service)
+    expanded_query_router_service = ExpandedQueryRouterService(
+        semantic_routing_service=routing_service
+    )
     
     # Получаем объединённый словарь маршрутов по расширенным запросам
     merged_routes = expanded_query_router_service.route_expanded_queries(selected_subsector, expanded_queries)
@@ -281,7 +301,7 @@ async def handle_query(query: Query) -> Response:
 
         formatted_content = json.dumps(
             relevant_data, indent=2, ensure_ascii=False)
-        cleaned_content = clean_text(formatted_content)
+        cleaned_content = clean_json_text(formatted_content)
 
         # Шаг 3 находим релевантную информацию (ключи) и генерируем ответ в заключительном модуле "process_json_and_answer"
         answer = generate_final_answer(
