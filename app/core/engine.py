@@ -8,7 +8,6 @@ from typing import Any, List, Dict
 from openai import OpenAI
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable, Client
-from semantic_router import HybridRouteLayer
 
 from core.services.reranking_service import RerankingConfig, RerankingPromptTemplate, RerankingService
 from core.services.key_selection_service import KeySelectionConfig, KeySelectionPromptTemplate, KeySelectionService
@@ -215,10 +214,11 @@ async def handle_query(query: Query) -> Response:
     
     # возврат полного пути к выбранным файлам/маршруту
     if reranked_routes:
-        reranked_routes_paths = [os.path.join(subsector_dir, r + '.json') for r in reranked_routes]
+        # Используем имена файлов из переранжированного списка
+        reranked_routes_paths = [os.path.join(subsector_dir, route + '.json') for route in reranked_routes]
     else:
         logger.info(f"Reranking failed; Falling back to semantic top_routes:\n {relevant_routes}")
-        reranked_routes_paths = [os.path.join(subsector_dir, r + '.json') for r in relevant_routes.keys()][:TOP_N_ROUTES]
+        reranked_routes_paths = [os.path.join(subsector_dir, r["route"] + '.json') for r in relevant_routes][:TOP_N_ROUTES]
 
     # Шаги 1-4: Подготовка данных
     merged_files : Dict[str, Any] = read_and_merge(reranked_routes_paths)
