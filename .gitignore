@@ -1,7 +1,5 @@
-# старые\временные файлы
-files_legacy/
-files_list_json_v2/
-files_list_json_v2_rem/
+# test coverage
+.coverage
 
 # Тесты для локального
 shit-tests/
@@ -30,5 +28,3 @@ app/utils/logs/
 
 # Исключаем системные файлы
 .DS_Store
-Thumbs.db
-test_llama_temperature.py

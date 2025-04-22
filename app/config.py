@@ -2,7 +2,7 @@
 
 import os
 
-BASE_DIR = os.getcwd()
-ROUTES_PATH = os.path.join(BASE_DIR, "app/routes/")  # Путь к репозиторию с файлами
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+ROUTES_PATH = os.path.join(BASE_DIR, "routes/")
 # Путь к json с роутерами/маршрутами
-ROUTING_TABLE_PATH = os.path.join(BASE_DIR, "app/routes/routing_table.json")
+ROUTING_TABLE_PATH = os.path.join(BASE_DIR, "routes/routing_table.json")

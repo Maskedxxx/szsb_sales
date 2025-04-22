@@ -1,0 +1,23 @@
+services:
+  debug-api:
+    build:
+      context: .
+      dockerfile: debug.Dockerfile
+    entrypoint: ["conda", "run", "--no-capture-output", "-p", "/env", "python", "-m", "main"]
+    container_name: "api-debug"
+    env_file:
+      - ./envs/.env.dev.docker
+    volumes:
+      - /opt/huggingface:/app/hf
+    ports:
+    - 8001:8000
+    - 5678:5678
+    networks:
+      - snabik
+    environment:
+      - PYTHONBUFFERED=1
+
+networks:
+  snabik:
+    driver: bridge
+    external: true

@@ -6,7 +6,7 @@ import os
 import re
 from pathlib import Path
 from typing import Dict, Any, List, Union, Tuple, Set
-from utils.logger import logger
+from .logger import logger
 
 def get_valid_routing_table(dir_path: str, routing_table_path: str) -> Dict[str, Dict[str,Dict[str, Any]]]:
     with open(routing_table_path, 'r', encoding='utf-8') as file:  # Читаем данные из JSON файла
@@ -217,7 +217,7 @@ def normalize_dict_descriptions(source: Dict[str, Any],
     return normalized
 
 
-def clean_text(json_text: str) -> str:
+def clean_json_text(json_text: str) -> str:
     """
     Очищает текст из JSON строки от специальных символов и форматирует его.
 
@@ -270,22 +270,37 @@ def clean_text(json_text: str) -> str:
 def get_nested_data(data: Dict[str, Any], keys: List[str]) -> Any:
     """
     Рекурсивно извлекает данные из словаря по списку ключей.
-
+    Если последний ключ равен 'product_list' и в том же словаре присутствует ключ 'description',
+    то результатом будет строка, состоящая из текста описания и данных из 'product_list'.
+    
     Args:
         data (Dict[str, Any]): Словарь, из которого нужно извлечь данные.
         keys (List[str]): Список ключей для доступа в словаре к вложенным данным.
-
+    
     Returns:
-        Any: Значение, расположенное по указанному пути ключей.
+        Any: Значение, расположенное по указанному пути ключей с объединённым описанием,
+             если оно присутствует.
     """
-    for key in keys:
-        if isinstance(data, dict) and key in data:
-            data = data[key]
+    current = data
+    for idx, key in enumerate(keys):
+        if isinstance(current, dict) and key in current:
+            # Если это последний ключ и он равен "product_list"
+            if idx == len(keys) - 1 and key == "product_list":
+                description = current.get("description")
+                product_data = current[key]
+                if description is not None:
+                    # Если данные не являются строкой, преобразуем их в JSON-строку
+                    if not isinstance(product_data, str):
+                        product_data = json.dumps(product_data, indent=2, ensure_ascii=False)
+                    # Объединяем описание и данные product_list
+                    return f"{description}\n{product_data}"
+                return product_data
+            current = current[key]
         else:
-            # Если ключ не найден или текущие данные не являются словарем, возвращаем текущие данные
-            return data
-    return data
+            # Если ключ не найден или данные не являются словарем, возвращаем текущие данные
+            return current
+    return current
 
 def remove_think_tags(text):
-    pattern = r'<think>.*?</think>'
+    pattern = r'<(think|analysis)>.*?</\1>'
     return re.sub(pattern, '', text, flags=re.DOTALL)

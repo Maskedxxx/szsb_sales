@@ -1,13 +1,13 @@
+# app/api/endpoints.py
 
 import asyncio
 from typing import List
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import RedirectResponse
-from api.models import Subsector, Response, Query
-from data.subsectors import SUBSECTORS
-from utils.logger import logger
-from core.engine import handle_query
+from app.api.api_models import Subsector, Response, Query
+from app.data import SUBSECTORS
+from app.utils import logger
 
 router = APIRouter(prefix="/api/v1")
 
@@ -61,6 +61,8 @@ async def process_query(query: Query) -> Response:
     Raises:
         HTTPException: For various error conditions with appropriate status codes.
     """
+    from app.core import handle_query
+
     try:
         return await handle_query(query)
 
