@@ -2,291 +2,53 @@
     "description": "This section presents an extensive collection of specialized beverage ingredients and additives that complement the previously described flavor and colorant systems. The file encompasses six distinct product categories essential for modern beverage production: preservatives and acids (including ascorbic acid, citric acid, sodium benzoate, potassium sorbate, and natural AIBI® fermented glucose); oxygen cocktail mixes (featuring rosehip extract formulations for functional beverages); probiotic cultures (notably the '6.10' AIBI® culture for fermented beverages); bacterial starter cultures (PROFILINE GOLDEN LINE® DR 45.01 and DR 45.05 for kvass and kombucha); plant-based milk powder (fermented oat powder for 'non-milk' beverages); and fruit powders (including strawberry powder for juice-containing drinks). Each category represents advanced technological solutions that address specific functional needs in beverage formulation, from shelf-life extension and product stabilization to nutritional enhancement and flavor development, providing manufacturers with comprehensive ingredient options for diverse product applications.",
     "keywords": [],
     "preservatives_and_acids": {
-        "description": "This section details preservatives, acids, and acidity regulators utilized in beverage production from SOYUZSNAB Group. The product range includes traditional additives such as ascorbic acid for color stabilization, citric acid for acidity regulation, sodium citrate as an acidity regulator and antioxidant, sodium benzoate and potassium sorbate as effective preservatives, as well as innovative solutions like AIBI® fermented glucose available in both powder and liquid forms. These components extend beverage shelf life by preventing undesirable microflora development and oxidation processes while ensuring consistent product quality. The section highlights the benefits of preservative mixtures for enhanced antimicrobial effectiveness at reduced individual component concentrations, and emphasizes the natural composition and thermal stability of AIBI® fermented glucose that contains no artificial additives with 'E' indices.",
-        "keywords": [],
-        "product_list": [
-            {
-                "id": 345,
-                "name": "КИСЛОТА АСКОРБИНОВАЯ",
-                "type": "Preservatives and Acids",
-                "description": "Белый мелкокристаллический порошок, легко растворяется в воде.",
-                "application_area": "Напитки с натуральными красителями для стабилизации цвета",
-                "sweetness_coefficient": "N/A",
-                "composition": "N/A",
-                "usage_benefits": "Является антиоксидантом, замедляющим процесс окисления пищевых продуктов, Предохраняет фрукты, овощи и продукты их переработки от потемнения, Замедляет ферментативное окисление пива, безалкогольных напитков",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "0,2-0,4 кг/1000 л",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            },
-            {
-                "id": 346,
-                "name": "НАТРИЙ ЛИМОННОКИСЛЫЙ (ЦИТРАТ НАТРИЯ)",
-                "type": "Preservatives and Acids",
-                "description": "Белый мелкокристаллический порошок легко растворяется в воде.",
-                "application_area": "Сокосодержащие, тонизирующие, функциональные напитки",
-                "sweetness_coefficient": "N/A",
-                "composition": "N/A",
-                "usage_benefits": "Применяется как вкусовая добавка, регулятор кислотности, синергист антиоксидантов",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "1-4 кг/т",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            },
-            {
-                "id": 347,
-                "name": "БЕНЗОАТ НАТРИЯ (КИТАЙ)",
-                "type": "Preservatives and Acids",
-                "description": "Белый порошок, слабо пахнущий, без посторонних примесей.",
-                "application_area": "Сокосодержащие напитки",
-                "sweetness_coefficient": "N/A",
-                "composition": "N/A",
-                "usage_benefits": "Применяется как консервант для пищевых продуктов, Продлевает срок хранения пищевых продуктов, Защищает от порчи, вызываемой микроорганизмами",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "0,15 кг/т",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            },
-            {
-                "id": 348,
-                "name": "СОРБАТ КАЛИЯ (КИТАЙ)",
-                "type": "Preservatives and Acids",
-                "description": "Белый/бесцветный кристаллический порошок.",
-                "application_area": "Безалкогольные, сокосодержащие напитки",
-                "sweetness_coefficient": "N/A",
-                "composition": "N/A",
-                "usage_benefits": "Применяется как консервант для пищевых продуктов, Продлевает срок хранения пищевых продуктов, Защищает от порчи, вызываемой микроорганизмами",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "0,15 кг/т",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            },
-            {
-                "id": 349,
-                "name": "КИСЛОТА ЛИМОННАЯ",
-                "type": "Preservatives and Acids",
-                "description": "Белый кристаллический порошок.",
-                "application_area": "Безалкогольные напитки",
-                "sweetness_coefficient": "N/A",
-                "composition": "N/A",
-                "usage_benefits": "Применяется как вкусовая добавка и регулятор кислотности",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "В зависимости от требуемой кислотности",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            },
-            {
-                "id": 350,
-                "name": "ГЛЮКОЗА ФЕРМЕНТИРОВАННАЯ «1.50» AIBI®",
-                "type": "Preservatives and Acids",
-                "description": "Порошкообразная смесь от белого до кремово-бежевого цвета. Допускается наличие комков, рассыпающихся при легком надавливании.",
-                "application_area": "Напитки безалкогольные, напитки сокосодержащие",
-                "sweetness_coefficient": "N/A",
-                "composition": "N/A",
-                "usage_benefits": "Является продуктом натурального происхождения, не содержит добавок с индексом «E», Защищает продукт от развития нежелательной микрофлоры, Термостабилен",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "0,1/0,15 %",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            },
-            {
-                "id": 351,
-                "name": "ГЛЮКОЗА ФЕРМЕНТИРОВАННАЯ «1.01» AIBI®",
-                "type": "Preservatives and Acids",
-                "description": "Жидкость от светло-желтого до темно-коричневого цвета.",
-                "application_area": "Квас, напитки сокосодержащие, напитки безалкогольные",
-                "sweetness_coefficient": "N/A",
-                "composition": "N/A",
-                "usage_benefits": "Является продуктом натурального происхождения, не содержит добавок с индексом «E», Защищает продукт от развития нежелательной микрофлоры, Термостабилен",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "0,1/0,15 %",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            },
-            {
-                "id": 352,
-                "name": "ГЛЮКОЗА ФЕРМЕНТИРОВАННАЯ «1.50» ЖИДКАЯ AIBI®",
-                "type": "Preservatives and Acids",
-                "description": "Жидкость от светло-желтого до желтого цвета",
-                "application_area": "Квас, напитки сокосодержащие, напитки безалкогольные",
-                "sweetness_coefficient": "N/A",
-                "composition": "N/A",
-                "usage_benefits": "Является продуктом натурального происхождения, не содержит добавок с индексом «E», Защищает продукт от развития нежелательной микрофлоры, Препятствует развитию молочнокислых микроорганизмов, Термостабилен",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "0,15 %",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            }
-        ]
+      "description": "This section details preservatives, acids, and acidity regulators utilized in beverage production from SOYUZSNAB Group. The product range includes traditional additives such as ascorbic acid for color stabilization, citric acid for acidity regulation, sodium citrate as an acidity regulator and antioxidant, sodium benzoate and potassium sorbate as effective preservatives, as well as innovative solutions like AIBI® fermented glucose available in both powder and liquid forms. These components extend beverage shelf life by preventing undesirable microflora development and oxidation processes while ensuring consistent product quality. The section highlights the benefits of preservative mixtures for enhanced antimicrobial effectiveness at reduced individual component concentrations, and emphasizes the natural composition and thermal stability of AIBI® fermented glucose that contains no artificial additives with 'E' indices.",
+      "keywords": [],
+      "product_list": [
+        "Название: КИСЛОТА АСКОРБИНОВАЯ\nТип продукта: Preservatives and Acids\nОписание: Белый мелкокристаллический порошок, легко растворяется в воде.\nОбласть применения: Напитки с натуральными красителями для стабилизации цвета\nПреимущества использования: Является антиоксидантом, замедляющим процесс окисления пищевых продуктов, Предохраняет фрукты, овощи и продукты их переработки от потемнения, Замедляет ферментативное окисление пива, безалкогольных напитков\nДозировка: 0,2-0,4 кг/1000 л",
+        "Название: НАТРИЙ ЛИМОННОКИСЛЫЙ (ЦИТРАТ НАТРИЯ)\nТип продукта: Preservatives and Acids\nОписание: Белый мелкокристаллический порошок легко растворяется в воде.\nОбласть применения: Сокосодержащие, тонизирующие, функциональные напитки\nПреимущества использования: Применяется как вкусовая добавка, регулятор кислотности, синергист антиоксидантов\nДозировка: 1-4 кг/т",
+        "Название: БЕНЗОАТ НАТРИЯ (КИТАЙ)\nТип продукта: Preservatives and Acids\nОписание: Белый порошок, слабо пахнущий, без посторонних примесей.\nОбласть применения: Сокосодержащие напитки\nПреимущества использования: Применяется как консервант для пищевых продуктов, Продлевает срок хранения пищевых продуктов, Защищает от порчи, вызываемой микроорганизмами\nДозировка: 0,15 кг/т",
+        "Название: СОРБАТ КАЛИЯ (КИТАЙ)\nТип продукта: Preservatives and Acids\nОписание: Белый/бесцветный кристаллический порошок.\nОбласть применения: Безалкогольные, сокосодержащие напитки\nПреимущества использования: Применяется как консервант для пищевых продуктов, Продлевает срок хранения пищевых продуктов, Защищает от порчи, вызываемой микроорганизмами\nДозировка: 0,15 кг/т",
+        "Название: КИСЛОТА ЛИМОННАЯ\nТип продукта: Preservatives and Acids\nОписание: Белый кристаллический порошок.\nОбласть применения: Безалкогольные напитки\nПреимущества использования: Применяется как вкусовая добавка и регулятор кислотности\nДозировка: В зависимости от требуемой кислотности",
+        "Название: ГЛЮКОЗА ФЕРМЕНТИРОВАННАЯ «1.50» AIBI®\nТип продукта: Preservatives and Acids\nОписание: Порошкообразная смесь от белого до кремово-бежевого цвета. Допускается наличие комков, рассыпающихся при легком надавливании.\nОбласть применения: Напитки безалкогольные, напитки сокосодержащие\nПреимущества использования: Является продуктом натурального происхождения, не содержит добавок с индексом «E», Защищает продукт от развития нежелательной микрофлоры, Термостабилен\nДозировка: 0,1/0,15 %",
+        "Название: ГЛЮКОЗА ФЕРМЕНТИРОВАННАЯ «1.01» AIBI®\nТип продукта: Preservatives and Acids\nОписание: Жидкость от светло-желтого до темно-коричневого цвета.\nОбласть применения: Квас, напитки сокосодержащие, напитки безалкогольные\nПреимущества использования: Является продуктом натурального происхождения, не содержит добавок с индексом «E», Защищает продукт от развития нежелательной микрофлоры, Термостабилен\nДозировка: 0,1/0,15 %",
+        "Название: ГЛЮКОЗА ФЕРМЕНТИРОВАННАЯ «1.50» ЖИДКАЯ AIBI®\nТип продукта: Preservatives and Acids\nОписание: Жидкость от светло-желтого до желтого цвета\nОбласть применения: Квас, напитки сокосодержащие, напитки безалкогольные\nПреимущества использования: Является продуктом натурального происхождения, не содержит добавок с индексом «E», Защищает продукт от развития нежелательной микрофлоры, Препятствует развитию молочнокислых микроорганизмов, Термостабилен\nДозировка: 0,15 %"
+      ]
     },
     "oxygen_cocktail": {
-        "description": "This section focuses on specialized mixtures for oxygen cocktail preparation developed by Green Lines Company. The content includes historical background on oxygen cocktails originally created by academician N.N. Sirotinin, their applications in hypoxia prevention and immune system strengthening, and detailed information about the company's proprietary mixture with rosehip extract. The powder formulation is designed for use with specialized equipment that saturates the solution with oxygen, creating a functional beverage with significant health benefits. The section outlines the product's primary advantages including hypoxia elimination, increased physical performance and endurance, and immune system support. The application spectrum spans sanatoriums, sports nutrition programs, respiratory system treatment, and general vitality restoration, positioning oxygen cocktails as an effective functional beverage solution for health-conscious consumers.",
-        "keywords": [],
-        "product_list": [
-            {
-                "id": 353,
-                "name": "СМЕСЬ ДЛЯ ПРИГОТОВЛЕНИЯ КИСЛОРОДНОГО КОКТЕЙЛЯ С ЭКСТРАКТОМ ШИПОВНИКА",
-                "type": "Oxygen Cocktail",
-                "description": "Порошок коричневого цвета. Производитель: Зеленые линии (Россия).",
-                "application_area": "Применяется в пищевой промышленности для изготовления коктейлей (преимущественно для санаторно-курортных комплексов)",
-                "sweetness_coefficient": "N/A",
-                "composition": "Сахар, экстракт шиповника, сухой яичный белок",
-                "usage_benefits": "Устранение гипоксии, Повышение работоспособности, устранение хронической усталости, Нормализация сна, Укрепление иммунитета, Повышение выносливости во время физических нагрузок",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "4 г на 30-50 мл воды (сока)",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            }
-        ]
+      "description": "This section focuses on specialized mixtures for oxygen cocktail preparation developed by Green Lines Company. The content includes historical background on oxygen cocktails originally created by academician N.N. Sirotinin, their applications in hypoxia prevention and immune system strengthening, and detailed information about the company's proprietary mixture with rosehip extract. The powder formulation is designed for use with specialized equipment that saturates the solution with oxygen, creating a functional beverage with significant health benefits. The section outlines the product's primary advantages including hypoxia elimination, increased physical performance and endurance, and immune system support. The application spectrum spans sanatoriums, sports nutrition programs, respiratory system treatment, and general vitality restoration, positioning oxygen cocktails as an effective functional beverage solution for health-conscious consumers.",
+      "keywords": [],
+      "product_list": [
+        "Название: СМЕСЬ ДЛЯ ПРИГОТОВЛЕНИЯ КИСЛОРОДНОГО КОКТЕЙЛЯ С ЭКСТРАКТОМ ШИПОВНИКА\nТип продукта: Oxygen Cocktail\nОписание: Порошок коричневого цвета. Производитель: Зеленые линии (Россия).\nОбласть применения: Применяется в пищевой промышленности для изготовления коктейлей (преимущественно для санаторно-курортных комплексов)\nСостав: Сахар, экстракт шиповника, сухой яичный белок\nПреимущества использования: Устранение гипоксии, Повышение работоспособности, устранение хронической усталости, Нормализация сна, Укрепление иммунитета, Повышение выносливости во время физических нагрузок\nДозировка: 4 г на 30-50 мл воды (сока)"
+      ]
     },
     "probiotic_cultures": {
-        "description": "This section examines probiotic cultures for enhancing non-alcoholic beverages, with particular emphasis on the origin of the term 'probiotic' (proposed by Ferdinand Vergin in 1954), key characteristics of probiotic microorganisms, and specific products offered by Green Lines Company. The detailed overview centers on Probiotic Culture '6.10' AIBI®, designed for direct incorporation into fermented beverages. The culture's benefits include antagonistic activity against pathogenic microflora, high tolerance to extreme environmental conditions, adhesive properties, and improved calcium and iron absorption. The section highlights the importance of Lactobacillus bulgaricus and bifidobacteria in human health, explaining how these non-toxic, viable microorganisms positively influence intestinal microflora. The application of probiotics in beverages allows manufacturers to position their products within the health food segment, addressing growing consumer demand for functional beverages with substantiated health benefits.",
-        "keywords": [],
-        "product_list": [
-            {
-                "id": 354,
-                "name": "ПРОБИОТИЧЕСКАЯ КУЛЬТУРА «6.10» AIBI®",
-                "type": "Probiotic Culture",
-                "description": "Лиофилизированные, концентрированные пробиотические культуры для прямого внесения. Производитель: Зеленые линии (Россия).",
-                "application_area": "Применяются в напитках брожения (квас, квасные напитки) для обогащения бифидобактериями",
-                "sweetness_coefficient": "N/A",
-                "composition": "Bifidobacterium sp.",
-                "usage_benefits": "Обладают высоким уровнем антагонистической активности по отношению к патогенным и условно патогенным микроорганизмам, Обладают высокой степенью толерантности к экстремальным значениям рН и резистентности к желчным кислотам, Обладают высокой степенью адгезивности к клеткам кишечного эпителия, Способствуют усилению процессов всасывания ионов кальция и железа через стенки кишечника, Оказывают позитивное влияние на кишечную флору (подтверждено клиническими испытаниями)",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "1 пакет на 5 кг напитка с последующим брожением",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            }
-        ]
+      "description": "This section examines probiotic cultures for enhancing non-alcoholic beverages, with particular emphasis on the origin of the term 'probiotic' (proposed by Ferdinand Vergin in 1954), key characteristics of probiotic microorganisms, and specific products offered by Green Lines Company. The detailed overview centers on Probiotic Culture '6.10' AIBI®, designed for direct incorporation into fermented beverages. The culture's benefits include antagonistic activity against pathogenic microflora, high tolerance to extreme environmental conditions, adhesive properties, and improved calcium and iron absorption. The section highlights the importance of Lactobacillus bulgaricus and bifidobacteria in human health, explaining how these non-toxic, viable microorganisms positively influence intestinal microflora. The application of probiotics in beverages allows manufacturers to position their products within the health food segment, addressing growing consumer demand for functional beverages with substantiated health benefits.",
+      "keywords": [],
+      "product_list": [
+        "Название: ПРОБИОТИЧЕСКАЯ КУЛЬТУРА «6.10» AIBI®\nТип продукта: Probiotic Culture\nОписание: Лиофилизированные, концентрированные пробиотические культуры для прямого внесения. Производитель: Зеленые линии (Россия).\nОбласть применения: Применяются в напитках брожения (квас, квасные напитки) для обогащения бифидобактериями\nСостав: Bifidobacterium sp.\nПреимущества использования: Обладают высоким уровнем антагонистической активности по отношению к патогенным и условно патогенным микроорганизмам, Обладают высокой степенью толерантности к экстремальным значениям рН и резистентности к желчным кислотам, Обладают высокой степенью адгезивности к клеткам кишечного эпителия, Способствуют усилению процессов всасывания ионов кальция и железа через стенки кишечника, Оказывают позитивное влияние на кишечную флору (подтверждено клиническими испытаниями)\nДозировка: 1 пакет на 5 кг напитка с последующим брожением"
+      ]
     },
     "ferments": {
-        "description": "This section presents bacterial concentrated starter cultures 'PROFILINE' GOLDEN LINE® produced by Green Lines Company, specifically designed for fermented non-alcoholic beverages such as kvass and kombucha. The detailed description covers the composition, application areas, and technological advantages of these cultures. The product range includes Starter Culture DR 45.01 for kvass production, containing Lactobacillus paracasei and Saccharomyces cerevisiae, and the multi-strain Starter Culture DR 45.05 developed for kombucha preparation. These cultures maintain high acid resistance and microorganism viability throughout the product lifecycle while facilitating the development of authentic flavor characteristics in fermented beverages. The starters provide manufacturers with significant technological benefits, including simplified production processes, consistent quality across batches, and the ability to achieve distinctive organoleptic profiles that meet consumer expectations for traditional fermented beverages.",
-        "keywords": [],
-        "product_list": [
-            {
-                "id": 355,
-                "name": "КУЛЬТУРА БАКТЕРИАЛЬНАЯ КОНЦЕНТРИРОВАННАЯ ЗАКВАСОЧНАЯ «PROFILINE» DR 45.01 GOLDEN LINE®",
-                "type": "Ferments",
-                "description": "Производитель: Зеленые линии (Россия).",
-                "application_area": "Ферментированные безалкогольные напитки (квас, в т. ч. фруктовый)",
-                "sweetness_coefficient": "N/A",
-                "composition": "Lactobacillus paracasei ssp. paracasei, Saccharomyces cerevisiae",
-                "usage_benefits": "Обладает кислотной устойчивостью в напитках, Сохраняет не менее 106 КОЕ/г в ферментированном напитке до конца 14 дня хранения при условии отсутствия исходно кислой среды",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "N/A",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            },
-            {
-                "id": 356,
-                "name": "КУЛЬТУРА БАКТЕРИАЛЬНАЯ КОНЦЕНТРИРОВАННАЯ ЗАКВАСОЧНАЯ «PROFILINE» DR 45.05 GOLDEN LINE®",
-                "type": "Ferments",
-                "description": "Производитель: Зеленые линии (Россия).",
-                "application_area": "Ферментированные безалкогольные напитки (комбуча)",
-                "sweetness_coefficient": "N/A",
-                "composition": "Streptococcus salivarius ssp. thermophilus, Lactobacillus delbrueckii subsp. bulgaricus, Lactobacillus delbrueckii subsp. lactis, Lactobacillus casei, Lactobacillus acidophilus, Bifidobactreium animalis ssp. lactis, Lactobacillus rhamnosus, Lactococcus lactis ssp. cremoris, Lactococcus lactis ssp. lactis biovar diacetylactis, Leuconostoc mesenteroides ssp. mesenteroides, Saccharomyces cerevisiae",
-                "usage_benefits": "Благодаря смешанному брожению обеспечивает продукту на основе чая вкус, свойственный комбуче (напитку на чайном грибе)",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "N/A",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            }
-        ]
+      "description": "This section presents bacterial concentrated starter cultures 'PROFILINE' GOLDEN LINE® produced by Green Lines Company, specifically designed for fermented non-alcoholic beverages such as kvass and kombucha. The detailed description covers the composition, application areas, and technological advantages of these cultures. The product range includes Starter Culture DR 45.01 for kvass production, containing Lactobacillus paracasei and Saccharomyces cerevisiae, and the multi-strain Starter Culture DR 45.05 developed for kombucha preparation. These cultures maintain high acid resistance and microorganism viability throughout the product lifecycle while facilitating the development of authentic flavor characteristics in fermented beverages. The starters provide manufacturers with significant technological benefits, including simplified production processes, consistent quality across batches, and the ability to achieve distinctive organoleptic profiles that meet consumer expectations for traditional fermented beverages.",
+      "keywords": [],
+      "product_list": [
+        "Название: КУЛЬТУРА БАКТЕРИАЛЬНАЯ КОНЦЕНТРИРОВАННАЯ ЗАКВАСОЧНАЯ «PROFILINE» DR 45.01 GOLDEN LINE®\nТип продукта: Ferments\nОписание: Производитель: Зеленые линии (Россия).\nОбласть применения: Ферментированные безалкогольные напитки (квас, в т. ч. фруктовый)\nСостав: Lactobacillus paracasei ssp. paracasei, Saccharomyces cerevisiae\nПреимущества использования: Обладает кислотной устойчивостью в напитках, Сохраняет не менее 106 КОЕ/г в ферментированном напитке до конца 14 дня хранения при условии отсутствия исходно кислой среды",
+        "Название: КУЛЬТУРА БАКТЕРИАЛЬНАЯ КОНЦЕНТРИРОВАННАЯ ЗАКВАСОЧНАЯ «PROFILINE» DR 45.05 GOLDEN LINE®\nТип продукта: Ferments\nОписание: Производитель: Зеленые линии (Россия).\nОбласть применения: Ферментированные безалкогольные напитки (комбуча)\nСостав: Streptococcus salivarius ssp. thermophilus, Lactobacillus delbrueckii subsp. bulgaricus, Lactobacillus delbrueckii subsp. lactis, Lactobacillus casei, Lactobacillus acidophilus, Bifidobactreium animalis ssp. lactis, Lactobacillus rhamnosus, Lactococcus lactis ssp. cremoris, Lactococcus lactis ssp. lactis biovar diacetylactis, Leuconostoc mesenteroides ssp. mesenteroides, Saccharomyces cerevisiae\nПреимущества использования: Благодаря смешанному брожению обеспечивает продукту на основе чая вкус, свойственный комбуче (напитку на чайном грибе)"
+      ]
     },
     "vegetable_milk_powder": {
-        "description": "This section details fermented oat powder 'N' used as a plant-based milk alternative in non-alcoholic beverage production. The product serves as an excellent foundation for 'non-milk' type beverages and functional drinks, meeting the growing consumer demand for plant-based alternatives. The fermented oat powder offers superior technological properties including high solubility and ease of incorporation into beverage systems. Derived entirely from natural oat flakes, the product contains no artificial additives, aligning with clean label trends in modern beverage formulation. The section provides information on recommended dosages and application methods, enabling manufacturers to develop innovative plant-based beverages with authentic taste profiles and functional benefits. This ingredient represents an important solution for expanding product portfolios to include dairy-free options that address evolving consumer preferences for sustainable, plant-derived beverage alternatives.",
-        "keywords": [],
-        "product_list": [
-            {
-                "id": 357,
-                "name": "ПОРОШОК ОВСЯНЫЙ «N» (ФЕРМЕНТИРОВАННЫЙ)",
-                "type": "Vegetable Milk Powder",
-                "description": "Однородный порошок от бежевого до кремового цвета. Допускаются комочки, легко рассыпающиеся при механическом воздействии. Производитель: Зеленые линии (Россия).",
-                "application_area": "Напитки безалкогольные тип «немолоко», функциональные напитки",
-                "sweetness_coefficient": "N/A",
-                "composition": "Овсяные хлопья",
-                "usage_benefits": "Создание растительных альтернатив молоку Производство функциональных напитков Применим в безалкогольных напитках типа «немолоко» Может использоваться при производстве кваса",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "напитки тип «немолоко» — 80-120 кг/т, квас — 5-20 кг/т",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            }
-        ]
+      "description": "This section details fermented oat powder 'N' used as a plant-based milk alternative in non-alcoholic beverage production. The product serves as an excellent foundation for 'non-milk' type beverages and functional drinks, meeting the growing consumer demand for plant-based alternatives. The fermented oat powder offers superior technological properties including high solubility and ease of incorporation into beverage systems. Derived entirely from natural oat flakes, the product contains no artificial additives, aligning with clean label trends in modern beverage formulation. The section provides information on recommended dosages and application methods, enabling manufacturers to develop innovative plant-based beverages with authentic taste profiles and functional benefits. This ingredient represents an important solution for expanding product portfolios to include dairy-free options that address evolving consumer preferences for sustainable, plant-derived beverage alternatives.",
+      "keywords": [],
+      "product_list": [
+        "Название: ПОРОШОК ОВСЯНЫЙ «N» (ФЕРМЕНТИРОВАННЫЙ)\nТип продукта: Vegetable Milk Powder\nОписание: Однородный порошок от бежевого до кремового цвета. Допускаются комочки, легко рассыпающиеся при механическом воздействии. Производитель: Зеленые линии (Россия).\nОбласть применения: Напитки безалкогольные тип «немолоко», функциональные напитки\nСостав: Овсяные хлопья\nПреимущества использования: Создание растительных альтернатив молоку Производство функциональных напитков Применим в безалкогольных напитках типа «немолоко» Может использоваться при производстве кваса\nДозировка: напитки тип «немолоко» — 80-120 кг/т, квас — 5-20 кг/т"
+      ]
     },
     "fruit_powders": {
-        "description": "This section focuses on fruit powders, specifically exemplified by dried strawberry in fine-dispersed powder form, utilized in the creation of juice-containing beverages. The product imparts natural flavor, color, and aroma to drinks without requiring artificial colorants or flavorings. Derived from real strawberries, this powder contains no synthetic additives, making it ideal for clean label applications in modern beverage formulations. The technical advantages include excellent solubility and straightforward incorporation into various beverage systems. When added to drinks, the powder delivers the authentic taste and aroma of fresh berries, enhancing consumer appeal through natural sensory qualities. The section outlines recommended usage rates and application methods, providing beverage manufacturers with practical guidance for implementing this natural ingredient in juice-containing products, smoothies, and other fruit-forward beverage concepts that align with contemporary consumer preferences for minimally processed, natural ingredients.",
-        "keywords": [],
-        "product_list": [
-            {
-                "id": 358,
-                "name": "КЛУБНИКА СУШЕНАЯ (ПОРОШОК)",
-                "type": "Fruit Powder",
-                "description": "Порошок клубники мелкодисперсный. Производитель: Зеленые линии (Россия).",
-                "application_area": "Напитки сокосодержащие",
-                "sweetness_coefficient": "N/A",
-                "composition": "Ягоды клубники быстрозамороженные, мальтодекстрин (носитель)",
-                "usage_benefits": "100% натуральный продукт, Придает вкус, цвет и аромат, характерный ягоде, Технологичен: хорошо растворим, Не содержит красителей и ароматизаторов",
-                "flavor_profile": "N/A",
-                "number": "N/A",
-                "for_energy_drinks": false,
-                "with_tea_and_herb_extracts": false,
-                "dosage": "В зависимости от рецептуры",
-                "emulsion": false,
-                "juice_containing": false,
-                "color": "N/A"
-            }
-        ]
+      "description": "This section focuses on fruit powders, specifically exemplified by dried strawberry in fine-dispersed powder form, utilized in the creation of juice-containing beverages. The product imparts natural flavor, color, and aroma to drinks without requiring artificial colorants or flavorings. Derived from real strawberries, this powder contains no synthetic additives, making it ideal for clean label applications in modern beverage formulations. The technical advantages include excellent solubility and straightforward incorporation into various beverage systems. When added to drinks, the powder delivers the authentic taste and aroma of fresh berries, enhancing consumer appeal through natural sensory qualities. The section outlines recommended usage rates and application methods, providing beverage manufacturers with practical guidance for implementing this natural ingredient in juice-containing products, smoothies, and other fruit-forward beverage concepts that align with contemporary consumer preferences for minimally processed, natural ingredients.",
+      "keywords": [],
+      "product_list": [
+        "Название: КЛУБНИКА СУШЕНАЯ (ПОРОШОК)\nТип продукта: Fruit Powder\nОписание: Порошок клубники мелкодисперсный. Производитель: Зеленые линии (Россия).\nОбласть применения: Напитки сокосодержащие\nСостав: Ягоды клубники быстрозамороженные, мальтодекстрин (носитель)\nПреимущества использования: 100% натуральный продукт, Придает вкус, цвет и аромат, характерный ягоде, Технологичен: хорошо растворим, Не содержит красителей и ароматизаторов\nДозировка: В зависимости от рецептуры"
+      ]
     }
-}
+  }
