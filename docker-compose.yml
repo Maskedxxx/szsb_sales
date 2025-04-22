@@ -3,7 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    entrypoint: ["conda", "run", "--no-capture-output", "-p", "/env", "python", "-m", "main"]
+    image: snabik-api
+    entrypoint: ["python","-m" ,"app.main"]
     container_name: "api-prod"
     env_file:
       - ./envs/.env.prod.docker
@@ -11,6 +12,7 @@ services:
       - /opt/huggingface:/app/hf
     ports:
     - 8000:8000
+    - 5678:5678
     networks:
       - snabik
 

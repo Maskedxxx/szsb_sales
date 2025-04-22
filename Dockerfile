@@ -1,11 +1,11 @@
-FROM continuumio/miniconda3:25.1.1-2
-
-COPY environment.yml .
-
-RUN conda env create -p /env --file environment.yml && conda clean -afy
+FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY ./app .
+COPY ./requirements.txt /app/requirements.txt
 
-ENTRYPOINT [ "conda", "run", "--no-capture-output", "-p", "/env",  "python", "-u", "main.py"]
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+
+COPY ./app ./app
+
+ENTRYPOINT ["python", "-m", "app.main"]

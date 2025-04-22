@@ -1,0 +1,15 @@
+# python 3.12
+
+python-dotenv==1.1.0
+uvicorn==0.34.0
+fastapi==0.115.12
+torch==2.6.0
+torchvision==0.21.0
+torchaudio==2.6.0
+transformers==4.50.3
+langchain==0.3.23
+semantic-router==0.1.7
+einops==0.8.1
+debugpy==1.8.13
+pytest==8.3.5
+pytest-cov==6.1.1
