@@ -1,4 +1,4 @@
-# core/services/engine.py
+# app/core/services/engine.py
 
 import os
 import json
@@ -21,8 +21,6 @@ from app.core.services import (
     KeySelectionConfig,
     KeySelectionPromptTemplate,
     KeySelectionService,
-    QueryExpansionService,
-    ExpandedQueryRouterService,
     FinalGenerationConfig,
     FinalGenerationPromptTemplate,
     FinalGenerationService
@@ -197,47 +195,6 @@ def generate_final_answer(user_query: str, context : str):
         logger.info(f"Error while generating answer: {str(e)}")
         raise Exception(e)
 
-def process_drinks_subsector(question: str, selected_subsector: str) -> Tuple[Dict[str, str], Dict[str, str]]:
-    """
-    Processes requests for the "drinks" subsector using query expansion.
-    
-    Args:
-        question (str): User question
-        selected_subsector (str): Selected subsector
-        
-    Returns:
-        Tuple[Dict[str, str], Dict[str, str]]: Tuple of relevant_routes and reranked_routes
-    """
-    # Вызов метода расширения запроса
-    query_expansion_service = QueryExpansionService(
-        logger=logger
-    )
-    expanded_queries = query_expansion_service.expand_query(question)
-    logger.info("Query expanded using QueryExpansionService.")
-    
-    # Используем уже сконфигурированный routing_service (глобальная переменная)
-    expanded_query_router_service = ExpandedQueryRouterService(
-        semantic_routing_service=routing_service
-    )
-    
-    # Получаем объединённый словарь маршрутов по расширенным запросам
-    merged_routes = expanded_query_router_service.route_expanded_queries(selected_subsector, expanded_queries)
-    
-    # Выбираем топ-1 маршрут из объединённых результатов
-    if merged_routes:
-        top_route = next(iter(merged_routes))
-        relevant_routes = {top_route: merged_routes[top_route]}
-        logger.info(f"Selected top route: {top_route}")
-    else:
-        logger.warning("No routes found via expanded query routing, falling back to dummy routes.")
-        relevant_routes = {q: 1 for q in expanded_queries}
-        
-    # Для drinks пропускаем повторное ранжирование
-    reranked_routes = relevant_routes
-    
-    return relevant_routes, reranked_routes
-
-
 async def handle_query(query: Query) -> Response:
     logger.info(
         "REQUEST USER QUERY: %s, SUBSECTOR_ID: %s", query.question, query.subsector_id)
@@ -249,23 +206,17 @@ async def handle_query(query: Query) -> Response:
     selected_subsector = SUBSECTOR_ROUTES[query.subsector_id]
     logger.info(f"Subsector selected: {selected_subsector}")
 
-    if selected_subsector == "drinks":
-        # Обработка для подсектора "drinks" вынесена в отдельную функцию
-        relevant_routes, reranked_routes = process_drinks_subsector(query.question, selected_subsector)
-            
-    else:
-        # Исходный блок для семантического поиска релевантных файлов
-        start_time = time.time()
-        relevant_routes = routing_service.top_routes(
-            subsector=selected_subsector,
-            text=query.question,
-            top_n=TOP_N_ROUTES
-        )
-        elapsed_time = time.time() - start_time
-        logger.info(f"SEMANTIC SEARCH handling time: {elapsed_time} seconds\n")
-        
-        # Повторное ранжирование найденных маршрутов
-        reranked_routes = rerank_routes(query.question, relevant_routes)
+    start_time = time.time()
+    relevant_routes = routing_service.top_routes(
+        subsector=selected_subsector,
+        text=query.question,
+        top_n=TOP_N_ROUTES
+    )
+    elapsed_time = time.time() - start_time
+    logger.info(f"SEMANTIC SEARCH handling time: {elapsed_time} seconds\n")
+    
+    # Повторное ранжирование найденных маршрутов
+    reranked_routes = rerank_routes(query.question, relevant_routes)
 
     # Путь к выбранной папке
     subsector_dir = os.path.join(ROUTES_PATH, selected_subsector)
@@ -280,7 +231,7 @@ async def handle_query(query: Query) -> Response:
         reranked_routes_paths = [os.path.join(subsector_dir, r + '.json') for r in reranked_routes]
     else:
         logger.info(f"Reranking failed; Falling back to semantic top_routes:\n {relevant_routes}")
-        reranked_routes_paths = [os.path.join(subsector_dir, r + '.json') for r in relevant_routes.keys()][:TOP_N_ROUTES]
+        reranked_routes_paths = [os.path.join(subsector_dir, r["route"] + '.json') for r in relevant_routes][:TOP_N_ROUTES]
 
     # Шаги 1-4: Подготовка данных
     merged_files : Dict[str, Any] = read_and_merge(reranked_routes_paths)

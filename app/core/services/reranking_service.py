@@ -117,7 +117,7 @@ class RerankingService:
             #routes_with_descriptions = self._format_routes_with_descriptions(routes=routes)
             messages = self._prepare_messages(query, routes)
             response = self._get_model_response(messages)
-            allowed_routes = list(routes.keys())
+            allowed_routes = [r["route"] for r in routes if "route" in r]
 
             return self._process_response(response, allowed_routes)
         
