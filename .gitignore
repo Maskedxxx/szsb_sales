@@ -3,6 +3,10 @@ files_legacy/
 files_list_json_v2/
 files_list_json_v2_rem/
 
+# Тесты для локального
+shit-tests/
+test_call.ipynb
+
 # Исключаем временные файлы и каталоги
 *.tmp
 *.log

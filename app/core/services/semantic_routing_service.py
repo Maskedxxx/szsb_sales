@@ -2,8 +2,8 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from semantic_router import HybridRouteLayer, Route
-from semantic_router.encoders import TfidfEncoder, HuggingFaceEncoder, BaseEncoder
+from semantic_router import HybridRouter, Route
+from semantic_router.encoders import TfidfEncoder, HuggingFaceEncoder
 from utils.file_utils import get_valid_routing_table
 from utils.logger import logger
 
@@ -42,11 +42,9 @@ class SemanticRoutingService:
             score_threshold = config.dense_score_threshold,
             device = config.dense_encoder_device
         )
-        self.sparse_encoder = sparse_encoder if sparse_encoder else TfidfEncoder(
-            score_threshold=config.sparse_score_threshold
-        )
+        self.sparse_encoder = sparse_encoder if sparse_encoder else TfidfEncoder()
         self.config: SemanticRoutingConfig = config
-        self.routers: HybridRouteLayer = {}
+        self.routers: HybridRouter = {}
         self.routing_table = get_valid_routing_table(dir_path=config.routes_path,
                             routing_table_path=config.routing_table_path)
 
@@ -71,7 +69,7 @@ class SemanticRoutingService:
 
         return route_objs
 
-    def _create_router(self, route_objs: List[Route]) -> HybridRouteLayer:
+    def _create_router(self, route_objs: List[Route]) -> HybridRouter:
         """
         Creates and returns a `Router` object.
 
@@ -87,11 +85,9 @@ class SemanticRoutingService:
             device = self.config.dense_encoder_device
         )
         
-        sparse_encoder = TfidfEncoder(
-            score_threshold=self.config.sparse_score_threshold
-        )
+        sparse_encoder = TfidfEncoder()
 
-        return HybridRouteLayer(
+        return HybridRouter(
             encoder=self.dense_encoder,
             sparse_encoder=sparse_encoder,
             routes=route_objs,
@@ -110,8 +106,11 @@ class SemanticRoutingService:
         for subsector, routes in self.routing_table.items():
             route_objs = self._create_routes(routes=routes)
             router = self._create_router(route_objs=route_objs)
+            router.add(route_objs)
             self.routers[subsector]=router
             logger.info(f"Router for {subsector} created.")
+        logger.info(f"Всего роутеров создано: {len(self.routers)}")
+        logger.info(f"Список категорий с роутерами: {list(self.routers.keys())}")
 
 
     def _sort_routes(self, routes: Dict[str, Any]):
@@ -140,15 +139,17 @@ class SemanticRoutingService:
         return aggregated_routes
 
     def top_routes(self, subsector: str, text: str, top_n: int = 5) -> List[Dict[str, Any]]:
-        dl : HybridRouteLayer = self.routers[subsector]
-        routes_with_scores = dl._query(text=text, top_k=dl.top_k)
+        dl: HybridRouter = self.routers[subsector]
+        route_choices = dl(text=text, limit=top_n)
 
-        aggregated_routes = self._aggregate(routes_with_scores)
-        sorted_routes = self._sort_routes(aggregated_routes)
+        result = []
+        for route in route_choices:
+            if route.name is None:
+                continue
+            result.append({
+                "route": route.name,
+                "score": route.similarity_score or 0.0,
+                "description": self.routing_table[subsector][route.name]["description"]
+            })
 
-        routes_with_description : Dict[str, str] = {}
-        for route in list(sorted_routes.keys())[:top_n]:
-            description = self.routing_table[subsector][route]["description"]
-            routes_with_description[route] = description
-
-        return routes_with_description
+        return result

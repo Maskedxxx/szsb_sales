@@ -12,7 +12,7 @@ class RouteRerankingParseModel(BaseModel):
     ...,
     min_items=MIN_REASONING_STEPS,
     max_items=MAX_REASONING_STEPS,
-    description="Массив строк с пошаговым рассуждением. Каждый элемент должен быть полным предложением."
+    description="Список [List] строк с пошаговым рассуждением. Каждый элемент должен быть полным предложением."
     )
     reason: str = Field(
     ...,
@@ -20,7 +20,7 @@ class RouteRerankingParseModel(BaseModel):
     )
     reranked_routes: List[str] = Field(
         ...,
-        max_items=MAX_ROUTES,
+        max_items=MIN_ROUTES,
         description="""Полное название / имя выбранного маршрута без его описания!
         Названия разделенные `_` (подчеркиванием) не делить на состовляющие!"""
     )
