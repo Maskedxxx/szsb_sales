@@ -197,7 +197,7 @@ class SemanticRoutingService:
             
           # Формируем JSON для логирования с сохранением кодировки
           results_json = {"query": text, "subsector": subsector, "alpha": original_alpha, "routes": top_routes_list}
-          logger.info(f"Топ-{top_n} маршрутов:\n{json.dumps(results_json, indent=2, ensure_ascii=False)}")
+          self.logger.info(f"Топ-{top_n} маршрутов:\n{json.dumps(results_json, indent=2, ensure_ascii=False)}")
             
           # Формируем результат для API (с полными описаниями)
           return  [{"route": r["name"], 
