@@ -1,4 +1,4 @@
-# main.py
+# app/main.py
 
 import argparse
 parser = argparse.ArgumentParser(description='Neuro-Assistant')
@@ -16,7 +16,9 @@ if args.env_file is not None:
 
 import os
 from fastapi import FastAPI
-from api.endpoints import router as api_router
+from app.api import router as api_router
+
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 app = FastAPI(
     title="AI-Assistant API",

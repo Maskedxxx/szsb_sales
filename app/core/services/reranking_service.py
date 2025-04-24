@@ -1,12 +1,12 @@
+# app/core/services/reranking_service.py
+
 from dataclasses import dataclass
 import json
+import logging
 from typing import Dict, List, Optional
-
 from pydantic import ValidationError
-from core.models.route_reranking import RouteRerankingParseModel, RouteRerankingValidationModel
-from core.prompts import PROMPT_RERANK_ROU
-from utils.logger import logger
-
+from app.core.service_models import RouteRerankingParseModel, RouteRerankingValidationModel
+from app.data import PROMPT_RERANK_ROU
 
 @dataclass
 class RerankingConfig:
@@ -28,11 +28,13 @@ class RerankingService:
         self,
         client,
         config: RerankingConfig,
-        prompt_template: RerankingPromptTemplate
+        prompt_template: RerankingPromptTemplate, 
+        logger
     ):
         self.client = client
         self.config = config
         self.prompt_template = prompt_template
+        self.logger = logger or logging.getLogger(__name__)
 
     @staticmethod
     def _format_routes_with_descriptions(
@@ -46,7 +48,7 @@ class RerankingService:
 
     def _log_response_obj(self, obj_str: str):
         """Log the fields of the response model object"""
-        logger.info(f"RouteReranking response: \n {json.dumps(json.loads(obj_str), indent=4, ensure_ascii=False)}")
+        self.logger.info(f"RouteReranking response: \n {json.dumps(json.loads(obj_str), indent=4, ensure_ascii=False)}")
 
     def _prepare_messages(
             self,
@@ -91,7 +93,7 @@ class RerankingService:
             return []
 
         if response.refusal:
-            logger.warning(f"Model refused to rerank: {response.refusal}")
+            self.logger.warning(f"Model refused to rerank: {response.refusal}")
             return []
 
         try:
@@ -99,10 +101,10 @@ class RerankingService:
                 obj=response.parsed.model_dump(),
                 context={"allowed_routes": allowed_routes}
             )
-            logger.info(f"Reranked routes: {validated.reranked_routes}")
+            self.logger.info(f"Reranked routes: {validated.reranked_routes}")
             return validated.reranked_routes
         except ValidationError as e:
-            logger.error(f"Response validation failed: {e}")
+            self.logger.error(f"Response validation failed: {e}")
             return []
 
     def rerank_routes(
@@ -120,6 +122,6 @@ class RerankingService:
             return self._process_response(response, allowed_routes)
         
         except Exception as e:
-            logger.error(f"Failed to rerank routes: {e}")
+            self.logger.error(f"Failed to rerank routes: {e}")
 
             return []

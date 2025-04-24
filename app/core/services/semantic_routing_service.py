@@ -1,13 +1,15 @@
+# app/core/services/semantic_routing_service.py
+
 from dataclasses import dataclass
 import json
 import numpy as np
 import math
 from pathlib import Path
+import logging
 from typing import Any, Dict, List, Optional
 from semantic_router import HybridRouter, Route
-from semantic_router.encoders import TfidfEncoder, HuggingFaceEncoder
-from utils.file_utils import get_valid_routing_table
-from utils.logger import logger
+from semantic_router.encoders import HuggingFaceEncoder, TfidfEncoder
+from app.utils import get_valid_routing_table, clean_text, clean_utterances
 
 @dataclass
 class SemanticRoutingConfig:
@@ -36,6 +38,7 @@ class SemanticRoutingService:
     def __init__(
             self,
             config: SemanticRoutingConfig,
+            logger,
             dense_encoder: Optional[HuggingFaceEncoder] = None,
             sparse_encoder: Optional[TfidfEncoder] = None,
     ):
@@ -49,6 +52,7 @@ class SemanticRoutingService:
         self.routers: HybridRouter = {}
         self.routing_table = get_valid_routing_table(dir_path=config.routes_path,
                             routing_table_path=config.routing_table_path)
+        self.logger = logger or logging.getLogger(__name__)
         
     def aggregate_scores(self, scores, alpha=0.5):
         """
@@ -132,9 +136,7 @@ class SemanticRoutingService:
             router = self._create_router(route_objs=route_objs)
             router.add(route_objs)
             self.routers[subsector]=router
-            logger.info(f"Router for {subsector} created.")
-        logger.info(f"Всего роутеров создано: {len(self.routers)}")
-        logger.info(f"Список категорий с роутерами: {list(self.routers.keys())}")
+            self.logger.info(f"Router for {subsector} created.")
 
     def top_routes(self, subsector: str, text: str, top_n: int = 5, use_aggregation: bool = True, alpha: float = 0.8) -> List[Dict[str, Any]]:
       """

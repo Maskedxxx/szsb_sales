@@ -1,7 +1,8 @@
+# app/core/services/final_generation_service.py
+
 from dataclasses import dataclass
-import os
+import logging
 from typing import Dict, List, Optional
-from utils.logger import logger
 
 @dataclass
 class FinalGenerationConfig:
@@ -25,11 +26,13 @@ class FinalGenerationService:
         self,
         client,
         config: FinalGenerationConfig,
-        prompt_template: FinalGenerationPromptTemplate
+        prompt_template: FinalGenerationPromptTemplate,
+        logger
     ):
         self.client = client
         self.config = config
         self.prompt_template = prompt_template
+        self.logger = logger or logging.getLogger(__name__)
 
     def _prepare_messages(
         self,
@@ -52,7 +55,7 @@ class FinalGenerationService:
             self,
             messages: List[Dict[str, str]]
             ) -> Optional[dict]:
-        logger.info(
+        self.logger.info(
             f"Running final answer generation model: {self.config.model_name}"
         )
         response = self.client.chat.completions.create(
@@ -73,7 +76,7 @@ class FinalGenerationService:
             return None
 
         if response.refusal:
-            logger.warning(f"Model refused to select: {response.refusal}")
+            self.logger.warning(f"Model refused to select: {response.refusal}")
             return None
         
 
@@ -86,7 +89,7 @@ class FinalGenerationService:
         response = self._get_model_response(messages=messages)
 
         if response.choices and response.choices[0].message:
-            logger.info(f"----- Final answer -----\n{response.choices[0].message.content}")
+            self.logger.info(f"----- Final answer -----\n{response.choices[0].message.content}")
 
             return response.choices[0].message
         else: 
