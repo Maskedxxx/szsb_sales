@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 import json
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Mapping, Sequence, Optional, Union
 from pydantic import ValidationError
 from app.core.service_models import RouteRerankingParseModel, RouteRerankingValidationModel
 from app.data import PROMPT_RERANK_ROU
@@ -38,12 +38,25 @@ class RerankingService:
 
     @staticmethod
     def _format_routes_with_descriptions(
-        routes: List[Dict[str, str]]
+        routes: Union[Mapping[str, str], Sequence[Dict[str, str]]]
     ) -> str:
-        """Format routes and descriptions to a single string for prompt."""
+        """
+        Привести маршруты к тексту для промпта.
+
+        Поддерживаются оба формата:
+        1. {"route_name": "description", ...}
+        2. [{"route": "...", "description": "..."}, ...]
+        """
+        if isinstance(routes, Mapping):
+            # dict: route -> description
+            return "\n".join(
+                f"Маршрут: {name}; Описание: {desc}"
+                for name, desc in routes.items()
+            )
+        # последовательность dict'ов
         return "\n".join(
-            f"Маршрут: {route['route']}; Описание: {route['description']}"
-            for route in routes
+            f"Маршрут: {r['route']}; Описание: {r['description']}"
+            for r in routes
         )
 
     def _log_response_obj(self, obj_str: str):
@@ -117,7 +130,11 @@ class RerankingService:
             routes_with_descriptions = self._format_routes_with_descriptions(routes=routes)
             messages = self._prepare_messages(query, routes_with_descriptions)
             response = self._get_model_response(messages)
-            allowed_routes = [r["route"] for r in routes if "route" in r]
+            allowed_routes = (
+                list(routes.keys())                # dict-формат
+                if isinstance(routes, Mapping)
+                else [r["route"] for r in routes]  # list-of-dict
+            )
 
             return self._process_response(response, allowed_routes)
         

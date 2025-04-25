@@ -8,16 +8,21 @@ def setup_logger(name: str = 'app') -> logging.Logger:
     """
     Настраивает и возвращает logger с ротацией файлов и выводом в консоль.
     """
-    # Создаем логгер
+    # Получаем логгер
     logger = logging.getLogger(name)
+    
+    # Проверяем, настроен ли он уже (важная защита от дублирования)
+    if logger.hasHandlers():
+        return logger  # Если уже настроен, просто возвращаем
+    
+    # Глобальная настройка для предотвращения распространения логов родительским логгерам
+    logger.propagate = False
+    
     logger.setLevel(logging.DEBUG)
     
-    # Очищаем существующие обработчики
-    logger.handlers.clear()
-
-    # Создаем форматтер
+    # Создаем форматтер с информацией о файле и строке
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        '%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s() - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 

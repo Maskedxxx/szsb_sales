@@ -58,7 +58,7 @@ class FinalGenerationService:
         self.logger.info(
             f"Running final answer generation model: {self.config.model_name}"
         )
-        response = self.client.beta.chat.completions.parse(
+        response = self.client.chat.completions.create(
             model=self.config.model_name,
             messages=messages,
             temperature=self.config.temperature,
