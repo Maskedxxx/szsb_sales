@@ -27,7 +27,7 @@ SUBSECTOR_ROUTES = {
     # "04": "dairy_sector",
     "05": "ice_cream",
     # "06": "flour_milling_sector",
-    "07": "bacery",
+    "07": "bakery",
     "08": "meat",
     "09": "drinks",
     # "10": "fruit_vegetables_sector",
