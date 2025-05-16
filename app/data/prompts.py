@@ -1,93 +1,71 @@
 # app/data/prompts.py
 
-# Промпт для ранжирования маршрутов (системный и пользовательский)
-PROMPT_RERANK_ROU = {
+# Универсальный промпт для ранжирования сущностей (маршрутов или ключей)
+PROMPT_ENTITY_RANKING = {
     "system": """
-        # Your Role: Вы система ранжирования списка файлов/ключей по модели Pydantic.
+        # Your Role: You are an entity ranking system using the Pydantic model.
         
         ## Task:
-        Вам будет предоставлена модель pydantic, вы должны заполнить ее поля согласно их описании.
-        У каждого файла/ключа есть его общее описание.
-        Сделать ранжирование списка файлов/ключей, и сделать выбор наиболее семантически близкого описания файлов/ключей к вопросу пользователя.
-        У каждого поля модели pydantic есть описание/подсказка которое подсказывает чем оно должно быть заполнено.
-        Ваши размышления и выбор ключа/файла должны быть сгенерированы аргументами согласно схеме модели pydantic. 
-        Сделайте сначала рассуждение а потом выбор!
+        You will be provided with a Pydantic model, and you must fill its fields according to their descriptions.
+        Each entity has a general description.
+        You need to evaluate the relevance of each entity to the user's question, assigning each a score from 0 to 1,
+        where 1 means maximum relevance and 0 means complete irrelevance.
+        Each field of the Pydantic model has a description/hint that suggests what it should be filled with.
+        Your reasoning and entity evaluations should be generated according to the Pydantic model schema.
+        First reason, then evaluate!
         
-        ## Пример:
+        ## Example:
         
-        Вопрос Пользователя: "Хочу купить кроссовки для бега по пересеченной местности"
+        User Question: <<<What are the best stabilizers for meat products?>>>
+        Available entities and their descriptions: <
+        - #carrageenan#: "A natural thickener and stabilizer derived from red seaweed, commonly used in meat products"
+        - #phosphates#: "Compounds that enhance water retention and binding in meat products"
+        - #starch#: "Carbohydrate-based thickener used to improve texture and moisture retention"
+        - #gelatin#: "Protein-based gelling agent derived from collagen, used for texture improvement"
+        - #agar#: "Plant-based gelling agent derived from algae, used as a stabilizer in food products"
+        >>>
         
-        Available routes and their description:
-        - running_shoes: "Спортивная обувь для бега с амортизацией, подходит для асфальта и беговых дорожек"
-        - hiking_boots: "Прочная обувь для треккинга и походов по горам с защитой от влаги"
-        - trail_running_shoes: "Кроссовки с глубоким протектором для бега по пересеченной местности и сложным трассам"
-        - casual_sneakers: "Повседневная модная обувь для города, комфортная для длительной носки"
-        - basketball_shoes: "Высокие кроссовки с хорошей фиксацией голеностопа для игры в баскетбол"
-        
-        Ответ:
+        Answer:
         ```json
             "reasoning_step_by_step": [
-                "Пользователь ищет обувь для бега по пересеченной местности, что указывает на потребность в специализированной беговой обуви.",
-                "Среди доступных категорий есть running_shoes, которые подходят для бега, но в описании указано, что они больше для асфальта и беговых дорожек.",
-                "Есть hiking_boots, которые подходят для пересеченной местности, но они предназначены больше для походов, чем для бега.",
-                "Категория trail_running_shoes точно соответствует запросу - это кроссовки специально для бега по пересеченной местности.",
-                "Категории casual_sneakers и basketball_shoes не соответствуют запросу, так как не предназначены для бега по пересеченной местности."
+                "The user is asking about stabilizers specifically for meat products.",
+                "The #phosphates# entity is highly relevant as it directly addresses water retention in meat products.",
+                "The #carrageenan# entity is also very relevant as it's commonly used in meat products as a stabilizer."
             ],
-            "reason": "Выбраны trail_running_shoes как наиболее релевантная категория, поскольку она напрямую соответствует запросу пользователя о кроссовках для бега по пересеченной местности, обеспечивая необходимую поддержку и сцепление с поверхностью.",
-            "reranked_routes": ["trail_running_shoes"]
+            "reason": "Different entities have varying degrees of relevance to the query about meat stabilizers, with phosphates and carrageenan being the most relevant due to their specific applications in meat processing.",
+            "entity_scores": {{
+                "phosphates": 0.95,
+                "carrageenan": 0.9,
+                "starch": 0.7,
+                "gelatin": 0.65,
+                "agar": 0.4
+            }}
         ```
     """,
     "user": """
-        Вопрос Пользователя: <<<{query}>>>
-        Available routes and their description: <<<{routes}>>>
-        # Пример структурированного ответа: 
-        Ответ:
+        User Question: <<<{query}>>>
+        Available {entity_type}s and their descriptions: <<<{entities}>>>
+        
+        # Example of a structured response:
+        Answer:
         ```json
             "reasoning_step_by_step": [
-                "Пользователь ищет обувь для бега по пересеченной местности, что указывает на потребность в специализированной беговой обуви.",
-                "Среди доступных категорий есть running_shoes, которые подходят для бега, но в описании указано, что они больше для асфальта и беговых дорожек.",
-                "Есть hiking_boots, которые подходят для пересеченной местности, но они предназначены больше для походов, чем для бега.",
-                "Категория trail_running_shoes точно соответствует запросу - это кроссовки специально для бега по пересеченной местности.",
-                "Категории casual_sneakers и basketball_shoes не соответствуют запросу, так как не предназначены для бега по пересеченной местности."
+                "The user is asking about stabilizers specifically for meat products.",
+                "The #phosphates# entity is highly relevant as it directly addresses water retention in meat products.",
+                "The #carrageenan# entity is also very relevant as it's commonly used in meat products as a stabilizer."
             ],
-            "reason": "Выбраны trail_running_shoes как наиболее релевантная категория, поскольку она напрямую соответствует запросу пользователя о кроссовках для бега по пересеченной местности, обеспечивая необходимую поддержку и сцепление с поверхностью.",
-            "reranked_routes": ["trail_running_shoes"]
+            "reason": "Different entities have varying degrees of relevance to the query about meat stabilizers, with phosphates and carrageenan being the most relevant due to their specific applications in meat processing.",
+            "entity_scores": {{
+                "phosphates": 0.95,
+                "carrageenan": 0.9,
+                "starch": 0.7,
+                "gelatin": 0.65,
+                "agar": 0.4
+            }}
         ```
-        ВАШ ОТВЕТ:
+        YOUR ANSWER:
     """
 }
-
-# Промпт для выбора ключей с помощью LLM (системный и пользовательский)
-PROMPT_SELECT_KEY = {
-    "system": """
-        # Your Role: Вы система ранжирования списка файлов/ключей по модели Pydantic.
-        
-        ## Task:
-        Вам будет предоставлена модель pydantic, вы должны заполнить ее поля согласно их описании.
-        У каждого файла/ключа есть его общее описание.
-        Сделать ранжирование списка файлов/ключей, и сделать выбор наиболее семантически близкого описания файлов/ключей к вопросу пользователя.
-        У каждого поля модели pydantic есть описание/подсказка которое подсказывает чем оно должно быть заполнено.
-        Ваши размышления и выбор ключа/файла должны быть сгенерированы аргументами согласно схеме модели pydantic.
-        
-        ## Правильный формат ответа:
-
-        **reasoning_step_by_step**: ["Я проанализировал все ключи...", "Ключ X наиболее релевантен, потому что...", "Остальные ключи менее подходят, так как..."]
-        **selected_keys**: ["X"] 
-
-        ## Неправильный формат ответа:
-
-        **selected_keys**: ["X"] 
-        **reasoning_step_by_step**: ["Я проанализировал все ключи...", "Ключ X наиболее релевантен, потому что...", "Остальные ключи менее подходят, так как..."] 
-        
-    """,
-    "user": """
-    Вопрос пользователя: ```{query}```
-    Available Keys and Their Content: ```{keys}```
-
-    """
-}
-
-
 
 
 # Промпт для генерации ответа на основе данных JSON (системный и пользовательский)

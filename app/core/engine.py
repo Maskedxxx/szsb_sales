@@ -9,18 +9,15 @@ from openai import OpenAI
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable, Client
 
-from app.data import SUBSECTOR_ROUTES, PROMPT_RERANK_ROU, PROMPT_SELECT_KEY, PROMPT_FINAL_ANSWER
+from app.data import SUBSECTOR_ROUTES, PROMPT_ENTITY_RANKING, PROMPT_FINAL_ANSWER
 from app.api.api_models import Metadata, Response, Query
 from app.config import ROUTES_PATH, ROUTING_TABLE_PATH
 from app.core.services import (
     SemanticRoutingConfig,
     SemanticRoutingService,
-    RerankingConfig,
-    RerankingPromptTemplate,
-    RerankingService,
-    KeySelectionConfig,
-    KeySelectionPromptTemplate,
-    KeySelectionService,
+    EntityRankingConfig,
+    EntityRankingPromptTemplate,
+    EntityRankingService,
     FinalGenerationConfig,
     FinalGenerationPromptTemplate,
     FinalGenerationService
@@ -58,29 +55,20 @@ routing_service.add_routers()
 
 @traceable(client=ls_client, project_name="llamaindex_test", run_type = "retriever")
 def rerank_routes(query_text: str, top_routes: Dict[str, str]) -> List[str]:
-    """
-    Reranks routes based on the user query.
-    Args:
-        query_text: User query text
-        top_routes: List of dictionaries with routes, where each contains 'route' and 'description'
-    Returns:
-        Dictionary with keys:
-            - selected_route: List[str] - list of selected routes
-            - reasoning_step_by_step: List[str] - reasoning steps
-            - reason: str - selection reason
-    """
+    """Reranks routes based on the user query."""
     try:
-        config = RerankingConfig(
+        config = EntityRankingConfig(
             model_name=os.getenv('RERANK_MODEL'),
-            max_tokens=2048
+            max_tokens=2048,
+            entity_type="route"  # Указываем тип сущности
         )
 
-        prompt_template = RerankingPromptTemplate(
-            system=PROMPT_RERANK_ROU["system"],
-            user=PROMPT_RERANK_ROU["user"]
+        prompt_template = EntityRankingPromptTemplate(
+            system=PROMPT_ENTITY_RANKING["system"],
+            user=PROMPT_ENTITY_RANKING["user"]
         )
 
-        routes_reranker = RerankingService(
+        entity_ranker = EntityRankingService(
             client=client,
             config=config,
             prompt_template=prompt_template,
@@ -89,46 +77,36 @@ def rerank_routes(query_text: str, top_routes: Dict[str, str]) -> List[str]:
 
         logger.info(f"Reranking routes...\n")
         start_time = time.time()
-        reranked_routes = routes_reranker.rerank_routes(query=query_text, routes=top_routes)
+        reranked_routes = entity_ranker.rank_entities(
+            query=query_text, 
+            entities=top_routes,
+            top_n=1  # Выбираем топ-1 маршрут
+        )
         elapsed_time = time.time() - start_time
 
-        # Подсчет и вывод метрик
         logger.info(f"RERANKING handling time: {elapsed_time:.2f} seconds\n")
        
         return reranked_routes
 
-    except ConnectionError as e:
-        logger.info(f"Сonnection error on reranking: {str(e)}")
-        raise ConnectionError(e)
-    
     except Exception as e:
         logger.info(f"Error on reranking: {str(e)}")
         raise Exception(e)
 
 @traceable(client=ls_client, project_name="llamaindex_test", run_type="retriever")
 def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[str]:
-    """
-    Uses LLM to select the most relevant keys based on the user query.
-
-    Args:
-        query (str): User query text.
-        key_descriptions (Dict[str, str]): Dictionary where keys are key names,
-            and values are their descriptions.
-
-    Returns:
-        List[str]: List of selected keys relevant to the user query.
-    """
-    config = KeySelectionConfig(
+    """Uses LLM to select the most relevant keys based on the user query."""
+    config = EntityRankingConfig(
         model_name=os.getenv('KEY_SELECTION_MODEL'),
-        max_tokens=4096
+        max_tokens=4096,
+        entity_type="key"  # Указываем тип сущности
     )
     
-    prompt_template = KeySelectionPromptTemplate(
-        system=PROMPT_SELECT_KEY["system"],
-        user=PROMPT_SELECT_KEY["user"]
+    prompt_template = EntityRankingPromptTemplate(
+        system=PROMPT_ENTITY_RANKING["system"],
+        user=PROMPT_ENTITY_RANKING["user"]
     )
     
-    key_selector = KeySelectionService(
+    entity_ranker = EntityRankingService(
         client=client,
         config=config,
         prompt_template=prompt_template,
@@ -137,7 +115,11 @@ def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[s
 
     logger.info(f"Selecting relevant keys...\n")
     start_time = time.time()
-    selected_keys = key_selector.select_relevant_keys(query, key_descriptions)
+    selected_keys = entity_ranker.rank_entities(
+        query=query, 
+        entities=key_descriptions,
+        top_n=1  # Выбираем топ-1 ключ
+    )
     elapsed_time = time.time() - start_time
 
     logger.info(f"KEYSELECTION handling time: {elapsed_time:.2f} seconds\n")
