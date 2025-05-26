@@ -13,6 +13,8 @@ class EntityRankingConfig:
     max_retries: int = 2
     max_tokens: int = 4096
     entity_type: str = "entity"  # "route" или "key"
+    subsector_id: Optional[str] = None  # Добавляем ID подсектора
+    context_hints: Optional[str] = None  # Добавляем контекстные подсказки
 
 @dataclass
 class EntityRankingPromptTemplate:
@@ -45,34 +47,48 @@ class EntityRankingService:
         1. {"entity_name": "description", ...}
         2. [{"entity": "...", "description": "..."}, ...]
         """
+        formatted_lines = []
+        entity_names = []
+        
         if isinstance(entities, Mapping):
             # dict: entity -> description
-            return "\n".join(
-                f"- #{name}#: \"{desc}\""
-                for name, desc in entities.items()
-            )
-        # sequence of dicts
-        return "\n".join(
-            f"- #{r.get('entity', r.get('route', ''))}#: \"{r.get('description', '')}\""
-            for r in entities
-        )
+            for i, (name, desc) in enumerate(entities.items(), 1):
+                formatted_lines.append(
+                    f"{i}. entities_name --> <{name}>, entities_description --> \"{desc}\""
+                )
+                entity_names.append(f"<{name}>")
+        else:
+            # sequence of dicts
+            for i, r in enumerate(entities, 1):
+                entity_name = r.get('entity', r.get('route', ''))
+                description = r.get('description', '')
+                formatted_lines.append(
+                    f"{i}. entities_name --> <{entity_name}>, entities_description --> \"{description}\""
+                )
+                entity_names.append(f"<{entity_name}>")
+        
+        # Добавляем напоминание в конец
+        entities_reminder = f"\nВнимание! Напоминаю вам список entity_name для оценки: [{', '.join(entity_names)}]"
+        
+        return "\n".join(formatted_lines) + entities_reminder
 
     def _log_response_obj(self, obj_str: str):
         """Log the fields of the response model object"""
         self.logger.info(f"EntityRanking response: \n {json.dumps(json.loads(obj_str), indent=4, ensure_ascii=False)}")
 
-    def _prepare_messages(
-            self,
-            query,
-            entities_with_descriptions: str
-    ) -> List[Dict[str, str]]:
+    def _prepare_messages(self, query, entities_with_descriptions: str) -> List[Dict[str, str]]:
         """Prepare messages for LLM prompt."""
+        
+        # Вставка контекстных подсказок если они есть
+        system_prompt = self.prompt_template.system
+        
         return [
-            {"role": "system", "content": self.prompt_template.system},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": self.prompt_template.user.format(
                 query=query, 
                 entities=entities_with_descriptions,
-                entity_type=self.config.entity_type
+                entity_type=self.config.entity_type,
+                context_hints=self.config.context_hints
             )}
         ]
 
@@ -95,12 +111,7 @@ class EntityRankingService:
         else: 
             return None
 
-    def _process_response(
-        self,
-        response: Optional[dict],
-        allowed_entities: List[str],
-        top_n: int = 1
-    )-> List[str]:
+    def _process_response(self, response: Optional[dict], allowed_entities: List[str], top_n: int = 1)-> List[str]:
         """Process and validate model response."""
         if not response:
             return []
@@ -110,6 +121,19 @@ class EntityRankingService:
             return []
 
         try:
+            # Очищаем имена сущностей от специальных символов (#, <, >)
+            if response.parsed and hasattr(response.parsed, 'entity_scores'):
+                cleaned_entity_scores = {}
+                for key, value in response.parsed.entity_scores.items():
+                    # Удаляем #, <, > из имени сущности
+                    cleaned_key = key.replace('#', '').replace('<', '').replace('>', '')
+                    cleaned_entity_scores[cleaned_key] = value
+                
+                # Заменяем оригинальные entity_scores на очищенные
+                response.parsed.entity_scores = cleaned_entity_scores
+                
+                self.logger.info(f"Cleaned entity names from special characters: {list(cleaned_entity_scores.keys())}")
+                
             validated = EntityRankingValidationModel.model_validate(
                 obj=response.parsed.model_dump(),
                 context={"allowed_entities": allowed_entities}
