@@ -1,4 +1,4 @@
-# app/core/services/engine.py
+# app/core/engine.py
 
 import os
 import json
@@ -9,7 +9,7 @@ from openai import OpenAI
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable, Client
 
-from app.data import SUBSECTOR_ROUTES, PROMPT_ENTITY_RANKING, PROMPT_FINAL_ANSWER
+from app.data import SUBSECTOR_ROUTES, PROMPT_ENTITY_RANKING, PROMPT_FINAL_ANSWER, ROUTER_HINTS, KEY_HINTS, get_final_answer_hint
 from app.api.api_models import Metadata, Response, Query
 from app.config import ROUTES_PATH, ROUTING_TABLE_PATH
 from app.core.services import (
@@ -37,7 +37,7 @@ ls_client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
 client = wrap_openai(
     OpenAI(base_url=os.path.join(os.getenv("PROVIDER_BASE_URL"), 'v1'),
             api_key=os.getenv("PROVIDER_API_KEY"),
-            timeout=60.0)
+            timeout=150.0)
     )
 
 routing_config = SemanticRoutingConfig(
@@ -54,13 +54,19 @@ routing_service = SemanticRoutingService(
 routing_service.add_routers()
 
 @traceable(client=ls_client, project_name="llamaindex_test", run_type = "retriever")
-def rerank_routes(query_text: str, top_routes: Dict[str, str]) -> List[str]:
+def rerank_routes(query_text: str, top_routes: Dict[str, str], subsector_id: str) -> List[str]:
     """Reranks routes based on the user query."""
     try:
+        # Получаем контекстные подсказки для данного подсектора
+        from app.data.context_hints import get_router_hint
+        context_hints = get_router_hint(subsector_id)
+        
         config = EntityRankingConfig(
             model_name=os.getenv('RERANK_MODEL'),
             max_tokens=2048,
-            entity_type="route"  # Указываем тип сущности
+            entity_type="route",
+            subsector_id=subsector_id,
+            context_hints=context_hints  # Передаем подсказки
         )
 
         prompt_template = EntityRankingPromptTemplate(
@@ -75,7 +81,7 @@ def rerank_routes(query_text: str, top_routes: Dict[str, str]) -> List[str]:
             logger=logger
         )
 
-        logger.info(f"Reranking routes...\n")
+        logger.info(f"Reranking routes with context hints for subsector {subsector_id}...\n")
         start_time = time.time()
         reranked_routes = entity_ranker.rank_entities(
             query=query_text, 
@@ -93,12 +99,19 @@ def rerank_routes(query_text: str, top_routes: Dict[str, str]) -> List[str]:
         raise Exception(e)
 
 @traceable(client=ls_client, project_name="llamaindex_test", run_type="retriever")
-def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[str]:
+def select_relevant_keys(query: str, key_descriptions: Dict[str, str], subsector_id: str, selected_route: str = None) -> List[str]:
     """Uses LLM to select the most relevant keys based on the user query."""
+    
+    # Получаем контекстные подсказки для данного подсектора и роутера
+    from app.data.context_hints import get_key_hint
+    context_hints = get_key_hint(subsector_id, selected_route)
+    
     config = EntityRankingConfig(
         model_name=os.getenv('KEY_SELECTION_MODEL'),
         max_tokens=4096,
-        entity_type="key"  # Указываем тип сущности
+        entity_type="key",
+        subsector_id=subsector_id,
+        context_hints=context_hints  # Передаем подсказки
     )
     
     prompt_template = EntityRankingPromptTemplate(
@@ -113,7 +126,7 @@ def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[s
         logger=logger
         )
 
-    logger.info(f"Selecting relevant keys...\n")
+    logger.info(f"Selecting relevant keys with context hints for subsector {subsector_id}...\n")
     start_time = time.time()
     selected_keys = entity_ranker.rank_entities(
         query=query, 
@@ -127,19 +140,25 @@ def select_relevant_keys(query: str, key_descriptions: Dict[str, str]) -> List[s
     return selected_keys
 
 @traceable(client=ls_client, project_name="llamaindex_test", run_type = "retriever")
-def generate_final_answer(user_query: str, context : str):
+def generate_final_answer(user_query: str, context: str, subsector_id: str = None, route_name: str = None, key_name: str = None):
     """
     Generates an answer to the user's question.
 
     Args:
         user_query (str): user's question in the query
         context (str): Context for answer generation
+        subsector_id (str, optional): ID подсектора
+        route_name (str, optional): Название выбранного роутера
+        key_name (str, optional): Название выбранного ключа
 
     Returns:
         str: generated answer
     """
 
     try:
+        # Получаем контекстные подсказки для финального ответа
+        context_hints = get_final_answer_hint(subsector_id, route_name, key_name)
+        
         config = FinalGenerationConfig(
             model_name=os.getenv('GENERATION_MODEL'),
             max_tokens=4096
@@ -158,7 +177,7 @@ def generate_final_answer(user_query: str, context : str):
         )
 
         start_time = time.time()
-        response = final_answer_generator.generate_final_answer(user_query, context)
+        response = final_answer_generator.generate_final_answer(user_query, context, context_hints=context_hints)
         elapsed_time = time.time() - start_time
 
         # Обработка ответа
@@ -169,10 +188,6 @@ def generate_final_answer(user_query: str, context : str):
 
         return answer
 
-    except ConnectionError as e:
-        logger.info(f"Error while generating answer: {str(e)}")
-        raise ConnectionError(e)
-    
     except Exception as e:
         logger.info(f"Error while generating answer: {str(e)}")
         raise Exception(e)
@@ -198,7 +213,7 @@ async def handle_query(query: Query) -> Response:
     logger.info(f"SEMANTIC SEARCH handling time: {elapsed_time} seconds\n")
     
     # Повторное ранжирование найденных маршрутов
-    reranked_routes = rerank_routes(query.question, relevant_routes)
+    reranked_routes = rerank_routes(query.question, relevant_routes, query.subsector_id)
 
     # Путь к выбранной папке
     subsector_dir = os.path.join(ROUTES_PATH, selected_subsector)
@@ -221,7 +236,12 @@ async def handle_query(query: Query) -> Response:
 
     key_descriptions = normalize_dict_descriptions(merged_files)
 
-    relevant_keys = select_relevant_keys(query.question, key_descriptions)
+    relevant_keys = select_relevant_keys(
+        query.question, 
+        key_descriptions, 
+        query.subsector_id,
+        reranked_routes[0] if reranked_routes and len(reranked_routes) > 0 else None  # Передаем выбранный роутер
+    )
 
     if not relevant_keys:
         answer = 'К сожалению не удалось сформировать ответ. Попробуйте переформулировать и уточнить вопрос.'
@@ -240,7 +260,10 @@ async def handle_query(query: Query) -> Response:
         # Шаг 3 находим релевантную информацию (ключи) и генерируем ответ в заключительном модуле "process_json_and_answer"
         answer = generate_final_answer(
             user_query=query.question,
-            context=cleaned_content
+            context=cleaned_content,
+            subsector_id=query.subsector_id,
+            route_name=reranked_routes[0] if reranked_routes else None,
+            key_name=relevant_keys[0] if relevant_keys else None 
         )
         answer = remove_think_tags(answer)
         logger.info("Answer formed successfully.")

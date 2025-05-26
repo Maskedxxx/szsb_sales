@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from app.utils import logger
 
 MIN_ROUTES = 1
-MAX_ROUTES = 5  # Увеличим до 5, т.к. теперь мы оцениваем все роуты
+MAX_ROUTES = 20  # Увеличим до 5, т.к. теперь мы оцениваем все роуты
 MIN_REASONING_STEPS = 1
 MAX_REASONING_STEPS = 3
 
@@ -12,7 +12,7 @@ class EntityRankingParseModel(BaseModel):
     ...,
     min_length=MIN_REASONING_STEPS,
     max_length=MAX_REASONING_STEPS,
-    description="Brief reason for the entity ranking and why their content is relevant for creating a response to the user"
+    description="List Brief reason for the entity ranking and why their content is relevant for creating a response to the user"
     )
     reason: str = Field(
     ...,
@@ -22,7 +22,7 @@ class EntityRankingParseModel(BaseModel):
         ...,
         max_length=MAX_ROUTES,
         description="""Dictionary where the key is the entity name and the value is a confidence score from 0 to 1.
-        Names separated by `_` (underscore) should not be divided into components!"""
+        Names separated by `_` (underscore) should not be divided into components! Maximum 5 entity in dict for eval"""
     )
 
 
