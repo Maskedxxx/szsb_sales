@@ -31,6 +31,14 @@ FINAL_ANSWER_HINTS = {
         }
     },
     
+    # Молочная отрасль (04)
+    "04": {
+        "delar_flavor_collection": {
+            "flavor_bases": """
+            """
+        }
+    },
+    
     # Мороженое (05)
     "05": {
         "ice_cream_stabilizers": {
@@ -59,6 +67,9 @@ FINAL_ANSWER_HINTS = {
 # Общие подсказки по подсекторам (если нет специфичных для роутера/ключа)
 GENERAL_SUBSECTOR_HINTS = {
     "08": """
+    """,
+
+    "04": """
     """,
     
     "05": """

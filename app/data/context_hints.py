@@ -7,6 +7,21 @@ ROUTER_HINTS = {
     ВАЖНО ПРИ ВЫБОРЕ ФАЙЛОВ:
     """,
     
+    # Молочная отрасль
+    "04": """
+    ВАЖНО ПРИ ВЫБОРЕ ФАЙЛОВ:
+    - If the question relates to starter cultures or bacterial cultures for fermented dairy products (fermentation, selection, issues with curdling, acidity, or fermentation time), as well as rennet enzymes and cheese ripening — select starter_cultures.
+    - If asked about the choice of cultures for specific products (yogurt, kefir, sour cream, cottage cheese, cheeses) or lactic acid fermentation — select starter_cultures.
+    - If the question concerns multifunctional systems, stabilizers, thickeners, gel formation, or maintaining/improving the structure and consistency of the product — select multifunctional_systems.
+    - If problems are mentioned with separation, syneresis, product yield, viscosity, strength, creaminess, or preventing protein coagulation during heat treatment — select multifunctional_systems.
+    - If the question is about melting salts for processed cheeses (including Denfos), their use in making various types of processed cheeses, or issues with melting — select phosphates.",
+    - If asked about density, elasticity, structure of processed cheeses, or about replacing imported (sanctioned) melting salts — select phosphates.
+    - If the question involves preservatives for shelf-life extension, protection from microorganisms (bacteria, mold, yeast), or microbiological safety — select preservatives_antioxidants.
+    - If the issue is about preventing product spoilage, extending shelf life, or slowing the growth of harmful microflora — select preservatives_antioxidants.
+    - If the question concerns aromatic and flavor additives (DEL'AR), flavor profile, emulsions with colorants, or the need to enhance or mask flavor — select delar_flavor_collection.
+    - If asked about standardizing taste and aroma, expanding the range of flavors (including specific ones: strawberry, vanilla, smoky, cheese) — select delar_flavor_collection.
+    """,
+    
     # Мороженое
     "05": """
     ВАЖНО ПРИ ВЫБОРЕ ФАЙЛОВ:
@@ -33,6 +48,10 @@ ROUTER_HINTS = {
 KEY_HINTS = {
     # Мясная отрасль
     "08": """
+    ВАЖНО ПРИ ВЫБОРЕ КЛЮЧЕЙ:
+    """,
+    # Молочная отрасль
+    "04": """
     ВАЖНО ПРИ ВЫБОРЕ КЛЮЧЕЙ:
     """,
     
