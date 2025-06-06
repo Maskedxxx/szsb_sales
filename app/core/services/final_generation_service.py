@@ -37,16 +37,19 @@ class FinalGenerationService:
     def _prepare_messages(
         self,
         question: str,
-        context:str 
+        context: str,
+        context_hints: str = ""  # Добавляем параметр для контекстных подсказок
     ) -> List[Dict[str, str]]:
         """Prepare messages for LLM prompt."""
+        
         return [
             {"role": "system", "content": self.prompt_template.system},
             {
                 "role": "user",
                 "content": self.prompt_template.user.format(
                     question=question,
-                    content=context
+                    content=context,
+                    context_hints=f"\n## Специальные инструкции:\n{context_hints}\n"
                 )
             }
         ]
@@ -80,12 +83,8 @@ class FinalGenerationService:
             return None
         
 
-    def generate_final_answer(
-        self,
-        question: str,
-        context: str
-        ):
-        messages = self._prepare_messages(question, context)
+    def generate_final_answer(self, question: str, context: str, context_hints: str = ""):
+        messages = self._prepare_messages(question, context, context_hints)
         response = self._get_model_response(messages=messages)
 
         if response.choices and response.choices[0].message:
