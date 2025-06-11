@@ -1,3 +1,5 @@
+# app/core/service_models/reranking_model.py
+
 from typing import List, Dict
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from app.utils import logger
