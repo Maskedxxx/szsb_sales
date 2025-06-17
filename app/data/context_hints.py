@@ -34,6 +34,7 @@ ROUTER_HINTS = {
     - If the question concerns "juice-containing bases,"  choose the "flavor_data" router.
     - If the question concerns "matcha tea," also choose the "flavor_data" router.
     - If the question concerns "bacterial cultures," choose the "various_data" router.
+    - If the question requests a recipe for cola or Pepsi Cola, always use the "retro_recipes" router.
     """,
     
     # Мучные кондитерские изделия
