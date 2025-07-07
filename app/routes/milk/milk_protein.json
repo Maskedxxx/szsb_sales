@@ -1,0 +1,14 @@
+{
+  "description": "Молочнобелковые концентраты позволяют получать натуральный молочный продукт.\nПреимущества использования молочнобелкового концентрата в производстве молочных продуктов:\n• обогащает продукт молочным белком;\n• улучшает органолептические характеристики продукта ( более выраженный вкус и аромат);\n• снижает себестоимость кисломолочных продуктов за счет полной или частичной замены стабилизационных систем;\n• позволяет получить 100% натуральный продукт.",
+  "keywords": [],
+  "milk_protein_concentrate": {
+    "description": "Milk protein concentrates allow for obtaining a natural dairy product. **Advantages of using milk protein concentrate in dairy product production:** enriches the product with milk protein; improves the organoleptic characteristics of the product (more pronounced taste and aroma); reduces the cost of fermented milk products due to full or partial replacement of stabilization systems; allows for obtaining a 100% natural product. **Common composition:** Milk protein concentrate, whey protein concentrate, or pasteurized skimmed milk. **Application areas:** Fermented milk products, dairy desserts, puddings, creams, cream, dairy preserves, boiled condensed milk, dairy whey products, cheeses, processed cheeses, and curd products.",
+    "keywords": [],
+    "product_list": [
+      "{\"name\": \"КОМПЛЕКСНАЯ ПИЩЕВАЯ ДОБАВКА 112 С-С ГЕЛЕОН\", \"properties\": \"Концентрат молочного белка, концентрат сывороточного белка\", \"characteristics\": \"Массовая доля белка не менее 74,0\\nКазеиновый белок не менее 45,0\\nМассовая доля жира не более 2,0\\nМассовая доля лактозы не более 13,0\"}",
+      "{\"name\": \"КОНЦЕНТРАТ МОЛОЧНОГО БЕЛКА 75 ZL\", \"properties\": \"Пастеризованное обезжиренное молоко\", \"characteristics\": \"Дозировка: 0,5-3,0\\nМассовая доля белка в сухом веществе: 75,0±2,5\\nМассовая доля жира в сухом веществе не более 2,0\"}",
+      "{\"name\": \"КОНЦЕНТРАТ МОЛОЧНОГО БЕЛКА 80 ZL\", \"properties\": \"Пастеризованное обезжиренное молоко\", \"characteristics\": \"Дозировка: 0,5-2,5\\nМассовая доля белка в сухом веществе: 80,0+2,5\\nМассовая доля жира в сухом веществе, не более: 2,0\"}",
+      "{\"name\": \"КОНЦЕНТРАТ МОЛОЧНОГО БЕЛКА 85 ZL\", \"properties\": \"Пастеризованное обезжиренное молоко\", \"characteristics\": \"Дозировка: 0,5-2,5\\nМассовая доля белка в сухом веществе: 83+3\\nМассовая доля жира в сухом веществе, не более 2,0\"}"
+    ]
+  }
+}

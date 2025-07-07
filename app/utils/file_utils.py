@@ -220,58 +220,82 @@ def normalize_dict_descriptions(source: Dict[str, Any],
 def clean_json_text(json_text: str) -> str:
     """
     Очищает текст из JSON строки от специальных символов и форматирует его.
-
-    Функция выполняет:
-    1. Парсинг JSON строки
-    2. Извлечение всех строк из словаря и списков
-    3. Очистку от специальных символов
-    4. Форматирование пробелов
-
-    Args:
-        json_text: JSON строка для обработки
-
-    Returns:
-        Очищенный и отформатированный текст
-
-    Example:
-        >>> text = '{"key1": ["item1", "item2"], "key2": "value"}'
-        >>> clean_text(text)
-        'item1\nitem2\nvalue'
+    Добавляет нумерацию для продуктов (строк содержащих "name":).
     """
     # Шаг 1: Парсинг JSON
     try:
-        data: Dict[str, Union[List[str], str]] = json.loads(json_text)
+        data: Dict[str, Union[List[str], str, Dict]] = json.loads(json_text)
     except json.JSONDecodeError as e:
         print(f"Ошибка при парсинге JSON: {e}")
         return ""
 
-    # Шаг 2: Извлечение строк
-    content_list: List[str] = []
-    for value in data.values():
-        if isinstance(value, list):
-            content_list.extend(str(item) for item in value)
+    # Шаг 2: Обработка данных
+    result_parts = []
+    
+    for key, value in data.items():
+        if isinstance(value, dict) and "description" in value and "product_list" in value:
+            # Обрабатываем специальную структуру с описанием и списком продуктов
+            result_parts.append(value["description"])
+            
+            # Добавляем префикс для списка продуктов
+            product_list_prefix = "### ВНИМАНИЕ ЭТО \"список продукции из ассортиментого перечня\" для ответа на вопрос пользователя!, ФОРМИРУЙТЕ ОТВЕТ ИЗ ЭТОГО СПИСКА ЕСЛИ ОН АКТУАЛЕН! ###: "
+            
+            # Обрабатываем список продуктов с нумерацией
+            product_list = value["product_list"]
+            if isinstance(product_list, list):
+                numbered_products = []
+                product_counter = 1
+                
+                for item in product_list:
+                    item_str = str(item)
+                    # Проверяем, является ли элемент продуктом
+                    if '"name":' in item_str or "'name':" in item_str:
+                        # Очищаем строку
+                        cleaned_item = re.sub(r'\s+', ' ', re.sub(r'[{}"\\]', '', item_str)).strip()
+                        # Добавляем нумерацию
+                        numbered_products.append(f"{product_counter}. {cleaned_item}")
+                        product_counter += 1
+                    else:
+                        # Обычная очистка для не-продуктов
+                        cleaned_item = re.sub(r'\s+', ' ', re.sub(r'[{}"\\]', '', item_str)).strip()
+                        numbered_products.append(cleaned_item)
+                
+                result_parts.append(f"{product_list_prefix}[\n" + "\n".join(numbered_products) + "\n]")
+            else:
+                result_parts.append(f"{product_list_prefix}{product_list}")
+                
+        elif isinstance(value, list):
+            # Обычный список
+            content_list = [str(item) for item in value]
+            cleaned_items = []
+            product_counter = 1
+            
+            for item in content_list:
+                if not item.strip():
+                    continue
+                    
+                is_product = '"name":' in item or "'name':" in item
+                cleaned_item = re.sub(r'\s+', ' ', re.sub(r'[{}"\\]', '', item)).strip()
+                
+                if is_product:
+                    cleaned_items.append(f"{product_counter}. {cleaned_item}")
+                    product_counter += 1
+                else:
+                    cleaned_items.append(cleaned_item)
+            
+            result_parts.extend(cleaned_items)
         else:
-            content_list.append(str(value))
+            # Обычное значение
+            result_parts.append(str(value))
 
-    # Шаг 3: Очистка строк
-    cleaned_items: List[str] = [
-        # Удаляем спецсимволы и лишние пробелы
-        re.sub(r'\s+', ' ',
-               re.sub(r'[{}"\\]', '', item)
-               ).strip()
-        for item in content_list
-        if item.strip()  # Пропускаем пустые строки
-    ]
-
-    # Объединение и возврат результата
-    return '\n'.join(cleaned_items)
+    return '\n\n'.join(result_parts)
 
 
 def get_nested_data(data: Dict[str, Any], keys: List[str]) -> Any:
     """
     Рекурсивно извлекает данные из словаря по списку ключей.
     Если последний ключ равен 'product_list' и в том же словаре присутствует ключ 'description',
-    то результатом будет строка, состоящая из текста описания и данных из 'product_list'.
+    то результатом будет словарь с описанием и данными из 'product_list'.
     
     Args:
         data (Dict[str, Any]): Словарь, из которого нужно извлечь данные.
@@ -289,11 +313,11 @@ def get_nested_data(data: Dict[str, Any], keys: List[str]) -> Any:
                 description = current.get("description")
                 product_data = current[key]
                 if description is not None:
-                    # Если данные не являются строкой, преобразуем их в JSON-строку
-                    if not isinstance(product_data, str):
-                        product_data = json.dumps(product_data, indent=2, ensure_ascii=False)
-                    # Объединяем описание и данные product_list
-                    return f"{description}\n{product_data}"
+                    # Возвращаем структурированные данные, а не JSON строку
+                    return {
+                        "description": f"### Это описание найденного раздела документа ###: {description}",
+                        "product_list": product_data
+                    }
                 return product_data
             current = current[key]
         else:

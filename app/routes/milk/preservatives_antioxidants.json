@@ -1,0 +1,18 @@
+{
+  "description": "Консерванты продлевают срок хранения продуктов и защищают их от порчи микроорганизмов: бактерий, плесневых грибов и\nдрожжей, среди которых могут быть патогенные и непатогенные виды. С этими ингредиентами удается предотвратить развитие\nвредоносной микрофлоры или замедлить в ней обмен веществ.\nВыбор консервантов и их дозировок зависит от степени бактериальной загрязненности, условий хранения и желаемого срока\nгодности готового продукта.",
+  "keywords": [],
+  "preservatives_antioxidants_emulsifying_salts": {
+    "description": "Preservatives prolong product shelf life and protect them from spoilage by microorganisms: bacteria, molds, and yeasts, including pathogenic and non-pathogenic species. With these ingredients, it is possible to prevent the development of harmful microflora or slow down their metabolism. The choice of preservatives and their dosages depends on the degree of bacterial contamination, storage conditions, and the desired shelf life of the finished product. **Advantages:** Many of these products are of natural origin, do not contain 'E' index additives, protect products from undesirable microflora (yeast, mold, listeria), increase the shelf life of dairy products, and are thermostable. They can also effectively suppress the growth of yeast and mold without inhibiting lactic acid bacteria, and some enhance their antimicrobial activity in the presence of salts and acids. They generally do not alter the organoleptic properties of the product, are non-toxic, and do not exhibit carcinogenic properties. Some also serve as acidity regulators, emulsifiers, complexing agents, and melting salts. **Application areas:** Sour cream products, yogurt, fermented milk products, curd products, condensed milk, cheeses, processed cheeses, spreads, and milk.",
+    "keywords": [],
+    "product_list": [
+      "{\"name\": \"ГЛЮКОЗА ФЕРМЕНТИРОВАННАЯ «1.50» ΑΙΒΙ\", \"dosage\": \"Сметанный продукт, кисломолочные продукты: 0,1-0,15% после ферментации.\\nТворожный продукт и творожные изделия: 0,1-0,15% после удаления сыворотки.\\nТворожные продукты с отвариванием: 0,2-0,25% (в творожный продукт с сывороткой вносится предварительно растворенным в воде, за 30 минут до конца отваривания)\"}",
+      "{\"name\": \"ГЛЮКОЗА ФЕРМЕНТИРОВАННАЯ АІВІ 1.50 ЖИДКАЯ\", \"dosage\": \"0,2-2,0% от объема (массы) продукта\"}",
+      "{\"name\": \"КОМПЛЕКСНАЯ ПИЩЕВАЯ ДОБАВКА «LАCТOВАС» DEL'AR\", \"dosage\": \"В зависимости от рецептуры. Вносят со всеми компонентами в сухом виде в дозировке 0,02-0,1%\"}",
+      "{\"name\": \"КИСЛОТА СОРБИНОВАЯ (КИТАЙ)\", \"dosage\": \"Сгущенное молоко: 0,5-1,0; сыры 0,6-1,0; плавленые сыры: 0,4-1,0\"}",
+      "{\"name\": \"КИСЛОТА ЛИМОННАЯ\", \"dosage\": \"В зависимости от требования рецептуры\"}",
+      "{\"name\": \"СОРБАТ КАЛИЯ (КИТАЙ)\", \"dosage\": \"Сыры: 1,0; плавленые сыры: 1,0-2,0; спреды: 1,0; творог: 0,7-1,0\"}",
+      "{\"name\": \"БЕНЗОАТ НАТРИЯ (КИТАЙ)\", \"dosage\": \"0,8-1,0\"}",
+      "{\"name\": \"НАТРИЙ ЛИМОННОКИСЛЫЙ (ЦИТРАТ НАТРИЯ)\", \"dosage\": \"Молоко стерилизованное, восстановленное, рекомбинированное: 0,05-0,40%.\\nСливки восстановленные, рекомбинированные: 0,05-0,40%.\\nПлавленые сыры: 2-3%.\\nСгущенное молоко (к общей массе смеси): 0,01%.\\nДопустимая суточная доза цитрата натрия для человека: 60-120 мг/кг веса тела\"}"
+    ]
+  }
+}

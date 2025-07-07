@@ -1,0 +1,21 @@
+{
+  "description": "The «СОЮЗСНАБ» Group of Companies offers confectionery glaze under the \"KLASSIKA\" trademark from the manufacturing company \"Green Lines,\" based on lauric-type cocoa butter substitutes. Triglycerides containing lauric acid possess important properties for glazed products:\n• sharply defined melting point;\n• short melting and solidification period;\n• low viscosity in a molten state.\nGlazes made from various lauric fats are presented in a wide assortment. Depending on the client's wishes, we can offer options with different properties. For example, glaze with high hardness, good gloss, and brittleness, and reduced setting time. For those who prefer a softer consistency, we offer a glaze that provides a pliable coating and strong adhesion to the glazed surface upon solidification.\n\nCommon Composition: Sugar, non-tempered lauric-type cocoa butter substitute (hydrogenated fractionated refined palm kernel oil, emulsifiers (soy lecithin, E492)), cocoa powder, skimmed milk powder, refined deodorized coconut oil, cocoa mass, whole milk powder, dry whey, emulsifiers (soy lecithin, E492, E 476), \"Vanilla\" flavoring, \"Vanillin\" flavor substance.",
+  "keywords": [],
+  "confectionery_glaze_klassika": {
+    "description": "The «СОЮЗСНАБ» Group of Companies offers confectionery glaze under the \"KLASSIKA\" trademark from the manufacturing company \"Green Lines,\" based on lauric-type cocoa butter substitutes. Triglycerides containing lauric acid possess important properties for glazed products:\n• sharply defined melting point;\n• short melting and solidification period;\n• low viscosity in a molten state.\nGlazes made from various lauric fats are presented in a wide assortment. Depending on the client's wishes, we can offer options with different properties. For example, glaze with high hardness, good gloss, and brittleness, and reduced setting time. For those who prefer a softer consistency, we offer a glaze that provides a pliable coating and strong adhesion to the glazed surface upon solidification.\n\nCommon Composition: Sugar, non-tempered lauric-type cocoa butter substitute (hydrogenated fractionated refined palm kernel oil, emulsifiers (soy lecithin, E492)), cocoa powder, skimmed milk powder, refined deodorized coconut oil, cocoa mass, whole milk powder, dry whey, emulsifiers (soy lecithin, E492, E 476), \"Vanilla\" flavoring, \"Vanillin\" flavor substance.",
+    "keywords": [],
+    "product_list": [
+      "{\"name\": \"МАССА КОНДИТЕРСКАЯ «042 ТЕМНАЯ» «КЛАССИКА»\", \"color\": \"Коричневый\", \"characteristics\": \"Вязкость: 3,6-4,8 Па*с\\nДисперсность: не менее 93,5%\"}",
+      "{\"name\": \"МАССА КОНДИТЕРСКАЯ «920 МОЛОЧНАЯ» «КЛАССИКА»\", \"color\": \"Светло-коричневый\", \"characteristics\": \"Вязкость: 6,0-7,0 Па*с\\nДисперсность: не менее 93,5%\"}",
+      "{\"name\": \"МАССА КОНДИТЕРСКАЯ «048 ТЕМНАЯ» «КЛАССИКА»\", \"color\": \"Коричневый\", \"characteristics\": \"Вязкость: 3,6-4,8 Па*с\\nДисперсность: не менее 93,5%\"}",
+      "{\"name\": \"ГЛАЗУРЬ КОНДИТЕРСКАЯ «145» «КЛАССИКА»\", \"color\": \"Коричневый\", \"characteristics\": \"Вязкость: 3,6-4,8 Па*с\\nДисперсность: не менее 93,5%\"}",
+      "{\"name\": \"МАССА КОНДИТЕРСКАЯ «805 БЕЛАЯ» «КЛАССИКА»\", \"color\": \"Белый\", \"characteristics\": \"Вязкость: 2,5-3,5 Па*с\\nДисперсность: не менее 95%\"}",
+      "{\"name\": \"ГЛАЗУРЬ КОНДИТЕРСКАЯ «149 В» (КАПЛИ) «КЛАССИКА»\", \"color\": \"Коричневый\", \"characteristics\": \"Вязкость: 7,2-8,4 Па*с\\nДисперсность: не менее 93,5%\"}",
+      "{\"name\": \"ГЛАЗУРЬ КОНДИТЕРСКАЯ «670» «КЛАССИКА»\", \"color\": \"Коричневый\", \"characteristics\": \"Вязкость: 3,5-4,8 Па*с\\nДисперсность: не менее 93%\"}",
+      "{\"name\": \"ГЛАЗУРЬ КОНДИТЕРСКАЯ «148» «КЛАССИКА»\", \"color\": \"Коричневый\", \"characteristics\": \"Вязкость: 3,6-4,8 Па*с\\nДисперсность: не менее 93,5%\"}",
+      "{\"name\": \"ШОКОЛАД ТЕМНЫЙ 430 «КЛАССИКА»\", \"color\": \"Коричневый\", \"characteristics\": \"Вязкость: 8,3-8,5 Па*с\\nДисперсность: не менее 95%\"}",
+      "{\"name\": \"ШОКОЛАД ТЕМНЫЙ 431 «КЛАССИКА»\", \"color\": \"Коричневый\", \"characteristics\": \"Вязкость: 8,3-8,5 Па*с\\nДисперсность: не менее 95%\"}",
+      "{\"name\": \"ШОКОЛАД БЕЛЫЙ 735 «КЛАССИКА»\", \"color\": \"Белый\", \"characteristics\": \"Вязкость: 4,0-4,8 Па*с\\nДисперсность: не менее 95%\"}"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "description": "The SOYUZSNAB Group of Companies offers a wide selection of cocoa powders from leading global manufacturers: TULIP Cocoa (Germany) and Golden Harvest Cocoa (Indonesia). Special attention was paid to the production facility's equipment when choosing a supplier, ensuring its ability to produce consistently high-quality products that meet the standards of the SOYUZSNAB Group. All cocoa powders are obtained by grinding low-fat cocoa cake, which is a result of pressing cocoa liquor made from Côte d'Ivoire beans. **Application areas include:** chocolate milk, desserts, curd products, condensed milk with cocoa, chocolate butter, spreads, and processed cheeses.",
+  "keywords": [],
+  "cocoa_powder": {
+    "description": "The SOYUZSNAB Group of Companies offers a wide selection of cocoa powders from leading global manufacturers: TULIP Cocoa (Germany) and Golden Harvest Cocoa (Indonesia). Special attention was paid to the production facility's equipment when choosing a supplier, ensuring its ability to produce consistently high-quality products that meet the standards of the SOYUZSNAB Group. All cocoa powders are obtained by grinding low-fat cocoa cake, which is a result of pressing cocoa liquor made from Côte d'Ivoire beans. **Application areas include:** chocolate milk, desserts, curd products, condensed milk with cocoa, chocolate butter, spreads, and processed cheeses.",
+    "keywords": [],
+    "product_list": [
+      "{\"name\": \"Какао-порошок алкализованный TULIP 400\", \"color\": \"Коричневый\", \"composition\": \"Какао-порошок алкализованный\"}",
+      "{\"name\": \"КАКАО-ПОРОШОК АЛКАЛИЗОВАННЫЙ ДЕНКАКАО-А\", \"color\": \"Коричневый\", \"composition\": \"Какао-порошок алкализованный\"}",
+      "{\"name\": \"КАКАО-ПОРОШОК НАТУРАЛЬНЫЙ «GOLDEN HARVEST»\", \"color\": \"Коричневый\", \"composition\": \"Какао-порошок натуральный\"}"
+    ]
+  }
+}

@@ -28,8 +28,8 @@ class SemanticRoutingConfig:
     routing_table_path: str
     dense_encoder_name: Optional[str] = "TatonkaHF/bge-m3_en_ru"
     dense_encoder_device: Optional[str] = "cpu"
-    dense_score_threshold: Optional[float] = 0.7
-    sparse_score_threshold: Optional[float] = 0.75
+    dense_score_threshold: Optional[float] = 0.4
+    sparse_score_threshold: Optional[float] = 0.4
     alpha : float = 0.7
     aggregation : str = "mean"
 
