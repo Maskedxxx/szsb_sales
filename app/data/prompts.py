@@ -13,13 +13,16 @@ PROMPT_ENTITY_RANKING = {
         2. Use **graduated scores** – avoid purely binary 0 / 1.  
         3. At least two entities should receive a non-zero score unless all others are truly irrelevant.  
         4. Do **not** invent entities or draw on external knowledge.
-        5. Score **every** entity listed in <ENTITIES>;  
-            • include **no more than 5** items (MAX_ROUTES) in *entity_scores*;  
+        5. If more than 5 entities provided, score all but return only top 5 highest scores in *entity_scores*;  
             • present the dict **ordered from the lowest score to the highest** (worst → best).
-        6. Always follow this specific analysis order:
-            • First analyze entities in <ENTITIES> based on user query relevance
-            • Only then consider <CONTEXT_HINTS> for additional refinement
-            • Your reasoning_step_by_step must start with entity analysis before context hints
+        6. **CONTEXT_HINTS Explanation**: These contain selection hints in format "entity_name: keyword1, keyword2, keyword3".
+            • If user query contains keywords that match or are similar to those listed after entity name, increase that entity's score
+            • The more keyword matches, the higher the score boost
+            • If CONTEXT_HINTS are empty, rely only on entity descriptions
+        7. **Required reasoning structure** - Your reasoning_step_by_step must have exactly 3 steps:
+            • Step 1: "Entity analysis" - Analyze each entity based on user query relevance
+            • Step 2: "Context hints analysis" - Check for keyword matches in CONTEXT_HINTS
+            • Step 3: "Final ranking" - Explain final scoring decisions
  
 
         <PYDANTIC_SCHEMA>
@@ -54,9 +57,9 @@ PROMPT_ENTITY_RANKING = {
             ```json
             {
             "reasoning_step_by_step": [
-                "Запрос о фруктовых вкусах для напитка с низким сахаром.",
-                "Citrus_aroma и berry_aroma подходят: яркий вкус без лишней сладости.",
-                "Caramel_aroma менее релевантен из-за сладких нот; herbal_aroma может дополнять, fruit_aroma — общий, но менее специфичный."
+                "Entity analysis: Запрос о фруктовых вкусах для напитка с низким сахаром. Citrus_aroma и berry_aroma подходят лучше из-за яркого вкуса без лишней сладости.",
+                "Context hints analysis: Проверяю совпадения ключевых слов из подсказок с запросом пользователя.",
+                "Final ranking: Citrus и berry получают высокие оценки, caramel_aroma менее релевантен из-за сладких нот."
             ],
             "reason": "Лучшие кандидаты — citrus и berry, т.к. усиливают вкус без повышения сладости.",
             "entity_scores": {
@@ -94,14 +97,17 @@ PROMPT_ENTITY_RANKING = {
         2. Use **graduated scores** – avoid purely binary 0 / 1.  
         3. At least two entities should receive a non-zero score unless all others are truly irrelevant.  
         4. Do **not** invent entities or draw on external knowledge.
-        5. Score **every** entity listed in <ENTITIES>;  
-            • include **no more than 5** items (MAX_ROUTES) in *entity_scores*;  
+        5. If more than 5 entities provided, score all but return only top 5 highest scores in *entity_scores*;  
             • present the dict **ordered from the lowest score to the highest** (worst → best).
-        6. Always follow this specific analysis order:
-            • First analyze entities in <ENTITIES> based on user query relevance
-            • Only then consider <CONTEXT_HINTS> for additional refinement
-            • Your reasoning_step_by_step must start with entity analysis before context hints
-        7. ⚠️ IMPORTANT: In the "entity_scores" dictionary, entity names must exactly match the provided names in <ENTITIES>. Do NOT modify, add, or omit any characters or words from the original entity names.
+        6. **CONTEXT_HINTS Explanation**: These contain selection hints in format "entity_name: keyword1, keyword2, keyword3".
+            • If user query contains keywords that match or are similar to those listed after entity name, increase that entity's score
+            • The more keyword matches, the higher the score boost
+            • If CONTEXT_HINTS are empty, rely only on entity descriptions
+        7. **Required reasoning structure** - Your reasoning_step_by_step must have exactly 3 steps:
+            • Step 1: "Entity analysis" - Analyze each entity based on user query relevance
+            • Step 2: "Context hints analysis" - Check for keyword matches in CONTEXT_HINTS
+            • Step 3: "Final ranking" - Explain final scoring decisions
+        8. ⚠️ IMPORTANT: In the "entity_scores" dictionary, entity names must exactly match the provided names in <ENTITIES>. Do NOT modify, add, or omit any characters or words from the original entity names.
 
         """
 }

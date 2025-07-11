@@ -90,6 +90,19 @@ class FinalGenerationService:
         if response.choices and response.choices[0].message:
             self.logger.info(f"----- Final answer -----\n{response.choices[0].message.content}")
 
-            return response.choices[0].message
+            # Добавляем общий префикс-предупреждение ко всем ответам
+            warning_prefix = "⚠️ **ВАЖНО**: Нейропомощник может ошибаться в точности цифр, названий продуктов и технических характеристик. Всегда требуется перепроверка предоставленной информации в официальных документах перед принятием решений.\n\n"
+            
+            # Создаем новый объект сообщения с префиксом
+            original_content = response.choices[0].message.content
+            modified_content = warning_prefix + original_content
+            
+            # Создаем копию объекта сообщения с измененным содержимым
+            modified_message = type(response.choices[0].message)(
+                content=modified_content,
+                role=response.choices[0].message.role
+            )
+            
+            return modified_message
         else: 
             return None
