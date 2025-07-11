@@ -20,10 +20,10 @@ PROMPT_ENTITY_RANKING = {
             • Consider logical relevance between the user query and the entity's described purpose
             • Use reasoning to determine how well each entity matches the user's needs based on these descriptions
             • If CONTEXT_HINTS are empty, rely only on entity descriptions
-        7. **Required reasoning structure** - Your reasoning_step_by_step must have exactly 3 steps:
-            • Step 1: "Entity analysis" - Analyze each entity based on user query relevance
-            • Step 2: "Context hints analysis" - Analyze how each entity's described purpose aligns with the user query
-            • Step 3: "Final ranking" - Explain final scoring decisions
+        7. **Required reasoning structure** - Your reasoning_step_by_step must have exactly 3 steps with detailed analysis:
+            • Step 1: "Initial screening" - Go through each entity and eliminate those clearly irrelevant to the user query. List which entities to discard and why.
+            • Step 2: "Detailed evaluation" - For remaining entities, analyze their descriptions against user needs. Explain which entities are promising and which have limitations.
+            • Step 3: "Final scoring rationale" - Assign final scores with specific justification for each entity's ranking based on relevance analysis.
  
 
         <PYDANTIC_SCHEMA>
@@ -58,9 +58,9 @@ PROMPT_ENTITY_RANKING = {
             ```json
             {
             "reasoning_step_by_step": [
-                "Entity analysis: Запрос о фруктовых вкусах для напитка с низким сахаром. Citrus_aroma и berry_aroma подходят лучше из-за яркого вкуса без лишней сладости.",
-                "Context hints analysis: Анализирую описания сущностей - citrus и berry лучше подходят для низкосахарных напитков из-за естественной кислотности и яркого вкуса.",
-                "Final ranking: Citrus и berry получают высокие оценки, caramel_aroma менее релевантен из-за сладких нот."
+                "Initial screening: Для низкосахарного напитка нужны яркие вкусы без лишней сладости. Исключаю caramel_aroma (слишком сладкий), herbal_aroma (не фруктовый). Оставляю для анализа: fruit_aroma, citrus_aroma, berry_aroma.",
+                "Detailed evaluation: fruit_aroma - универсальный, но может быть слишком сладким; citrus_aroma - естественная кислотность компенсирует отсутствие сахара, яркий вкус; berry_aroma - природная терпкость и интенсивность вкуса.",
+                "Final scoring rationale: citrus_aroma (0.85) - идеально подходит из-за кислотности; berry_aroma (0.8) - терпкость и яркость; fruit_aroma (0.35) - слишком общий; herbal_aroma (0.45) - может дополнить; caramel_aroma (0.15) - противоречит концепции."
             ],
             "reason": "Лучшие кандидаты — citrus и berry, т.к. усиливают вкус без повышения сладости.",
             "entity_scores": {
@@ -105,10 +105,10 @@ PROMPT_ENTITY_RANKING = {
             • Consider logical relevance between the user query and the entity's described purpose
             • Use reasoning to determine how well each entity matches the user's needs based on these descriptions
             • If CONTEXT_HINTS are empty, rely only on entity descriptions
-        7. **Required reasoning structure** - Your reasoning_step_by_step must have exactly 3 steps:
-            • Step 1: "Entity analysis" - Analyze each entity based on user query relevance
-            • Step 2: "Context hints analysis" - Analyze how each entity's described purpose aligns with the user query
-            • Step 3: "Final ranking" - Explain final scoring decisions
+        7. **Required reasoning structure** - Your reasoning_step_by_step must have exactly 3 steps with detailed analysis:
+            • Step 1: "Initial screening" - Go through each entity and eliminate those clearly irrelevant to the user query. List which entities to discard and why.
+            • Step 2: "Detailed evaluation" - For remaining entities, analyze their descriptions against user needs. Explain which entities are promising and which have limitations.
+            • Step 3: "Final scoring rationale" - Assign final scores with specific justification for each entity's ranking based on relevance analysis.
         8. ⚠️ IMPORTANT: In the "entity_scores" dictionary, entity names must exactly match the provided names in <ENTITIES>. Do NOT modify, add, or omit any characters or words from the original entity names.
 
         """
