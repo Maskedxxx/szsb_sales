@@ -4,8 +4,8 @@ from dataclasses import dataclass
 import json
 import logging
 from typing import Dict, List, Optional, Mapping, Sequence, Union
-from pydantic import ValidationError
-from app.core.service_models import EntityRankingParseModel, EntityRankingValidationModel
+# ValidationError больше не используется с динамической моделью
+from app.core.service_models import create_dynamic_entity_ranking_model
 
 @dataclass
 class EntityRankingConfig:
@@ -94,16 +94,18 @@ class EntityRankingService:
             )}
         ]
 
-    def _get_model_response(
+
+    def _get_model_response_structured(
             self,
-            messages: List[Dict[str, str]]
+            messages: List[Dict[str, str]],
+            dynamic_model
     ) -> Optional[Dict]:
-        """Get model response."""
+        """Get model response using dynamic structured model."""
         response = self.client.beta.chat.completions.parse(
             temperature=self.config.temperature,
             model=self.config.model_name,
             messages=messages,
-            response_format=EntityRankingParseModel,
+            response_format=dynamic_model,
             max_tokens=self.config.max_tokens
         )
 
@@ -136,14 +138,12 @@ class EntityRankingService:
                 
                 self.logger.info(f"Cleaned entity names from special characters: {list(cleaned_entity_scores.keys())}")
                 
-            validated = EntityRankingValidationModel.model_validate(
-                obj=response.parsed.model_dump(),
-                context={"allowed_entities": allowed_entities}
-            )
+            # С динамической моделью validation больше не нужен - используем напрямую
+            entity_scores = response.parsed.entity_scores
             
             # Сортируем сущности по оценке и берем top_n
             sorted_entities = sorted(
-                validated.entity_scores.items(), 
+                entity_scores.items(), 
                 key=lambda x: x[1], 
                 reverse=True
             )
@@ -151,12 +151,12 @@ class EntityRankingService:
             selected_entities = [entity for entity, _ in sorted_entities[:top_n]]
             
             self.logger.info(f"Selected top {top_n} entities: {selected_entities}")
-            self.logger.info(f"All scores: {validated.entity_scores}")
+            self.logger.info(f"All scores: {entity_scores}")
             
             return selected_entities
             
-        except ValidationError as e:
-            self.logger.error(f"Response validation failed: {e}")
+        except Exception as e:
+            self.logger.error(f"Response processing failed: {e}")
             return []
 
     def rank_entities(
@@ -179,13 +179,18 @@ class EntityRankingService:
         try:
             entities_with_descriptions = self._format_entities_with_descriptions(entities)
             messages = self._prepare_messages(query, entities_with_descriptions)
-            response = self._get_model_response(messages)
+            
+            # Получаем список разрешённых сущностей
             allowed_entities = (
                 list(entities.keys())                   # dict-format
                 if isinstance(entities, Mapping)
                 else [e.get("entity", e.get("route", "")) for e in entities]  # list-of-dict
             )
-
+            
+            # Создаём динамическую модель для структурированного ответа
+            DynamicModel = create_dynamic_entity_ranking_model(allowed_entities)
+            
+            response = self._get_model_response_structured(messages, DynamicModel)
             return self._process_response(response, allowed_entities, top_n)
         
         except Exception as e:
