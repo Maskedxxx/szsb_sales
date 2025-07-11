@@ -74,14 +74,59 @@ class EntityRankingService:
         
         return "\n".join(formatted_lines) + entities_reminder
 
+    def _filter_context_hints(self, context_hints: str, allowed_entities: List[str]) -> str:
+        """
+        Фильтрует context hints, оставляя только строки для разрешенных сущностей.
+        
+        Args:
+            context_hints: Полный текст контекстных подсказок
+            allowed_entities: Список разрешенных имен сущностей
+            
+        Returns:
+            Отфильтрованные context hints только для разрешенных сущностей
+        """
+        if not context_hints or not allowed_entities:
+            return context_hints or ""
+            
+        lines = context_hints.split('\n')
+        filtered_lines = []
+        current_entity = None
+        
+        for line in lines:
+            # Проверяем, является ли строка началом описания сущности (формат: "entity_name: ")
+            stripped = line.strip()
+            if ':' in stripped and not stripped.startswith('ВАЖНО'):
+                # Извлекаем имя сущности (все до первого двоеточия)
+                entity_name = stripped.split(':')[0].strip()
+                if entity_name in allowed_entities:
+                    current_entity = entity_name
+                    filtered_lines.append(line)
+                else:
+                    current_entity = None
+            else:
+                # Если мы внутри разрешенной сущности или это общая строка, добавляем
+                if current_entity is not None or not stripped or stripped.startswith('ВАЖНО'):
+                    filtered_lines.append(line)
+        
+        filtered_hints = '\n'.join(filtered_lines)
+        self.logger.info(f"Filtered context hints for entities: {allowed_entities}")
+        self.logger.debug(f"Original hints length: {len(context_hints)}, Filtered length: {len(filtered_hints)}")
+        
+        return filtered_hints
+
     def _log_response_obj(self, obj_str: str):
         """Log the fields of the response model object"""
         self.logger.info(f"EntityRanking response: \n {json.dumps(json.loads(obj_str), indent=4, ensure_ascii=False)}")
 
-    def _prepare_messages(self, query, entities_with_descriptions: str) -> List[Dict[str, str]]:
+    def _prepare_messages(self, query, entities_with_descriptions: str, allowed_entities: List[str]) -> List[Dict[str, str]]:
         """Prepare messages for LLM prompt."""
         
-        # Вставка контекстных подсказок если они есть
+        # Фильтруем context hints только для разрешенных сущностей
+        filtered_context_hints = self._filter_context_hints(
+            self.config.context_hints or "", 
+            allowed_entities
+        )
+        
         system_prompt = self.prompt_template.system
         
         return [
@@ -90,7 +135,7 @@ class EntityRankingService:
                 query=query, 
                 entities=entities_with_descriptions,
                 entity_type=self.config.entity_type,
-                context_hints=self.config.context_hints
+                context_hints=filtered_context_hints
             )}
         ]
 
@@ -178,7 +223,6 @@ class EntityRankingService:
         """
         try:
             entities_with_descriptions = self._format_entities_with_descriptions(entities)
-            messages = self._prepare_messages(query, entities_with_descriptions)
             
             # Получаем список разрешённых сущностей
             allowed_entities = (
@@ -186,6 +230,9 @@ class EntityRankingService:
                 if isinstance(entities, Mapping)
                 else [e.get("entity", e.get("route", "")) for e in entities]  # list-of-dict
             )
+            
+            # Подготавливаем сообщения с отфильтрованными context hints
+            messages = self._prepare_messages(query, entities_with_descriptions, allowed_entities)
             
             # Создаём динамическую модель для структурированного ответа
             DynamicModel = create_dynamic_entity_ranking_model(allowed_entities)
