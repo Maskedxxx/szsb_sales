@@ -5,7 +5,7 @@ import json
 import logging
 from typing import Dict, List, Optional, Mapping, Sequence, Union
 # ValidationError больше не используется с динамической моделью
-from app.core.service_models import create_dynamic_entity_ranking_model
+from app.core.service_models import EntityRankingModel
 
 @dataclass
 class EntityRankingConfig:
@@ -142,15 +142,14 @@ class EntityRankingService:
 
     def _get_model_response_structured(
             self,
-            messages: List[Dict[str, str]],
-            dynamic_model
+            messages: List[Dict[str, str]]
     ) -> Optional[Dict]:
-        """Get model response using dynamic structured model."""
+        """Get model response using static structured model."""
         response = self.client.beta.chat.completions.parse(
             temperature=self.config.temperature,
             model=self.config.model_name,
             messages=messages,
-            response_format=dynamic_model,
+            response_format=EntityRankingModel,
             max_tokens=self.config.max_tokens
         )
 
@@ -183,8 +182,22 @@ class EntityRankingService:
                 
                 self.logger.info(f"Cleaned entity names from special characters: {list(cleaned_entity_scores.keys())}")
                 
-            # С динамической моделью validation больше не нужен - используем напрямую
-            entity_scores = response.parsed.entity_scores
+            # Фильтруем ответ - оставляем только разрешенные сущности
+            raw_entity_scores = response.parsed.entity_scores
+            
+            # Оставляем только сущности из allowed_entities
+            entity_scores = {
+                entity: score for entity, score in raw_entity_scores.items() 
+                if entity in allowed_entities
+            }
+            
+            if not entity_scores:
+                self.logger.warning(f"No valid entities found in response. Raw: {list(raw_entity_scores.keys())}, Allowed: {allowed_entities}")
+                return []
+                
+            if len(entity_scores) != len(raw_entity_scores):
+                filtered_out = set(raw_entity_scores.keys()) - set(entity_scores.keys())
+                self.logger.info(f"Filtered out invalid entities: {list(filtered_out)}")
             
             # Сортируем сущности по оценке и берем top_n
             sorted_entities = sorted(
@@ -234,10 +247,8 @@ class EntityRankingService:
             # Подготавливаем сообщения с отфильтрованными context hints
             messages = self._prepare_messages(query, entities_with_descriptions, allowed_entities)
             
-            # Создаём динамическую модель для структурированного ответа
-            DynamicModel = create_dynamic_entity_ranking_model(allowed_entities)
-            
-            response = self._get_model_response_structured(messages, DynamicModel)
+            # Используем статическую модель, фильтрация происходит через context hints и post-processing
+            response = self._get_model_response_structured(messages)
             return self._process_response(response, allowed_entities, top_n)
         
         except Exception as e:
