@@ -9,8 +9,8 @@ import pandas as pd
 import logging
 from typing import List
 
-# Импортируем промежуточный маппинг
-from ready_sauces_enum_mapping import has_enum_match
+# Импортируем универсальный промежуточный маппинг
+from universal_enum_mapping import has_universal_enum_match
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -63,8 +63,8 @@ def filter_horeca_products_smart(
         logger.error(f"Ключ '{filter_key}' не найден в продуктах. Доступные ключи: {list(df.columns)}")
         return []
     
-    # Умная фильтрация: используем промежуточный маппинг с паттернами и regex
-    mask = df[filter_key].apply(lambda x: has_enum_match(x, enum_value, filter_key))
+    # Умная фильтрация: используем универсальный промежуточный маппинг с паттернами и regex
+    mask = df[filter_key].apply(lambda x: has_universal_enum_match(x, enum_value, filter_key))
     filtered_df = df[mask]
     
     logger.info(f"Найдено совпадений: {len(filtered_df)} из {len(df)}")
