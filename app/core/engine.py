@@ -31,6 +31,9 @@ from app.utils import (
     logger
 )
 
+# Импорт для Tool Calling HoReCa
+from horeca_tool_service import HoReCaToolService
+
 TOP_N_ROUTES = 5
 
 ls_client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
@@ -247,14 +250,57 @@ async def handle_query(query: Query) -> Response:
         answer = 'К сожалению не удалось сформировать ответ. Попробуйте переформулировать и уточнить вопрос.'
         logger.info('No relevant_keys found, cannot generate final answer!')
     else:
+        # Получаем данные для релевантных ключей
         relevant_data = {
             key: get_nested_data(merged_files[key], ['product_list'])
             for key in relevant_keys
             if key in merged_files
         }
 
-        formatted_content = json.dumps(
-            relevant_data, indent=2, ensure_ascii=False)
+        # === TOOL CALLING INTEGRATION ДЛЯ HORECA ===
+        # Проверяем, является ли подсектор HoReCa
+        if query.subsector_id == "01":  # HoReCa subsector
+            logger.info("Применение Tool Calling для HoReCa")
+            
+            # Инициализируем HoReCaToolService
+            # Создаем временный LLM сервис для tool calling
+            class MockLLMService:
+                def call_with_tools(self, system_prompt, user_query, tools):
+                    # Заглушка для LLM вызова, пока не интегрируем с настоящим сервисом
+                    logger.info("Mock LLM service called")
+                    return None
+            
+            horeca_tool_service = HoReCaToolService(llm_service=MockLLMService())
+            
+            # Применяем tool calling к каждому релевантному ключу
+            processed_data = {}
+            for key in relevant_keys:
+                if key in merged_files:
+                    file_name = key + ".json"  # Формируем имя файла
+                    key_data = merged_files[key]
+                    
+                    # Применяем tool calling
+                    tool_result = horeca_tool_service.process_horeca_query(
+                        query=query.question,
+                        file_name=file_name,
+                        product_data=key_data
+                    )
+                    
+                    if tool_result.success and tool_result.filtered_products:
+                        # Используем отфильтрованные продукты
+                        processed_data[key] = tool_result.filtered_products
+                        logger.info(f"Tool calling для {key}: {len(tool_result.filtered_products)} продуктов")
+                    else:
+                        # Fallback: используем все продукты
+                        processed_data[key] = get_nested_data(key_data, ['product_list'])
+                        logger.info(f"Tool calling fallback для {key}: {len(processed_data[key])} продуктов")
+            
+            # Форматируем обработанные данные
+            formatted_content = json.dumps(processed_data, indent=2, ensure_ascii=False)
+        else:
+            # Обычный флоу для других подсекторов (без tool calling)
+            formatted_content = json.dumps(relevant_data, indent=2, ensure_ascii=False)
+        
         cleaned_content = clean_json_text(formatted_content)
 
         # Шаг 3 находим релевантную информацию (ключи) и генерируем ответ в заключительном модуле "process_json_and_answer"
