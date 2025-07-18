@@ -31,6 +31,11 @@ from app.utils import (
     logger
 )
 
+# Импорт для Tool Calling
+from app.core.tool_calling import ToolService
+from app.core.tool_calling.adapters import OpenAIAdapter
+from app.core.tool_calling.horeca.service import HoReCaHandler
+
 TOP_N_ROUTES = 5
 
 ls_client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
@@ -247,14 +252,59 @@ async def handle_query(query: Query) -> Response:
         answer = 'К сожалению не удалось сформировать ответ. Попробуйте переформулировать и уточнить вопрос.'
         logger.info('No relevant_keys found, cannot generate final answer!')
     else:
+        # Получаем данные для релевантных ключей
         relevant_data = {
             key: get_nested_data(merged_files[key], ['product_list'])
             for key in relevant_keys
             if key in merged_files
         }
 
-        formatted_content = json.dumps(
-            relevant_data, indent=2, ensure_ascii=False)
+        # === TOOL CALLING INTEGRATION ===
+        # Проверяем, поддерживается ли tool calling для данной отрасли
+        # Создаем и настраиваем ToolService
+        llm_adapter = OpenAIAdapter(client, os.getenv('KEY_SELECTION_MODEL'))
+        tool_service = ToolService(llm_adapter)
+        
+        # Регистрируем обработчики для поддерживаемых отраслей
+        if query.subsector_id == "01":  # HoReCa
+            horeca_handler = HoReCaHandler()
+            tool_service.register_subsector("01", horeca_handler)
+        
+        # Применяем tool calling если отрасль поддерживается
+        if tool_service.is_supported(query.subsector_id):
+            logger.info(f"Применение Tool Calling для отрасли {query.subsector_id}")
+            
+            # Применяем tool calling к каждому релевантному ключу
+            processed_data = {}
+            for key in relevant_keys:
+                if key in merged_files:
+                    file_name = key + ".json"  # Формируем имя файла
+                    key_data = merged_files[key]
+                    
+                    # Применяем tool calling
+                    tool_result = tool_service.process_query(
+                        query=query.question,
+                        subsector_id=query.subsector_id,
+                        file_name=file_name,
+                        data=key_data
+                    )
+                    
+                    if tool_result.success and tool_result.filtered_data:
+                        # Используем отфильтрованные продукты
+                        processed_data[key] = tool_result.filtered_data
+                        logger.info(f"Tool calling для {key}: {len(tool_result.filtered_data)} продуктов")
+                    else:
+                        # Fallback: используем все продукты
+                        processed_data[key] = get_nested_data(key_data, ['product_list'])
+                        logger.info(f"Tool calling fallback для {key}: {len(processed_data[key])} продуктов")
+            
+            # Форматируем обработанные данные
+            formatted_content = json.dumps(processed_data, indent=2, ensure_ascii=False)
+        else:
+            # Обычный флоу для неподдерживаемых отраслей (без tool calling)
+            logger.info(f"Tool calling не поддерживается для отрасли {query.subsector_id}")
+            formatted_content = json.dumps(relevant_data, indent=2, ensure_ascii=False)
+        
         cleaned_content = clean_json_text(formatted_content)
 
         # Шаг 3 находим релевантную информацию (ключи) и генерируем ответ в заключительном модуле "process_json_and_answer"
