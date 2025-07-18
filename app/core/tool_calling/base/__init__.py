@@ -6,6 +6,6 @@
 """
 
 from .handler import BaseToolHandler
-from .types import ToolCallResult, FilterParameters
+from .types import ToolCallResult, FilterParameters, ToolSchema
 
-__all__ = ["BaseToolHandler", "ToolCallResult", "FilterParameters"]
+__all__ = ["BaseToolHandler", "ToolCallResult", "FilterParameters", "ToolSchema"]
