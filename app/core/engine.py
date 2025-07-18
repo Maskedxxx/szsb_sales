@@ -3,13 +3,13 @@
 import os
 import json
 import time
-from typing import Any, List, Dict, Tuple
+from typing import Any, List, Dict
 
 from openai import OpenAI
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable, Client
 
-from app.data import SUBSECTOR_ROUTES, PROMPT_ENTITY_RANKING, PROMPT_FINAL_ANSWER, ROUTER_HINTS, KEY_HINTS, get_final_answer_hint
+from app.data import SUBSECTOR_ROUTES, PROMPT_ENTITY_RANKING, PROMPT_FINAL_ANSWER, get_final_answer_hint
 from app.api.api_models import Metadata, Response, Query
 from app.config import ROUTES_PATH, ROUTING_TABLE_PATH
 from app.core.services import (
@@ -250,11 +250,6 @@ async def handle_query(query: Query) -> Response:
         answer = 'К сожалению не удалось сформировать ответ. Попробуйте переформулировать и уточнить вопрос.'
         logger.info('No relevant_keys found, cannot generate final answer!')
     else:
-        relevant_data = {
-            key: get_nested_data(merged_files[key], ['product_list'])
-            for key in relevant_keys
-            if key in merged_files
-        }
 
         # === TOOL CALLING INTEGRATION ===
         # Инициализируем Tool Calling сервис
