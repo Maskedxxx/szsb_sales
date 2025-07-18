@@ -4,8 +4,8 @@ from dataclasses import dataclass
 import json
 import logging
 from typing import Dict, List, Optional, Mapping, Sequence, Union
-from pydantic import ValidationError
-from app.core.service_models import EntityRankingParseModel, EntityRankingValidationModel
+# ValidationError больше не используется с динамической моделью
+from app.core.service_models import EntityRankingModel
 
 @dataclass
 class EntityRankingConfig:
@@ -74,14 +74,59 @@ class EntityRankingService:
         
         return "\n".join(formatted_lines) + entities_reminder
 
+    def _filter_context_hints(self, context_hints: str, allowed_entities: List[str]) -> str:
+        """
+        Фильтрует context hints, оставляя только строки для разрешенных сущностей.
+        
+        Args:
+            context_hints: Полный текст контекстных подсказок
+            allowed_entities: Список разрешенных имен сущностей
+            
+        Returns:
+            Отфильтрованные context hints только для разрешенных сущностей
+        """
+        if not context_hints or not allowed_entities:
+            return context_hints or ""
+            
+        lines = context_hints.split('\n')
+        filtered_lines = []
+        current_entity = None
+        
+        for line in lines:
+            # Проверяем, является ли строка началом описания сущности (формат: "entity_name: ")
+            stripped = line.strip()
+            if ':' in stripped and not stripped.startswith('ВАЖНО'):
+                # Извлекаем имя сущности (все до первого двоеточия)
+                entity_name = stripped.split(':')[0].strip()
+                if entity_name in allowed_entities:
+                    current_entity = entity_name
+                    filtered_lines.append(line)
+                else:
+                    current_entity = None
+            else:
+                # Если мы внутри разрешенной сущности или это общая строка, добавляем
+                if current_entity is not None or not stripped or stripped.startswith('ВАЖНО'):
+                    filtered_lines.append(line)
+        
+        filtered_hints = '\n'.join(filtered_lines)
+        self.logger.info(f"Filtered context hints for entities: {allowed_entities}")
+        self.logger.debug(f"Original hints length: {len(context_hints)}, Filtered length: {len(filtered_hints)}")
+        
+        return filtered_hints
+
     def _log_response_obj(self, obj_str: str):
         """Log the fields of the response model object"""
         self.logger.info(f"EntityRanking response: \n {json.dumps(json.loads(obj_str), indent=4, ensure_ascii=False)}")
 
-    def _prepare_messages(self, query, entities_with_descriptions: str) -> List[Dict[str, str]]:
+    def _prepare_messages(self, query, entities_with_descriptions: str, allowed_entities: List[str]) -> List[Dict[str, str]]:
         """Prepare messages for LLM prompt."""
         
-        # Вставка контекстных подсказок если они есть
+        # Фильтруем context hints только для разрешенных сущностей
+        filtered_context_hints = self._filter_context_hints(
+            self.config.context_hints or "", 
+            allowed_entities
+        )
+        
         system_prompt = self.prompt_template.system
         
         return [
@@ -90,20 +135,21 @@ class EntityRankingService:
                 query=query, 
                 entities=entities_with_descriptions,
                 entity_type=self.config.entity_type,
-                context_hints=self.config.context_hints
+                context_hints=filtered_context_hints
             )}
         ]
 
-    def _get_model_response(
+
+    def _get_model_response_structured(
             self,
             messages: List[Dict[str, str]]
     ) -> Optional[Dict]:
-        """Get model response."""
+        """Get model response using static structured model."""
         response = self.client.beta.chat.completions.parse(
             temperature=self.config.temperature,
             model=self.config.model_name,
             messages=messages,
-            response_format=EntityRankingParseModel,
+            response_format=EntityRankingModel,
             max_tokens=self.config.max_tokens
         )
 
@@ -136,14 +182,26 @@ class EntityRankingService:
                 
                 self.logger.info(f"Cleaned entity names from special characters: {list(cleaned_entity_scores.keys())}")
                 
-            validated = EntityRankingValidationModel.model_validate(
-                obj=response.parsed.model_dump(),
-                context={"allowed_entities": allowed_entities}
-            )
+            # Фильтруем ответ - оставляем только разрешенные сущности
+            raw_entity_scores = response.parsed.entity_scores
+            
+            # Оставляем только сущности из allowed_entities
+            entity_scores = {
+                entity: score for entity, score in raw_entity_scores.items() 
+                if entity in allowed_entities
+            }
+            
+            if not entity_scores:
+                self.logger.warning(f"No valid entities found in response. Raw: {list(raw_entity_scores.keys())}, Allowed: {allowed_entities}")
+                return []
+                
+            if len(entity_scores) != len(raw_entity_scores):
+                filtered_out = set(raw_entity_scores.keys()) - set(entity_scores.keys())
+                self.logger.info(f"Filtered out invalid entities: {list(filtered_out)}")
             
             # Сортируем сущности по оценке и берем top_n
             sorted_entities = sorted(
-                validated.entity_scores.items(), 
+                entity_scores.items(), 
                 key=lambda x: x[1], 
                 reverse=True
             )
@@ -151,12 +209,12 @@ class EntityRankingService:
             selected_entities = [entity for entity, _ in sorted_entities[:top_n]]
             
             self.logger.info(f"Selected top {top_n} entities: {selected_entities}")
-            self.logger.info(f"All scores: {validated.entity_scores}")
+            self.logger.info(f"All scores: {entity_scores}")
             
             return selected_entities
             
-        except ValidationError as e:
-            self.logger.error(f"Response validation failed: {e}")
+        except Exception as e:
+            self.logger.error(f"Response processing failed: {e}")
             return []
 
     def rank_entities(
@@ -178,14 +236,19 @@ class EntityRankingService:
         """
         try:
             entities_with_descriptions = self._format_entities_with_descriptions(entities)
-            messages = self._prepare_messages(query, entities_with_descriptions)
-            response = self._get_model_response(messages)
+            
+            # Получаем список разрешённых сущностей
             allowed_entities = (
                 list(entities.keys())                   # dict-format
                 if isinstance(entities, Mapping)
                 else [e.get("entity", e.get("route", "")) for e in entities]  # list-of-dict
             )
-
+            
+            # Подготавливаем сообщения с отфильтрованными context hints
+            messages = self._prepare_messages(query, entities_with_descriptions, allowed_entities)
+            
+            # Используем статическую модель, фильтрация происходит через context hints и post-processing
+            response = self._get_model_response_structured(messages)
             return self._process_response(response, allowed_entities, top_n)
         
         except Exception as e:

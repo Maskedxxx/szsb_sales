@@ -61,6 +61,69 @@ FINAL_ANSWER_HINTS = {
     "07": {
         "delar_collection": {
         }
+    },
+    
+    # Жировая отрасль (02)
+    "02": {
+        # Роутер: антиоксиданты
+        "antioxidants": {
+            "antioxidants": """
+            """
+        },
+        
+        # Роутер: какао порошки
+        "cocoa_powders": {
+            "cocoa_powders": """
+            """
+        },
+        
+        # Роутер: ароматизаторы DEL'AR
+        "delar_flavors": {
+            "flavors": """
+            """
+        },
+        
+        # Роутер: сухие молочные продукты
+        "dry_milk_products": {
+            "milk_products": """
+            """
+        },
+        
+        # Роутер: эмульгаторы для маргарина и спредов
+        "emulsifiers_for_margarine_spreads": {
+            "emulsifiers": """
+            """
+        },
+        
+        # Роутер: наполнители и топпинги
+        "fillers_and_toppings": {
+            "fillers": """
+            """
+        },
+        
+        # Роутер: пищевые красители
+        "food_colors": {
+            "colors": """
+            """
+        },
+        
+        # Роутер: консерванты и кислоты
+        "preservatives_acids": {
+            "preservatives": """
+            """
+        },
+        
+        # Роутер: стабилизирующие составы
+        "stabilizers_compounds": {
+            "stabilizers": """
+            """
+        },
+        
+        # Роутер: подсластители
+        "sweeteners": {
+            "sweeteners": """
+            """
+        }
     }
 }
 
@@ -79,6 +142,9 @@ GENERAL_SUBSECTOR_HINTS = {
     """,
     
     "07": """
+    """,
+    
+    "02": """
     """
 }
 

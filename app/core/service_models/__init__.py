@@ -1,8 +1,7 @@
 # app/core/service_models/__init__.py
 
-from .reranking_model import EntityRankingParseModel, EntityRankingValidationModel
+from .reranking_model import EntityRankingModel
 
 __all__ = [
-    "EntityRankingParseModel",
-    "EntityRankingValidationModel",
+    "EntityRankingModel",
 ]
