@@ -20,10 +20,16 @@ class ToolService:
     предоставляя единый интерфейс для интеграции в engine.py.
     """
     
-    def __init__(self):
-        """Инициализация сервиса с автоматической регистрацией хендлеров."""
+    def __init__(self, llm_service: Optional[Any] = None):
+        """
+        Инициализация сервиса с автоматической регистрацией хендлеров.
+        
+        Args:
+            llm_service: Сервис для вызова LLM (например, OpenAI client)
+        """
         self.registry = HandlerRegistry()
         self.logger = logging.getLogger("tool_calling.service")
+        self.llm_service = llm_service
         
         # Автоматическая регистрация доступных хендлеров
         self._register_handlers()
@@ -38,8 +44,7 @@ class ToolService:
         try:
             # Импорт и регистрация HoReCa хендлера
             from .horeca.service import HoReCaHandler
-            # Пока используем None для llm_service, в будущем будет передаваться из engine.py
-            self.registry.register_handler("01", HoReCaHandler("01", llm_service=None))
+            self.registry.register_handler("01", HoReCaHandler("01", llm_service=self.llm_service))
             self.logger.info("HoReCa хендлер зарегистрирован")
             
             # Здесь будут добавляться новые отрасли:

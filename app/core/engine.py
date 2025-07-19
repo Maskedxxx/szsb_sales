@@ -253,7 +253,7 @@ async def handle_query(query: Query) -> Response:
 
         # === TOOL CALLING INTEGRATION ===
         # Инициализируем Tool Calling сервис
-        tool_service = ToolService()
+        tool_service = ToolService(llm_service=client)
         
         # Применяем tool calling для поддерживаемых отраслей
         processed_data = {}

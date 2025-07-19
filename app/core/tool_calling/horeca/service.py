@@ -168,26 +168,34 @@ class HoReCaHandler(BaseToolHandler):
             Если в запросе несколько критериев, выбери самый важный для начальной фильтрации.
             """
             
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": query}
+            ]
+
             # Преобразуем схемы в формат для LLM
             llm_tools = []
             for schema in schemas:
-                llm_tools.append({
-                    "type": schema.type,
-                    "function": schema.function
-                })
+                llm_tools.append(
+                    {"type": schema.type, "function": schema.function}
+                )
             
             # Вызываем LLM с tool calling
-            response = self.llm_service.call_with_tools(
-                system_prompt=system_prompt,
-                user_query=query,
-                tools=llm_tools
+            response = self.llm_service.chat.completions.create(
+                model="devstral:24b-small-2505-q8_0 ",  # Или другая подходящая модель
+                messages=messages,
+                tools=llm_tools,
+                tool_choice="auto"
             )
             
+            response_message = response.choices[0].message
+            tool_calls = response_message.tool_calls
+
             # Парсим ответ LLM
-            if response and "tool_calls" in response:
-                tool_call = response["tool_calls"][0]
-                tool_name = tool_call["function"]["name"]
-                tool_params = json.loads(tool_call["function"]["arguments"])
+            if tool_calls:
+                tool_call = tool_calls[0]
+                tool_name = tool_call.function.name
+                tool_params = json.loads(tool_call.function.arguments)
                 
                 logger.info(f"LLM выбрал tool: {tool_name} с параметрами: {tool_params}")
                 return FilterParameters(
