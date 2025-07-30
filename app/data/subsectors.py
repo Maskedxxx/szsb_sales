@@ -3,7 +3,7 @@
 # Список доступных отраслей для фронтенда
 SUBSECTORS = [
     # {"name": "В2С", "id": "00"},
-    # {"name": "HoReCa", "id": "01"},
+    {"name": "HoReCa", "id": "01"},
     # {"name": "Кондитерская", "id": "02"},
     {"name": "Масложировая", "id": "03"},
     {"name": "Молочная", "id": "04"},
@@ -21,7 +21,7 @@ SUBSECTORS = [
 # Маппинг ID отраслей к папкам с документами
 SUBSECTOR_ROUTES = {
     # "00": "b2c_sector",
-    # "01": "horeca_sector",
+    "01": "horeca",
     # "02": "confectionery_sector",
     "03": "fat_and_oil",
     "04": "milk",

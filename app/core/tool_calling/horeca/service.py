@@ -182,7 +182,7 @@ class HoReCaHandler(BaseToolHandler):
             
             # Вызываем LLM с tool calling
             response = self.llm_service.chat.completions.create(
-                model="devstral:24b-small-2505-q8_0 ",  # Или другая подходящая модель
+                model="devstral:24b-small-2505-q8_0",  # Или другая подходящая модель
                 messages=messages,
                 tools=llm_tools,
                 tool_choice="auto"
