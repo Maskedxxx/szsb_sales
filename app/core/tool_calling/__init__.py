@@ -1,21 +1,28 @@
 """
-Tool Calling Module для системы SZSB Sales.
+Tool Calling модуль для обработки запросов с использованием LLM инструментов.
 
-Этот модуль предоставляет универсальную инфраструктуру для работы с Tool Calling
-в различных отраслях. Позволяет LLM динамически выбирать и применять специализированные
-инструменты для точной фильтрации данных.
+Этот модуль предоставляет расширяемую архитектуру для интеграции Tool Calling 
+в различные отрасли (подсекторы) системы.
 
-Архитектура:
-- service.py - Универсальный ToolService для всех отраслей
-- adapters.py - Адаптеры для интеграции с LLM
-- subsectors/ - Специфичные реализации для каждой отрасли
-- tests/ - Тестирование функциональности
+Основные компоненты:
+- ToolService: главный координатор и точка входа
+- BaseToolHandler: базовый класс для хендлеров отраслей
+- Registry: реестр хендлеров по subsector_id
 
 Поддерживаемые отрасли:
-- HoReCa (01) - Готовые соусы, сыры, напитки и другие продукты
+- HoReCa (subsector_id: "01")
+
+Использование:
+    from app.core.tool_calling import ToolService
+    
+    tool_service = ToolService()
+    result = tool_service.process_query(
+        subsector_id="01",
+        query="Найти соус Барбекю",
+        data=horeca_data
+    )
 """
 
 from .service import ToolService
-from .adapters import LLMAdapter
 
-__all__ = ['ToolService', 'LLMAdapter']
+__all__ = ["ToolService"]

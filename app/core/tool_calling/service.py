@@ -1,163 +1,134 @@
 """
-Универсальный сервис для Tool Calling.
+Основной сервис Tool Calling - координатор всей логики.
 
-Предоставляет единый интерфейс для работы с Tool Calling в различных отраслях.
+Предоставляет единую точку входа для обработки запросов
+с использованием Tool Calling для различных отраслей.
 """
 
-import json
-import time
+from typing import Dict, Any, Optional
 import logging
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
 
-from .adapters import LLMAdapter
-
-logger = logging.getLogger(__name__)
-
-
-@dataclass
-class ToolCallResult:
-    """Результат выполнения tool calling."""
-    success: bool
-    subsector: Optional[str] = None
-    selected_tool: Optional[str] = None
-    tool_parameters: Optional[Dict[str, Any]] = None
-    filtered_data: Optional[List[str]] = None
-    error_message: Optional[str] = None
-    execution_time: Optional[float] = None
-
+from .registry import HandlerRegistry
+from .base.types import ToolCallResult
 
 class ToolService:
     """
-    Универсальный сервис для Tool Calling.
+    Главный сервис Tool Calling.
     
-    Обеспечивает единый интерфейс для работы с tool calling в различных отраслях.
-    Автоматически определяет подходящий обработчик на основе subsector_id.
+    Координирует работу хендлеров различных отраслей,
+    предоставляя единый интерфейс для интеграции в engine.py.
     """
     
-    def __init__(self, llm_adapter: LLMAdapter):
+    def __init__(self, llm_service: Optional[Any] = None):
         """
-        Инициализация сервиса.
+        Инициализация сервиса с автоматической регистрацией хендлеров.
         
         Args:
-            llm_adapter: Адаптер для работы с LLM
+            llm_service: Сервис для вызова LLM (например, OpenAI client)
         """
-        self.llm_adapter = llm_adapter
-        self._subsector_handlers = {}
-        logger.info("Инициализирован универсальный ToolService")
+        self.registry = HandlerRegistry()
+        self.logger = logging.getLogger("tool_calling.service")
+        self.llm_service = llm_service
+        
+        # Автоматическая регистрация доступных хендлеров
+        self._register_handlers()
     
-    def register_subsector(self, subsector_id: str, handler):
+    def _register_handlers(self) -> None:
         """
-        Регистрирует обработчик для конкретной отрасли.
+        Регистрирует все доступные хендлеры отраслей.
         
-        Args:
-            subsector_id: ID отрасли (например, "01" для HoReCa)
-            handler: Обработчик отрасли
+        При добавлении новых отраслей, импорты и регистрация
+        добавляются здесь.
         """
-        self._subsector_handlers[subsector_id] = handler
-        logger.info(f"Зарегистрирован обработчик для отрасли: {subsector_id}")
-    
-    def is_supported(self, subsector_id: str) -> bool:
-        """
-        Проверяет, поддерживается ли tool calling для данной отрасли.
-        
-        Args:
-            subsector_id: ID отрасли
+        try:
+            # Импорт и регистрация HoReCa хендлера
+            from .horeca.service import HoReCaHandler
+            self.registry.register_handler("01", HoReCaHandler("01", llm_service=self.llm_service))
+            self.logger.info("HoReCa хендлер зарегистрирован")
             
-        Returns:
-            True если поддерживается, False иначе
-        """
-        return subsector_id in self._subsector_handlers
+            # Здесь будут добавляться новые отрасли:
+            # from .fat_oil.service import FatOilHandler
+            # self.registry.register_handler("02", FatOilHandler("02"))
+            
+        except ImportError as e:
+            self.logger.warning(f"Не удалось загрузить некоторые хендлеры: {e}")
     
     def process_query(
         self, 
+        subsector_id: str, 
         query: str, 
-        subsector_id: str,
-        file_name: str, 
-        data: Dict[str, Any]
+        data: Dict[str, Any], 
+        selected_key: str
     ) -> ToolCallResult:
         """
-        Обрабатывает запрос пользователя через tool calling.
+        Обрабатывает запрос с использованием Tool Calling.
         
         Args:
-            query: Запрос пользователя
-            subsector_id: ID отрасли
-            file_name: Имя файла данных
-            data: Данные для обработки
+            subsector_id: Идентификатор подсектора (например, "01" для HoReCa)
+            query: Пользовательский запрос
+            data: Данные отрасли для обработки
+            selected_key: Выбранный ключ данных для фокусировки
             
         Returns:
-            Результат обработки
+            Результат обработки с отфильтрованными данными или исходными данными
         """
-        start_time = time.time()
+        self.logger.info(f"Обработка запроса для отрасли {subsector_id}")
         
-        logger.info(f"Обработка запроса для отрасли {subsector_id}: {query}")
+        # Получаем хендлер для отрасли
+        handler = self.registry.get_handler(subsector_id)
         
-        try:
-            # Проверяем поддержку отрасли
-            if not self.is_supported(subsector_id):
-                return ToolCallResult(
-                    success=False,
-                    subsector=subsector_id,
-                    error_message=f"Tool calling не поддерживается для отрасли {subsector_id}",
-                    execution_time=time.time() - start_time
-                )
-            
-            # Получаем обработчик отрасли
-            handler = self._subsector_handlers[subsector_id]
-            
-            # Выполняем обработку
-            result = handler.process_query(
-                query=query,
-                file_name=file_name,
-                data=data,
-                llm_adapter=self.llm_adapter
+        if not handler:
+            self.logger.info(f"Tool Calling не поддерживается для отрасли {subsector_id}")
+            # Возвращаем исходные данные без изменений
+            return ToolCallResult(
+                success=False,
+                filtered_data=data,
+                applied_filters={},
+                error_message=f"Tool Calling не поддерживается для отрасли {subsector_id}",
+                metadata={
+                    "subsector_id": subsector_id,
+                    "fallback": True
+                }
             )
-            
-            # Добавляем метаданные
-            result.subsector = subsector_id
-            result.execution_time = time.time() - start_time
-            
-            logger.info(f"Обработка завершена за {result.execution_time:.2f}с")
+        
+        # Выполняем обработку через соответствующий хендлер
+        try:
+            result = handler.process(query, data, selected_key)
+            self.logger.info(f"Обработка завершена. Успех: {result.success}")
             return result
             
         except Exception as e:
-            execution_time = time.time() - start_time
-            logger.error(f"Ошибка при обработке запроса: {str(e)}")
-            
+            self.logger.error(f"Критическая ошибка в Tool Calling: {str(e)}")
+            # Graceful fallback - возвращаем исходные данные
             return ToolCallResult(
                 success=False,
-                subsector=subsector_id,
-                error_message=str(e),
-                execution_time=execution_time
+                filtered_data=data,
+                applied_filters={},
+                error_message=f"Критическая ошибка: {str(e)}",
+                metadata={
+                    "subsector_id": subsector_id,
+                    "fallback": True,
+                    "critical_error": True
+                }
             )
     
-    def get_supported_subsectors(self) -> List[str]:
+    def is_supported(self, subsector_id: str) -> bool:
         """
-        Возвращает список поддерживаемых отраслей.
-        
-        Returns:
-            Список ID отраслей
-        """
-        return list(self._subsector_handlers.keys())
-    
-    def get_subsector_info(self, subsector_id: str) -> Dict[str, Any]:
-        """
-        Возвращает информацию о конкретной отрасли.
+        Проверяет, поддерживается ли Tool Calling для отрасли.
         
         Args:
-            subsector_id: ID отрасли
+            subsector_id: Идентификатор подсектора
             
         Returns:
-            Словарь с информацией об отрасли
+            True, если отрасль поддерживается
         """
-        if not self.is_supported(subsector_id):
-            return {"supported": False, "error": "Отрасль не поддерживается"}
+        return self.registry.is_supported(subsector_id)
+    
+    def get_supported_subsectors(self) -> list[str]:
+        """
+        Возвращает список отраслей с поддержкой Tool Calling.
         
-        handler = self._subsector_handlers[subsector_id]
-        
-        return {
-            "supported": True,
-            "subsector_id": subsector_id,
-            "handler_type": type(handler).__name__,
-            "capabilities": getattr(handler, 'get_capabilities', lambda: [])()
-        }
+        Returns:
+            Список идентификаторов поддерживаемых подсекторов
+        """
+        return self.registry.get_supported_subsectors()

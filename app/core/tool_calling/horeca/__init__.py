@@ -1,14 +1,15 @@
 """
-HoReCa специфичная реализация Tool Calling.
+HoReCa Tool Calling модуль.
 
-Содержит все компоненты для работы с tool calling в сфере HoReCa:
-- Маппинги ключей и enum значений
-- Функции фильтрации
-- Обработчик запросов
+Реализует Tool Calling логику для отрасли HoReCa (subsector_id: "01").
+Включает генерацию динамических схем, фильтрацию продуктов и маппинги данных.
+
+Компоненты:
+- HoReCaHandler: основной хендлер для обработки запросов
+- Mappings: маппинги ключей, enum'ов и универсальные паттерны
+- DataFilter: функции фильтрации продуктов
 """
 
 from .service import HoReCaHandler
-from .mappings import KEYS_MAPPING, ENUM_MAPPING, UNIVERSAL_MAPPING
-from .filters import filter_products
 
-__all__ = ['HoReCaHandler', 'KEYS_MAPPING', 'ENUM_MAPPING', 'UNIVERSAL_MAPPING', 'filter_products']
+__all__ = ["HoReCaHandler"]
