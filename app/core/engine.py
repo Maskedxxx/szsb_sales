@@ -3,13 +3,13 @@
 import os
 import json
 import time
-from typing import Any, List, Dict, Tuple
+from typing import Any, List, Dict
 
 from openai import OpenAI
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable, Client
 
-from app.data import SUBSECTOR_ROUTES, PROMPT_ENTITY_RANKING, PROMPT_FINAL_ANSWER, ROUTER_HINTS, KEY_HINTS, get_final_answer_hint
+from app.data import SUBSECTOR_ROUTES, PROMPT_ENTITY_RANKING, PROMPT_FINAL_ANSWER, get_final_answer_hint
 from app.api.api_models import Metadata, Response, Query
 from app.config import ROUTES_PATH, ROUTING_TABLE_PATH
 from app.core.services import (
@@ -30,6 +30,9 @@ from app.utils import (
     remove_think_tags,
     logger
 )
+
+# Импорт для Tool Calling
+from app.core.tool_calling import ToolService
 
 TOP_N_ROUTES = 5
 
@@ -247,14 +250,43 @@ async def handle_query(query: Query) -> Response:
         answer = 'К сожалению не удалось сформировать ответ. Попробуйте переформулировать и уточнить вопрос.'
         logger.info('No relevant_keys found, cannot generate final answer!')
     else:
-        relevant_data = {
-            key: get_nested_data(merged_files[key], ['product_list'])
-            for key in relevant_keys
-            if key in merged_files
-        }
-
-        formatted_content = json.dumps(
-            relevant_data, indent=2, ensure_ascii=False)
+        # === TOOL CALLING INTEGRATION ===
+        # Инициализируем Tool Calling сервис
+        tool_service = ToolService(llm_service=client)
+        
+        # Применяем tool calling для поддерживаемых отраслей
+        processed_data = {}
+        for key in relevant_keys:
+            if key in merged_files:
+                key_data = merged_files[key]
+                
+                # Проверяем, поддерживается ли Tool Calling для данной отрасли
+                if tool_service.is_supported(query.subsector_id):
+                    logger.info(f"Применение Tool Calling для отрасли {query.subsector_id}, ключ: {key}")
+                    
+                    # Применяем tool calling
+                    tool_result = tool_service.process_query(
+                        subsector_id=query.subsector_id,
+                        query=query.question,
+                        data=key_data,
+                        selected_key=key
+                    )
+                    
+                    if tool_result.success:
+                        # Используем отфильтрованные продукты
+                        processed_data[key] = get_nested_data(tool_result.filtered_data, ['product_list'])
+                        logger.info(f"Tool calling для {key}: {len(processed_data[key])} продуктов")
+                    else:
+                        # Fallback: используем все продукты
+                        processed_data[key] = get_nested_data(key_data, ['product_list'])
+                        logger.info(f"Tool calling fallback для {key}: {tool_result.error_message}")
+                else:
+                    # Для неподдерживаемых отраслей используем обычную логику
+                    processed_data[key] = get_nested_data(key_data, ['product_list'])
+                    logger.info(f"Стандартная обработка для отрасли {query.subsector_id}, ключ: {key}")
+        
+        # Форматируем обработанные данные
+        formatted_content = json.dumps(processed_data, indent=2, ensure_ascii=False)
         cleaned_content = clean_json_text(formatted_content)
 
         # Шаг 3 находим релевантную информацию (ключи) и генерируем ответ в заключительном модуле "process_json_and_answer"
