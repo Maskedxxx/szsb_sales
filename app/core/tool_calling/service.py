@@ -11,7 +11,6 @@ import logging
 from .registry import HandlerRegistry
 from .base.types import ToolCallResult
 
-
 class ToolService:
     """
     Главный сервис Tool Calling.

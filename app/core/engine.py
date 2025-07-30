@@ -250,7 +250,6 @@ async def handle_query(query: Query) -> Response:
         answer = 'К сожалению не удалось сформировать ответ. Попробуйте переформулировать и уточнить вопрос.'
         logger.info('No relevant_keys found, cannot generate final answer!')
     else:
-
         # === TOOL CALLING INTEGRATION ===
         # Инициализируем Tool Calling сервис
         tool_service = ToolService(llm_service=client)
