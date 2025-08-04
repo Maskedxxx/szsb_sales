@@ -10,16 +10,26 @@ Tool Calling модуль для обработки запросов с испо
 - Registry: реестр хендлеров по subsector_id
 
 Поддерживаемые отрасли:
-- HoReCa (subsector_id: "01")
+- HoReCa (subsector_id: "01") - гостинично-ресторанный комплекс
+- Молочная отрасль (subsector_id: "04") - молочные продукты и ингредиенты
 
 Использование:
     from app.core.tool_calling import ToolService
     
     tool_service = ToolService()
+    
+    # Для HoReCa
     result = tool_service.process_query(
         subsector_id="01",
         query="Найти соус Барбекю",
         data=horeca_data
+    )
+    
+    # Для молочной отрасли
+    result = tool_service.process_query(
+        subsector_id="04", 
+        query="Покажи концентраты молочного белка с высоким содержанием белка",
+        data=milk_data
     )
 """
 

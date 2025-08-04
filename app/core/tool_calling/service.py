@@ -46,9 +46,16 @@ class ToolService:
             self.registry.register_handler("01", HoReCaHandler("01", llm_service=self.llm_service))
             self.logger.info("HoReCa хендлер зарегистрирован")
             
+            # Импорт и регистрация Milk хендлера
+            from .milk.service import MilkHandler
+            self.registry.register_handler("04", MilkHandler("04", llm_service=self.llm_service))
+            self.logger.info("Milk хендлер зарегистрирован")
+            
             # Здесь будут добавляться новые отрасли:
             # from .fat_oil.service import FatOilHandler
-            # self.registry.register_handler("02", FatOilHandler("02"))
+            # self.registry.register_handler("02", FatOilHandler("02", llm_service=self.llm_service))
+            # from .confectionery.service import ConfectioneryHandler
+            # self.registry.register_handler("03", ConfectioneryHandler("03", llm_service=self.llm_service))
             
         except ImportError as e:
             self.logger.warning(f"Не удалось загрузить некоторые хендлеры: {e}")
