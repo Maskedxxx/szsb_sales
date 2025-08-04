@@ -67,50 +67,57 @@ class MilkHandler(BaseToolHandler):
         file_data = MILK_ENUM_MAPPING.get(file_name, {})
         return file_data.get(key_name, {})
     
-    def _determine_json_file_from_key(self, selected_key: str, data: Dict[str, Any]) -> str:
+    def _find_file_for_key(self, selected_key: str) -> str:
         """
-        Определяет имя JSON файла на основе selected_key и данных.
+        Находит JSON файл, содержащий указанный ключ на основе маппинга всех ключей.
         
         Args:
-            selected_key: Ключ выбранный в данных (например, "milk_protein_collection")
-            data: Данные отрасли для анализа структуры
+            selected_key: Ключ для поиска
             
         Returns:
-            Имя JSON файла (например, "milk_protein.json")
+            Имя JSON файла
         """
-        # Список всех файлов молочной отрасли
-        available_files = list(MILK_KEYS_MAPPING.keys())
-        
-        # Пытаемся найти файл по прямому соответствию ключа
-        for file_name in available_files:
-            base_name = file_name.replace('.json', '')
-            if selected_key == base_name or selected_key.startswith(base_name):
-                return file_name
-        
-        # Если прямого соответствия нет, пытаемся найти по частичным совпадениям
-        key_mappings = {
-            'protein': 'milk_protein.json',
-            'culture': 'starter_cultures.json',
-            'dye': 'dyes.json',
-            'fruit': 'fruit_fillings.json',
-            'vegetable': 'vegetable_fillings.json',
-            'glaze': 'confectionery_glaze.json',
-            'cocoa': 'cocoa_powder.json',
-            'phosphate': 'phosphates.json',
-            'preservative': 'preservatives_antioxidants.json',
-            'multifunctional': 'multifunctional_systems.json',
-            'flavor': 'delar_flavor_collection.json'
+        # Полный маппинг всех ключей к файлам из молочной отрасли
+        KEY_TO_FILE_MAPPING = {
+            # delar_flavor_collection.json
+            "aromatic_emulsions": "delar_flavor_collection.json",
+            "flavor_bases": "delar_flavor_collection.json", 
+            "gastronomic_flavors": "delar_flavor_collection.json",
+            "juice_containing_flavors": "delar_flavor_collection.json",
+            "spread_flavorings": "delar_flavor_collection.json",
+            "sweet_flavors": "delar_flavor_collection.json",
+            
+            # fruit_fillings.json
+            "nonthermostable_homogeneous_fillings": "fruit_fillings.json",
+            "thermostable_homogeneous_fillings": "fruit_fillings.json",
+            
+            # starter_cultures.json
+            "probiotic_cultures": "starter_cultures.json",
+            "protective_cultures": "starter_cultures.json", 
+            "starter_cultures": "starter_cultures.json",
+            
+            # Остальные файлы (ключ = имя файла)
+            "cocoa_powder": "cocoa_powder.json",
+            "confectionery_glaze_klassika": "confectionery_glaze.json",
+            "denfruit_vegetable_fillings": "vegetable_fillings.json",
+            "dyes": "dyes.json",
+            "milk_protein_concentrate": "milk_protein.json",
+            "multifunctional_systems": "multifunctional_systems.json",
+            "phosphates": "phosphates.json",
+            "preservatives_antioxidants_emulsifying_salts": "preservatives_antioxidants.json"
         }
         
-        selected_key_lower = selected_key.lower()
-        for keyword, file_name in key_mappings.items():
-            if keyword in selected_key_lower:
-                return file_name
+        # Ищем прямое соответствие
+        if selected_key in KEY_TO_FILE_MAPPING:
+            file_name = KEY_TO_FILE_MAPPING[selected_key]
+            logger.info(f"Найден файл для ключа {selected_key}: {file_name}")
+            return file_name
         
-        # По умолчанию возвращаем первый файл
-        logger.warning(f"Не удалось определить файл для ключа {selected_key}, используем {available_files[0]}")
-        return available_files[0]
-    
+        # Если не найден, возвращаем fallback
+        fallback_file = "fruit_fillings.json"
+        logger.warning(f"Ключ {selected_key} не найден в маппинге, используем fallback: {fallback_file}")
+        return fallback_file
+
     def _get_llm_model(self) -> str:
         """
         Возвращает модель LLM для Tool Calling.
@@ -136,8 +143,8 @@ class MilkHandler(BaseToolHandler):
         logger.info(f"Генерация tool схемы для молочной отрасли, выбранный ключ: {selected_key}")
         
         # Определяем имя файла из selected_key
-        # selected_key может быть именем ключа в данных, нужно найти соответствующий JSON файл
-        file_name = self._determine_json_file_from_key(selected_key, data)
+        # В молочной отрасли selected_key может быть подключом внутри файла
+        file_name = self._find_file_for_key(selected_key)
         
         # Получаем маппинг ключей и enum'ов для файла
         file_keys = self._get_file_specific_keys(file_name)
