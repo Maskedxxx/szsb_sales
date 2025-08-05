@@ -172,6 +172,7 @@ class MilkHandler(BaseToolHandler):
         
         # Добавляем свойства для каждого ключа
         properties = tool_schema["function"]["parameters"]["properties"]
+        required_fields = tool_schema["function"]["parameters"]["required"]
         
         # Получаем описания ключей продуктов
         product_keys = file_keys.get("product_keys", {})
@@ -188,14 +189,18 @@ class MilkHandler(BaseToolHandler):
             for category, values in enum_categories.items():
                 all_enum_values.extend(values)
             
-            # Создаем свойство для этого ключа
+            # Создаем свойство для этого ключа (согласно OpenAI strict mode)
+            # Поля необязательны, поэтому добавляем null в type
             properties[key_name] = {
-                "type": "string",
+                "type": ["string", "null"],
                 "description": f"{key_info['description']}. {key_info['filter_impact']}",
-                "enum": all_enum_values
+                "enum": all_enum_values + [None]  # Добавляем None для необязательных полей
             }
+            
+            # Добавляем все поля в required (обязательное требование strict mode)
+            required_fields.append(key_name)
         
-        logger.info(f"Сгенерирована схема с {len(properties)} свойствами")
+        logger.info(f"Сгенерирована схема с {len(properties)} свойствами, все поля в required")
         return [ToolSchema(type="function", function=tool_schema["function"])]
     
     def extract_parameters(self, query: str, schemas: List[ToolSchema]) -> FilterParameters:
