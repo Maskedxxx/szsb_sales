@@ -148,7 +148,19 @@ class MilkHandler(BaseToolHandler):
         
         # Получаем маппинг ключей и enum'ов для файла
         file_keys = self._get_file_specific_keys(file_name)
-        file_enums = MILK_ENUM_MAPPING.get(file_name, {})
+        
+        # ВАЖНО: Получаем enum только для выбранного selected_key (подключа)
+        file_enum_mapping = MILK_ENUM_MAPPING.get(file_name, {})
+        
+        # Для файлов с подключами (как fruit_fillings.json) берем enum'ы конкретного подключа
+        if selected_key in file_enum_mapping:
+            # Файл с подключами - используем enum'ы конкретного подключа
+            file_enums = file_enum_mapping[selected_key]
+            logger.info(f"Используем enum'ы для подключа {selected_key}")
+        else:
+            # Стандартный файл - используем общие enum'ы
+            file_enums = file_enum_mapping
+            logger.info(f"Используем общие enum'ы для файла {file_name}")
         
         if not file_keys or not file_enums:
             logger.error(f"Не найдены маппинги для файла: {file_name}")
@@ -233,8 +245,11 @@ class MilkHandler(BaseToolHandler):
             Ты - эксперт по анализу запросов пользователей для системы молочной промышленности.
             Твоя задача - проанализировать запрос и выбрать подходящий инструмент для фильтрации продуктов.
             
+            ВАЖНО: Ты ДОЛЖЕН вызвать инструмент ТОЛЬКО ОДИН РАЗ. Никогда не делай несколько вызовов инструмента.
             Используй предоставленный инструмент для точной фильтрации продуктов по критериям из запроса.
             Если в запросе несколько критериев, выбери самый важный для начальной фильтрации.
+            
+            Обязательно выбери только ОДНО значение для каждого параметра или null если параметр не нужен.
             """
             
             messages = [
