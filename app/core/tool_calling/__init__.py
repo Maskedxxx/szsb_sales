@@ -1,13 +1,14 @@
 """
 Tool Calling модуль для обработки запросов с использованием LLM инструментов.
 
-Этот модуль предоставляет расширяемую архитектуру для интеграции Tool Calling 
-в различные отрасли (подсекторы) системы.
+Обновлен для новой универсальной архитектуры с UniversalIndustryHandler.
+Все отрасли теперь используют единый обработчик с конфигурационными mappings.
 
 Основные компоненты:
 - ToolService: главный координатор и точка входа
-- BaseToolHandler: базовый класс для хендлеров отраслей
-- Registry: реестр хендлеров по subsector_id
+- UniversalIndustryHandler: единый обработчик для всех отраслей
+- IndustryMappingsLoader: динамическая загрузка mappings
+- BaseToolHandler: базовый класс (наследуется UniversalIndustryHandler)
 
 Поддерживаемые отрасли:
 - HoReCa (subsector_id: "01") - гостинично-ресторанный комплекс
@@ -16,23 +17,23 @@ Tool Calling модуль для обработки запросов с испо
 Использование:
     from app.core.tool_calling import ToolService
     
-    tool_service = ToolService()
+    tool_service = ToolService(llm_service=your_llm_client)
     
-    # Для HoReCa
+    # Для любой поддерживаемой отрасли
     result = tool_service.process_query(
-        subsector_id="01",
-        query="Найти соус Барбекю",
-        data=horeca_data
+        subsector_id="01",  # или "04" для молочной
+        query="Найти низкокалорийные соусы Millgri в пластиковых бутылках",
+        data=industry_data,
+        selected_key="ready_sauces"
     )
     
-    # Для молочной отрасли
-    result = tool_service.process_query(
-        subsector_id="04", 
-        query="Покажи концентраты молочного белка с высоким содержанием белка",
-        data=milk_data
-    )
+    # Проверка поддержки отрасли
+    if tool_service.is_supported("01"):
+        # Обработка запроса...
+        pass
 """
 
 from .service import ToolService
+from .universal_handler import UniversalIndustryHandler
 
-__all__ = ["ToolService"]
+__all__ = ["ToolService", "UniversalIndustryHandler"]

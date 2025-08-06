@@ -1,15 +1,14 @@
 """
 HoReCa Tool Calling модуль.
 
-Реализует Tool Calling логику для отрасли HoReCa (subsector_id: "01").
-Включает генерацию динамических схем, фильтрацию продуктов и маппинги данных.
+Обновлено для новой универсальной архитектуры - теперь использует UniversalIndustryHandler.
+Содержит только mappings для данных HoReCa отрасли.
 
 Компоненты:
-- HoReCaHandler: основной хендлер для обработки запросов
-- Mappings: маппинги ключей, enum'ов и универсальные паттерны
-- DataFilter: функции фильтрации продуктов
+- mappings/keys.py: структура полей продуктов HoReCa
+- mappings/enums.py: возможные значения для фильтрации (в формате Milk с субключами)
+- mappings/universal.py: паттерны для умной фильтрации
 """
 
-from .service import HoReCaHandler
-
-__all__ = ["HoReCaHandler"]
+# Не экспортируем старые хендлеры - они заменены на UniversalIndustryHandler
+__all__ = []

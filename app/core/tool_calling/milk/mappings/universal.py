@@ -8,14 +8,42 @@
 import re
 from typing import List, Dict, Callable
 
-# Импортируем базовые универсальные функции
-from ...horeca.mappings.universal import (
-    has_universal_enum_match,
-    get_universal_patterns,
-    UNIVERSAL_KBGU_CHECKERS,
-    PACKAGING_CHECKERS,
-    SHELF_LIFE_CHECKERS
-)
+# ===================== БАЗОВЫЕ УНИВЕРСАЛЬНЫЕ ФУНКЦИИ (СКОПИРОВАНЫ ИЗ HORECA) =====================
+
+def check_calorie_range(text: str, min_val: int, max_val: int = None) -> bool:
+    """Проверяет, попадает ли калорийность в указанный диапазон."""
+    calories_match = re.search(r'ккал\s*[-–]\s*(\d+)', text)
+    if not calories_match:
+        return False
+    
+    calories = int(calories_match.group(1))
+    if max_val is None:
+        return calories <= min_val
+    return min_val <= calories <= max_val
+
+def check_fat_content(text: str, min_val: int, max_val: int = None) -> bool:
+    """Проверяет содержание жира."""
+    fat_match = re.search(r'Жиры,?\s*г?\s*[-–]\s*(\d+(?:[.,]\d+)?)', text)
+    if not fat_match:
+        return False
+    
+    fat = float(fat_match.group(1).replace(',', '.'))
+    if max_val is None:
+        return fat <= min_val
+    return min_val <= fat <= max_val
+
+# Базовые чекеры для КБЖУ
+UNIVERSAL_KBGU_CHECKERS = {
+    "низкие_до_150": lambda text, _: check_calorie_range(text, 0, 150),
+    "средние_150_250": lambda text, _: check_calorie_range(text, 150, 250),
+    "высокие_250_400": lambda text, _: check_calorie_range(text, 250, 400),
+    "обезжиренные": lambda text, _: check_fat_content(text, 0, 3),
+    "низкожирные_до_15": lambda text, _: check_fat_content(text, 0, 15)
+}
+
+# Заглушки для совместимости
+PACKAGING_CHECKERS = {}
+SHELF_LIFE_CHECKERS = {}
 
 # ===================== СПЕЦИФИЧНЫЕ ДЛЯ МОЛОЧНОЙ ОТРАСЛИ ПАТТЕРНЫ =====================
 
@@ -552,8 +580,31 @@ def has_milk_enum_match(text: str, enum_value: str, field_key: str = None) -> bo
         if pattern.lower() in text_lower:
             return True
     
-    # Fallback на универсальную функцию
-    return has_universal_enum_match(text, enum_value, field_key)
+    # Fallback: простой поиск в тексте
+    return enum_value.lower() in text.lower()
+
+
+# ===================== СОВМЕСТИМЫЕ ФУНКЦИИ ДЛЯ НОВОЙ АРХИТЕКТУРЫ =====================
+
+def get_universal_patterns(enum_value: str) -> List[str]:
+    """
+    Возвращает паттерны поиска для enum значения.
+    Совместимая функция для новой универсальной архитектуры.
+    """
+    # Сначала ищем в специфичных молочных паттернах
+    milk_patterns = MILK_SPECIFIC_MAPPING.get(enum_value, [])
+    if milk_patterns:
+        return milk_patterns
+    
+    # Если не найдено, возвращаем само значение как fallback
+    return [enum_value]
+
+
+def has_universal_enum_match(text: str, enum_value: str, field_key: str = None) -> bool:
+    """
+    Базовая проверка совпадения для новой архитектуры.
+    """
+    return has_milk_enum_match(text, enum_value, field_key)
 
 
 # ===================== ТЕСТИРОВАНИЕ =====================

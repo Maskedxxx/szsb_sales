@@ -221,6 +221,44 @@ MILK_KEYS_MAPPING = {
     }
 }
 
+# Маппинг selected_key к файлам для сложных структур молочной отрасли
+KEY_TO_FILE_MAPPING = {
+    # delar_flavor_collection.json
+    "aromatic_emulsions": "delar_flavor_collection.json",
+    "flavor_bases": "delar_flavor_collection.json", 
+    "gastronomic_flavors": "delar_flavor_collection.json",
+    "juice_containing_flavors": "delar_flavor_collection.json",
+    "spread_flavorings": "delar_flavor_collection.json",
+    "sweet_flavors": "delar_flavor_collection.json",
+    
+    # fruit_fillings.json
+    "nonthermostable_homogeneous_fillings": "fruit_fillings.json",
+    "thermostable_homogeneous_fillings": "fruit_fillings.json",
+    
+    # starter_cultures.json
+    "probiotic_cultures": "starter_cultures.json",
+    "protective_cultures": "starter_cultures.json", 
+    "thermophilic_starter_cultures": "starter_cultures.json",
+    "mesophilic_starter_cultures": "starter_cultures.json",
+    "yogurt_starter_cultures": "starter_cultures.json",
+    "kefir_starter_cultures": "starter_cultures.json",
+    "sour_cream_starter_cultures": "starter_cultures.json",
+    "cheese_starter_cultures": "starter_cultures.json",
+    
+    # vegetable_fillings.json  
+    "nonthermostable_homogeneous_vegetable_fillings": "vegetable_fillings.json",
+    "thermostable_homogeneous_vegetable_fillings": "vegetable_fillings.json",
+    
+    # Остальные файлы с прямым соответствием
+    "milk_protein": "milk_protein.json",
+    "multifunctional_systems": "multifunctional_systems.json",
+    "cocoa_powder": "cocoa_powder.json",
+    "confectionery_glaze": "confectionery_glaze.json",
+    "dyes": "dyes.json",
+    "phosphates": "phosphates.json",
+    "preservatives_antioxidants_emulsifying_salts": "preservatives_antioxidants.json"
+}
+
 
 def get_milk_file_specific_keys(file_name: str) -> Dict[str, Any]:
     """
