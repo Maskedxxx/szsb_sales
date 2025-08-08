@@ -3,6 +3,8 @@
 
 Предоставляет единую точку входа для обработки запросов
 с использованием Tool Calling для различных отраслей.
+
+Обновлено для новой универсальной архитектуры с UniversalIndustryHandler.
 """
 
 from typing import Dict, Any, Optional
@@ -10,6 +12,7 @@ import logging
 
 from .registry import HandlerRegistry
 from .base.types import ToolCallResult
+from .universal_handler import UniversalIndustryHandler
 
 class ToolService:
     """
@@ -37,21 +40,27 @@ class ToolService:
         """
         Регистрирует все доступные хендлеры отраслей.
         
-        При добавлении новых отраслей, импорты и регистрация
-        добавляются здесь.
+        В новой архитектуре используется ТОЛЬКО UniversalIndustryHandler
+        для всех поддерживаемых отраслей.
         """
         try:
-            # Импорт и регистрация HoReCa хендлера
-            from .horeca.service import HoReCaHandler
-            self.registry.register_handler("01", HoReCaHandler("01", llm_service=self.llm_service))
-            self.logger.info("HoReCa хендлер зарегистрирован")
+            # Регистрируем универсальный хендлер для HoReCa
+            handler_horeca = UniversalIndustryHandler("01", self.llm_service)
+            self.registry.register_handler("01", handler_horeca)
+            self.logger.info("Универсальный HoReCa хендлер зарегистрирован")
             
-            # Здесь будут добавляться новые отрасли:
-            # from .fat_oil.service import FatOilHandler
-            # self.registry.register_handler("02", FatOilHandler("02"))
+            # Регистрируем универсальный хендлер для Milk
+            handler_milk = UniversalIndustryHandler("04", self.llm_service)
+            self.registry.register_handler("04", handler_milk)
+            self.logger.info("Универсальный Milk хендлер зарегистрирован")
             
-        except ImportError as e:
-            self.logger.warning(f"Не удалось загрузить некоторые хендлеры: {e}")
+            # В будущем: добавление новых отраслей сводится к одной строке:
+            # handler_bakery = UniversalIndustryHandler("03", self.llm_service)
+            # self.registry.register_handler("03", handler_bakery)
+            
+        except Exception as e:
+            self.logger.error(f"Ошибка регистрации универсальных хендлеров: {e}")
+            self.logger.warning("Будет использован fallback режим")
     
     def process_query(
         self, 
