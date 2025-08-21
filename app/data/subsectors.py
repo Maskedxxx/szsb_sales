@@ -4,7 +4,7 @@
 SUBSECTORS = [
     {"name": "Сельнозпродукция", "id": "00"},
     {"name": "HoReCa", "id": "01"},
-    # {"name": "Кондитерская", "id": "02"},
+    {"name": "Полуфабрикаты", "id": "02"},
     {"name": "Масложировая", "id": "03"},
     {"name": "Молочная", "id": "04"},
     {"name": "Мороженое", "id": "05"},
@@ -22,7 +22,7 @@ SUBSECTORS = [
 SUBSECTOR_ROUTES = {
     "00": "selo",
     "01": "horeca",
-    # "02": "confectionery_sector",
+    "02": "semi_finished",
     "03": "fat_and_oil",
     "04": "milk",
     "05": "ice_cream",
