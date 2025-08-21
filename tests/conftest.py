@@ -3,11 +3,6 @@
 import time
 import pytest
 from typing import Any, Dict, Type, TypeVar
-from openai.types.chat import (
-    ParsedChoice,
-    ParsedChatCompletion,
-    ParsedChatCompletionMessage
-)
 
 T = TypeVar("T")
 
@@ -19,10 +14,16 @@ def mock_response_factory():
       - response_message_content (str)
       - model_class (Type[T])
     """
-    def _factory(response_message_content: str, model_class: Type[T], model_instance: T) -> ParsedChatCompletion[T]:
+    def _factory(response_message_content: str, model_class: Type[T], model_instance: T) -> Any:
         """
         Build a mock ParsedChatCompletion[model_class].
         """
+        # Lazy import to avoid requiring openai at test collection time
+        from openai.types.chat import (
+            ParsedChoice,
+            ParsedChatCompletion,
+            ParsedChatCompletionMessage,
+        )
         return ParsedChatCompletion[model_class](
             id='mockchatcmpl-042',
             created=int(time.time()),
@@ -42,4 +43,3 @@ def mock_response_factory():
         )
 
     return _factory
-

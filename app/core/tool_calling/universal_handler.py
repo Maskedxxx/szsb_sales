@@ -33,6 +33,7 @@ class IndustryMappingsLoader:
     INDUSTRY_MAPPING = {
         "01": "horeca",    # HoReCa
         "04": "milk",      # Молочная
+        "00": "selo",      # Сельнозпродукция
     }
     
     @staticmethod
