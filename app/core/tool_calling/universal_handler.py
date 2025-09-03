@@ -34,6 +34,7 @@ class IndustryMappingsLoader:
         "01": "horeca",    # HoReCa
         "04": "milk",      # Молочная
         "00": "selo",      # Сельнозпродукция
+        "03": "fat_and_oil",  # Масложировая отрасль
     }
     
     @staticmethod
