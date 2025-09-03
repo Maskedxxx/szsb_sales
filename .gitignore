@@ -3,8 +3,8 @@
 
 # Тесты для локального
 shit-tests/
-docs/
 test_call.ipynb
+.claude
 
 # Исключаем временные файлы и каталоги
 *.tmp

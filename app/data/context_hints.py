@@ -462,7 +462,7 @@ KEY_HINTS = {
         "stabilizers_compounds": """
         ВАЖНО ПРИ ВЫБОРЕ КЛЮЧЕЙ В ФАЙЛЕ stabilizers_compounds:
         
-        стабилизаторы_и_многофункциональные_системы_(компаунды): None
+        stabilizer_compounds: None
         """,
         "sweeteners": """
         ВАЖНО ПРИ ВЫБОРЕ КЛЮЧЕЙ В ФАЙЛЕ sweeteners:
