@@ -205,21 +205,25 @@ class UniversalIndustryHandler(BaseToolHandler):
             
             for filter_key, enum_value in parameters.parameters.items():
                 if enum_value and str(enum_value).strip():
+                    prev_products = filtered_products
                     self.logger.info(f"Применяем фильтр: {filter_key} = {enum_value}")
-                    
-                    filtered_products = self._apply_smart_filter(
-                        filtered_products, 
-                        filter_key, 
+
+                    candidate = self._apply_smart_filter(
+                        prev_products,
+                        filter_key,
                         enum_value
                     )
-                    
-                    applied_filters[filter_key] = enum_value
-                    current_count = len(filtered_products)
-                    self.logger.info(f"После фильтрации по {filter_key}: {current_count} продуктов")
-                    
-                    if not filtered_products:
-                        self.logger.warning(f"После фильтрации по {filter_key} не осталось продуктов")
-                        break
+
+                    if candidate:
+                        filtered_products = candidate
+                        applied_filters[filter_key] = enum_value
+                        self.logger.info(f"После фильтрации по {filter_key}: {len(filtered_products)} продуктов")
+                    else:
+                        self.logger.warning(
+                            f"Фильтр {filter_key}={enum_value} отброшен: обнуляет выдачу"
+                        )
+                        # Оставляем предыдущее множество без изменений (RELAX_ON_ZERO)
+                        filtered_products = prev_products
             
             # 3. Создаем отфильтрованные данные
             filtered_data = self._create_filtered_data(data, filtered_products)
@@ -308,7 +312,7 @@ class UniversalIndustryHandler(BaseToolHandler):
             # Собираем все enum значения для этого ключа
             enum_values = []
             key_enums = file_enums.get(key_name, {})
-            
+
             for enum_category in key_enums.values():
                 if isinstance(enum_category, list):
                     enum_values.extend(enum_category)
