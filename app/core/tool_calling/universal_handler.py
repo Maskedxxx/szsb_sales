@@ -312,7 +312,7 @@ class UniversalIndustryHandler(BaseToolHandler):
             # Собираем все enum значения для этого ключа
             enum_values = []
             key_enums = file_enums.get(key_name, {})
-            
+
             for enum_category in key_enums.values():
                 if isinstance(enum_category, list):
                     enum_values.extend(enum_category)
