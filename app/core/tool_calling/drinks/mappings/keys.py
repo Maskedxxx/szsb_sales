@@ -6,7 +6,7 @@
 """
 
 import json
-from typing import Dict, List, Any
+from typing import Dict, Any
 
 # Маппинг ключей продуктов для каждого файла отрасли напитков
 DRINKS_KEYS_MAPPING = {
@@ -412,21 +412,21 @@ KEY_TO_FILE_MAPPING = {
     "daiquiri_kruchon": "club_recipes.json",
     
     # energy_recipes.json субключи
-    "citrus": "energy_recipes.json",
-    "fruit": "energy_recipes.json",
+    "citrus_energy": "energy_recipes.json",
+    "fruit_energy": "energy_recipes.json",
     
     # cold_tea_recipes.json субключи
     "black_tea": "cold_tea_recipes.json",
     "green_tea": "cold_tea_recipes.json",
     
     # drink_snaps_recipes.json субключи
-    "berry": "drink_snaps_recipes.json",
+    "berry_snaps": "drink_snaps_recipes.json",
     "vanilla_cream_caramel": "drink_snaps_recipes.json",
-    "fruit": "drink_snaps_recipes.json",
+    "fruit_snaps": "drink_snaps_recipes.json",
     
     # jelly_recipes.json субключи
     "berry_bird_cherry": "jelly_recipes.json",
-    "berry": "jelly_recipes.json",
+    "berry_jelly": "jelly_recipes.json",
     "aloe_cactus_grape": "jelly_recipes.json",
     "orange_watermelon_herbs": "jelly_recipes.json",
     
@@ -439,13 +439,14 @@ KEY_TO_FILE_MAPPING = {
     
     # malt_recipes.json субключи
     "cooling_effect": "malt_recipes.json",
-    "berry": "malt_recipes.json",
-    "herbal": "malt_recipes.json",
+    "berry_malt": "malt_recipes.json",
+    "herbal_malt": "malt_recipes.json",
     
     # retro_recipes.json субключи
     "tarragon": "retro_recipes.json",
     "duchess_pear": "retro_recipes.json",
     "lemonades": "retro_recipes.json",
+    "citrus_retro": "retro_recipes.json",
     # Добавляем реально существующие субключи
     "buratino_cream_soda": "retro_recipes.json",
     "cherry_feijoa_activity": "retro_recipes.json",
@@ -455,8 +456,8 @@ KEY_TO_FILE_MAPPING = {
     
     # vegetable_extract_recipes.json субключи
     "algorithms": "vegetable_extract_recipes.json",
-    "herbal": "vegetable_extract_recipes.json",
-    "berry": "vegetable_extract_recipes.json",
+    "herbal_vegetable": "vegetable_extract_recipes.json",
+    "berry_vegetable": "vegetable_extract_recipes.json",
     
     # mixture_data.json субключи
     "kvass_mixtures": "mixture_data.json",

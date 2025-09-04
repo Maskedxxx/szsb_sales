@@ -8,7 +8,7 @@
 универсальной архитектуры Tool Calling.
 """
 
-from typing import Dict, List
+# Импорты не нужны для статической структуры данных
 
 # Маппинг enum значений для ключей продуктов в каждом файле отрасли напитков (в формате с субключами)
 DRINKS_ENUM_MAPPING = {
@@ -228,6 +228,103 @@ DRINKS_ENUM_MAPPING = {
             "product_code": {
                 "code_categories": ["специальные_соковые"],
                 "juice_codes": ["концентрированные", "комплексные"]
+            }
+        },
+        "herbal_flavor": {  # Субключ для травяных ароматизаторов
+            "name_product": {
+                "herbal_types": ["эстрагон", "мята", "базилик", "лаванда"],
+                "flavor_characteristics": ["натуральный", "натуральный_тип"],
+                "application_types": ["травяные_напитки", "ароматические"],
+                "brands": ["DEL_AR"]
+            },
+            "product_code": {
+                "code_categories": ["11.01", "11.02"],
+                "herbal_codes": ["травяные_ароматизаторы"]
+            }
+        },
+        "vanilla_creamy_aroma": {  # Субключ для ванильно-сливочных ароматов
+            "name_product": {
+                "vanilla_types": ["ваниль", "ванильный_крем"],
+                "creamy_types": ["сливочный", "кремовый", "молочный"],
+                "dessert_profiles": ["ванильно_сливочный", "кремовый_аромат"],
+                "brands": ["DEL_AR"]
+            },
+            "product_code": {
+                "code_categories": ["11.01", "11.02"],
+                "dessert_codes": ["ванильные_ароматы", "сливочные_ароматы"]
+            }
+        },
+        "grape_flavor": {  # Субключ для виноградных вкусов
+            "name_product": {
+                "grape_varieties": ["виноград", "изабелла", "мускат"],
+                "flavor_intensity": ["натуральный_виноградный", "интенсивный_виноградный"],
+                "grape_types": ["темный_виноград", "белый_виноград"],
+                "brands": ["DEL_AR"]
+            },
+            "product_code": {
+                "code_categories": ["11.01"],
+                "grape_codes": ["виноградные_ароматизаторы"]
+            }
+        },
+        "nut_cereal_flavor": {  # Субключ для орехово-злаковых ароматизаторов
+            "name_product": {
+                "nut_types": ["миндаль", "орех", "фундук", "арахис"],
+                "cereal_types": ["злаковые", "овсяные", "пшеничные"],
+                "flavor_profiles": ["ореховые", "злаковые", "медовые"],
+                "brands": ["DEL_AR"]
+            },
+            "product_code": {
+                "code_categories": ["11.01"],
+                "nut_cereal_codes": ["ореховые_ароматизаторы", "злаковые_ароматизаторы"]
+            }
+        },
+        "alcohol_flavor": {  # Субключ для алкогольных ароматизаторов
+            "name_product": {
+                "alcohol_types": ["виски", "ром", "коньяк", "амаретто"],
+                "spirit_categories": ["крепкие_напитки", "ликеры"],
+                "flavor_applications": ["безалкогольные_аналоги"],
+                "brands": ["DEL_AR"]
+            },
+            "product_code": {
+                "code_categories": ["11.01"],
+                "alcohol_codes": ["алкогольные_ароматизаторы"]
+            }
+        },
+        "fruit_aroma": {  # Субключ для фруктовых ароматов
+            "name_product": {
+                "fruit_types": ["яблоко", "груша", "персик", "абрикос", "манго", "ананас"],
+                "tropical_fruits": ["тропические", "экзотические"],
+                "stone_fruits": ["косточковые"],
+                "pome_fruits": ["семечковые"],
+                "brands": ["DEL_AR"]
+            },
+            "product_code": {
+                "code_categories": ["11.01", "10.01"],
+                "fruit_codes": ["фруктовые_ароматы"]
+            }
+        },
+        "citrus_aroma": {  # Субключ для цитрусовых ароматов
+            "name_product": {
+                "citrus_types": ["лимон", "апельсин", "грейпфрут", "лайм", "бергамот"],
+                "citrus_effects": ["clouding_эффект", "помутнение"],
+                "flavor_characteristics": ["натуральный", "эмульсионный"],
+                "brands": ["DEL_AR"]
+            },
+            "product_code": {
+                "code_categories": ["10.02", "11.02", "11.04"],
+                "citrus_codes": ["цитрусовые_ароматы"]
+            }
+        },
+        "choco_coffee_bakery_aroma": {  # Субключ для шоколадно-кофейно-хлебобулочных ароматов
+            "name_product": {
+                "chocolate_types": ["шоколад", "какао", "молочный_шоколад"],
+                "coffee_types": ["кофе", "эспрессо", "капучино"],
+                "bakery_types": ["хлебобулочные", "выпечка", "печенье"],
+                "brands": ["DEL_AR"]
+            },
+            "product_code": {
+                "code_categories": ["11.01", "11.02"],
+                "premium_codes": ["шоколадные_ароматы", "кофейные_ароматы", "хлебобулочные_ароматы"]
             }
         }
     },
@@ -472,7 +569,7 @@ DRINKS_ENUM_MAPPING = {
     },
 
     "energy_recipes.json": {
-        "citrus": {  # Субключ для цитрусовых энергетиков
+        "citrus_energy": {  # Субключ для цитрусовых энергетиков
             "recipe_name": {
                 "drink_types": ["энергетический", "напиток_безалкогольный_газированный"],
                 "flavor_profiles": ["цитрусовая_бомба", "bitter_lemon"],
@@ -488,7 +585,7 @@ DRINKS_ENUM_MAPPING = {
                 "energy_additives": ["женьшень", "L_карнитин", "энергетические_компоненты"]
             }
         },
-        "fruit": {  # Субключ для фруктовых энергетиков
+        "fruit_energy": {  # Субключ для фруктовых энергетиков
             "recipe_name": {
                 "drink_types": ["энергетический", "напиток_безалкогольный_газированный"],
                 "flavor_profiles": ["тропический_манго", "фруктовые_энергетики"],
@@ -542,7 +639,7 @@ DRINKS_ENUM_MAPPING = {
     },
 
     "drink_snaps_recipes.json": {
-        "berry": {  # Субключ для ягодных снап-напитков
+        "berry_snaps": {  # Субключ для ягодных снап-напитков
             "recipe_name": {
                 "drink_types": ["снап_напиток", "ягодный"],
                 "flavor_profiles": ["ягодные_смеси"],
@@ -574,7 +671,7 @@ DRINKS_ENUM_MAPPING = {
                 "dessert_processing": ["ванильно_карамельная_обработка"]
             }
         },
-        "fruit": {  # Субключ для фруктовых снап-напитков
+        "fruit_snaps": {  # Субключ для фруктовых снап-напитков
             "recipe_name": {
                 "drink_types": ["снап_напиток", "фруктовый"],
                 "fruit_types": ["тропические", "косточковые", "семечковые"],
@@ -609,7 +706,7 @@ DRINKS_ENUM_MAPPING = {
                 "gelling_agents": ["желирующие_агенты", "гелеобразование"]
             }
         },
-        "berry": {  # Субключ для ягодных желе-напитков
+        "berry_jelly": {  # Субключ для ягодных желе-напитков
             "recipe_name": {
                 "drink_types": ["желе_напиток", "ягодный"],
                 "berry_types": ["смешанные_ягоды"],
@@ -708,6 +805,23 @@ DRINKS_ENUM_MAPPING = {
                 "traditional_fermentation": ["классическая_технология"]
             }
         },
+        "whey": {  # Субключ для сывороточного кваса
+            "recipe_name": {
+                "drink_types": ["квас", "сывороточный"],
+                "base_ingredients": ["молочная_сыворотка", "сыворотка"],
+                "functional_category": ["функциональный_квас"],
+                "gost_compliance": ["ГОСТ"]
+            },
+            "variants": {
+                "sugar_types": ["на_сахаре", "на_подсластителе"],
+                "whey_concentration": ["стандартная", "повышенная"]
+            },
+            "process_stages": {
+                "preparation_methods": ["сывороточное_брожение"],
+                "stages": ["syrup_preparation", "intermediate_stage", "final_drink_preparation"],
+                "whey_processing": ["сывороточная_технология"]
+            }
+        },
         "beet_berry": {  # Субключ для свекольно-ягодного кваса
             "recipe_name": {
                 "drink_types": ["квас", "свекольно_ягодный"],
@@ -743,7 +857,7 @@ DRINKS_ENUM_MAPPING = {
                 "malt_processing": ["солодовые_экстракты", "охлаждающие_компоненты"]
             }
         },
-        "berry": {  # Субключ для ягодных солодовых напитков
+        "berry_malt": {  # Субключ для ягодных солодовых напитков
             "recipe_name": {
                 "drink_types": ["солодовый_напиток", "ягодный"],
                 "flavor_combinations": ["солод", "ягоды"],
@@ -759,7 +873,7 @@ DRINKS_ENUM_MAPPING = {
                 "berry_malt_processing": ["ягодно_солодовые_компоненты"]
             }
         },
-        "herbal": {  # Субключ для травяных солодовых напитков
+        "herbal_malt": {  # Субключ для травяных солодовых напитков
             "recipe_name": {
                 "drink_types": ["солодовый_напиток", "травяной"],
                 "herbal_types": ["лечебные_травы", "ароматические_травы"],
@@ -825,6 +939,104 @@ DRINKS_ENUM_MAPPING = {
                 "stages": ["syrup_preparation", "final_drink_preparation"],
                 "citrus_processing": ["классические_цитрусовые_технологии"]
             }
+        },
+        "cherry_feijoa_activity": {  # Субключ для вишнево-фейхоа напитков
+            "recipe_name": {
+                "drink_types": ["ретро_напиток", "функциональный"],
+                "fruit_combination": ["вишня", "фейхоа"],
+                "activity_types": ["тонизирующий", "витаминизированный"],
+                "retro_category": ["экзотические_ретро"]
+            },
+            "variants": {
+                "sugar_types": ["традиционный", "современная_формула"],
+                "fruit_intensity": ["сбалансированная", "насыщенная"]
+            },
+            "process_stages": {
+                "preparation_methods": ["классическая_технология"],
+                "stages": ["syrup_preparation", "final_drink_preparation"],
+                "fruit_processing": ["экстракция_активных_веществ"]
+            }
+        },
+        "buratino_cream_soda": {  # Субключ для буратино и крем-соды
+            "recipe_name": {
+                "drink_types": ["буратино", "крем_сода", "ретро_напиток"],
+                "flavor_profile": ["сливочный", "ванильный"],
+                "retro_category": ["классические_ретро"]
+            },
+            "variants": {
+                "sugar_types": ["традиционный", "современная_формула"],
+                "cream_intensity": ["классическая", "усиленная"]
+            },
+            "process_stages": {
+                "preparation_methods": ["классическая_технология"],
+                "stages": ["syrup_preparation", "final_drink_preparation"],
+                "cream_processing": ["сливочная_ароматизация"]
+            }
+        },
+        "kolokolchik": {  # Субключ для колокольчика
+            "recipe_name": {
+                "drink_types": ["колокольчик", "ретро_напиток"],
+                "flavor_profile": ["цветочный", "травяной"],
+                "retro_category": ["классические_ретро"]
+            },
+            "variants": {
+                "sugar_types": ["традиционный", "современная_формула"],
+                "floral_intensity": ["деликатная", "выраженная"]
+            },
+            "process_stages": {
+                "preparation_methods": ["классическая_технология"],
+                "stages": ["syrup_preparation", "final_drink_preparation"],
+                "floral_processing": ["цветочная_ароматизация"]
+            }
+        },
+        "kvas_drinks": {  # Субключ для квасных напитков
+            "recipe_name": {
+                "drink_types": ["квасной_напиток", "ретро_напиток"],
+                "kvass_base": ["квасная_основа"],
+                "retro_category": ["квасные_ретро"]
+            },
+            "variants": {
+                "sugar_types": ["традиционный", "современная_формула"],
+                "kvass_intensity": ["легкая", "традиционная"]
+            },
+            "process_stages": {
+                "preparation_methods": ["классическая_технология"],
+                "stages": ["syrup_preparation", "final_drink_preparation"],
+                "kvass_processing": ["квасная_технология"]
+            }
+        },
+        "cola": {  # Субключ для колы
+            "recipe_name": {
+                "drink_types": ["кола", "ретро_напиток"],
+                "flavor_profile": ["кола_классик", "пряный"],
+                "retro_category": ["классические_ретро"]
+            },
+            "variants": {
+                "sugar_types": ["традиционный", "современная_формула"],
+                "cola_intensity": ["мягкая", "интенсивная"]
+            },
+            "process_stages": {
+                "preparation_methods": ["классическая_технология"],
+                "stages": ["syrup_preparation", "final_drink_preparation"],
+                "cola_processing": ["кола_ароматизация"]
+            }
+        },
+        "citrus_retro": {  # Субключ для цитрусовых ретро-напитков
+            "recipe_name": {
+                "drink_types": ["ретро_напиток", "газированный"],
+                "flavor_profiles": ["bitter_lemon", "с_ароматом_лимона", "с_ароматом_апельсина"],
+                "retro_types": ["швепс", "спрайт", "миринда", "фанта"],
+                "retro_category": ["классические_ретро"]
+            },
+            "variants": {
+                "sugar_types": ["традиционный", "современная_формула"],
+                "citrus_intensity": ["классическая", "усиленная"]
+            },
+            "process_stages": {
+                "preparation_methods": ["классическая_технология"],
+                "stages": ["syrup_preparation", "final_drink_preparation"],
+                "citrus_processing": ["ретро_цитрусовые_технологии"]
+            }
         }
     },
 
@@ -845,7 +1057,7 @@ DRINKS_ENUM_MAPPING = {
                 "extract_processing": ["технология_экстракции", "функциональные_добавки"]
             }
         },
-        "herbal": {  # Субключ для травяных напитков с экстрактами
+        "herbal_vegetable": {  # Субключ для травяных напитков с экстрактами
             "recipe_name": {
                 "drink_types": ["травяной_функциональный", "с_растительными_экстрактами"],
                 "herbal_types": ["лечебные_травы", "ароматические_травы"],
@@ -861,7 +1073,7 @@ DRINKS_ENUM_MAPPING = {
                 "herbal_processing": ["экстракция_активных_веществ"]
             }
         },
-        "berry": {  # Субключ для ягодных напитков с экстрактами
+        "berry_vegetable": {  # Субключ для ягодных напитков с экстрактами
             "recipe_name": {
                 "drink_types": ["с_растительными_экстрактами", "ягодный"],
                 "berry_extracts": ["ягодные_экстракты"],
@@ -996,6 +1208,76 @@ DRINKS_ENUM_MAPPING = {
             "dosage": {
                 "dosage_ranges": ["специальные_дозировки"],
                 "application_specific_rates": ["по_назначению"]
+            }
+        },
+        "oxygen_cocktail": {  # Субключ для кислородных коктейлей
+            "name_product": {
+                "cocktail_types": ["кислородный_коктейль", "функциональный_напиток"],
+                "oxygen_enriched": ["обогащенный_кислородом"],
+                "wellness_category": ["wellness_напитки"]
+            },
+            "has_E_code": {
+                "functional_codes": ["функциональные_добавки"]
+            },
+            "dosage": {
+                "oxygen_levels": ["стандартное_обогащение", "повышенное_обогащение"],
+                "application_rates": ["по_технологии"]
+            }
+        },
+        "vegetable_milk_powder": {  # Субключ для растительных молочных порошков
+            "name_product": {
+                "powder_types": ["растительный_молочный_порошок", "растительное_молоко"],
+                "plant_sources": ["соевый", "овсяный", "миндальный", "кокосовый"],
+                "functional_category": ["растительные_альтернативы"]
+            },
+            "has_E_code": {
+                "plant_codes": ["растительные_добавки"]
+            },
+            "dosage": {
+                "powder_concentrations": ["стандартная_концентрация", "высокая_концентрация"],
+                "reconstitution_ratios": ["1:10", "1:8", "по_рецептуре"]
+            }
+        },
+        "fruit_powders": {  # Субключ для фруктовых порошков
+            "name_product": {
+                "powder_types": ["фруктовый_порошок", "сублимированные_фрукты"],
+                "fruit_sources": ["ягодные", "цитрусовые", "тропические", "косточковые"],
+                "processing_types": ["сублимационная_сушка", "распылительная_сушка"]
+            },
+            "has_E_code": {
+                "fruit_codes": ["натуральные_фруктовые"]
+            },
+            "dosage": {
+                "powder_concentrations": ["легкая_ароматизация", "интенсивная_ароматизация"],
+                "application_rates": ["5_15_г_на_литр", "по_вкусу"]
+            }
+        },
+        "ferments": {  # Субключ для ферментов
+            "name_product": {
+                "enzyme_types": ["ферменты", "энзимы"],
+                "application_areas": ["брожение", "гидролиз", "осветление"],
+                "enzyme_sources": ["микробиальные", "растительные"]
+            },
+            "has_E_code": {
+                "enzyme_codes": ["ферментные_препараты"]
+            },
+            "dosage": {
+                "enzyme_activity": ["стандартная_активность", "высокая_активность"],
+                "application_rates": ["по_технологическим_нормам"]
+            }
+        },
+        "probiotic_cultures": {  # Субключ для пробиотических культур
+            "name_product": {
+                "culture_types": ["пробиотические_культуры", "живые_культуры"],
+                "strain_varieties": ["лактобактерии", "бифидобактерии", "молочнокислые"],
+                "functional_benefits": ["пищеварение", "иммунитет", "микрофлора"]
+            },
+            "has_E_code": {
+                "probiotic_codes": ["пробиотические_добавки"]
+            },
+            "dosage": {
+                "culture_concentrations": ["стандартная_концентрация", "высокая_концентрация"],
+                "cfu_levels": ["10^6_КОЕ", "10^8_КОЕ", "10^9_КОЕ"]
             }
         }
     }
