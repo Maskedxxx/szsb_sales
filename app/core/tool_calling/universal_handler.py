@@ -34,6 +34,7 @@ class IndustryMappingsLoader:
         "01": "horeca",    # HoReCa
         "04": "milk",      # Молочная
         "00": "selo",      # Сельнозпродукция
+        "03": "fat_and_oil",  # Масложировая отрасль
     }
     
     @staticmethod
@@ -204,21 +205,25 @@ class UniversalIndustryHandler(BaseToolHandler):
             
             for filter_key, enum_value in parameters.parameters.items():
                 if enum_value and str(enum_value).strip():
+                    prev_products = filtered_products
                     self.logger.info(f"Применяем фильтр: {filter_key} = {enum_value}")
-                    
-                    filtered_products = self._apply_smart_filter(
-                        filtered_products, 
-                        filter_key, 
+
+                    candidate = self._apply_smart_filter(
+                        prev_products,
+                        filter_key,
                         enum_value
                     )
-                    
-                    applied_filters[filter_key] = enum_value
-                    current_count = len(filtered_products)
-                    self.logger.info(f"После фильтрации по {filter_key}: {current_count} продуктов")
-                    
-                    if not filtered_products:
-                        self.logger.warning(f"После фильтрации по {filter_key} не осталось продуктов")
-                        break
+
+                    if candidate:
+                        filtered_products = candidate
+                        applied_filters[filter_key] = enum_value
+                        self.logger.info(f"После фильтрации по {filter_key}: {len(filtered_products)} продуктов")
+                    else:
+                        self.logger.warning(
+                            f"Фильтр {filter_key}={enum_value} отброшен: обнуляет выдачу"
+                        )
+                        # Оставляем предыдущее множество без изменений (RELAX_ON_ZERO)
+                        filtered_products = prev_products
             
             # 3. Создаем отфильтрованные данные
             filtered_data = self._create_filtered_data(data, filtered_products)
@@ -349,7 +354,7 @@ class UniversalIndustryHandler(BaseToolHandler):
 
 ВАЖНО: Ты ДОЛЖЕН вызвать инструмент ТОЛЬКО ОДИН РАЗ. Никогда не делай несколько вызовов инструмента.
 Используй предоставленный инструмент для точной фильтрации продуктов по критериям из запроса.
-Если в запросе несколько критериев, выбери самый важный для начальной фильтрации.
+Если в запросе несколько критериев, выбери самый важный для начальной фильтрации и остальные если ты считаешь что они есть в запросе!.
 
 Обязательно выбери только ОДНО значение для каждого параметра или null если параметр не нужен."""
     
