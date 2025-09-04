@@ -1,0 +1,189 @@
+
+=== ОТЧЕТ ВАЛИДАЦИИ DRINKS MAPPINGS ===
+Дата: 2025-09-04 13:37:12
+
+📊 СТАТИСТИКА:
+  Файлы:
+    Всего JSON файлов: 15
+    Файлов в KEYS_MAPPING: 15
+    Корректно описанных: 15
+    Отсутствующих в mapping: 0
+    Лишних в mapping: 0
+  Субключи:
+    Всего субключей в JSON: 60
+    Субключей в mapping: 54
+    Корректных маппингов: 39
+    Отсутствующих: 19
+    Лишних: 13
+  Enums:
+    Файлов с enums: 15
+    Субключей покрыто: 54
+    Всего enum категорий: 447
+    Файлов без enums: 0
+    Лишних файлов: 0
+  Universal Patterns:
+    Всего enum значений: 603
+    Паттернов в mapping: 222
+    Покрытых enum: 125
+    Отсутствующих паттернов: 478
+    Лишних паттернов: 97
+    % покрытия: 20.7
+
+❌ ОШИБКИ (41):
+  1. Субключ 'vegetable_milk_powder' из various_data.json отсутствует в KEY_TO_FILE_MAPPING
+  2. Субключ 'oxygen_cocktail' из various_data.json отсутствует в KEY_TO_FILE_MAPPING
+  3. Субключ 'herbal_flavor' из flavor_data.json отсутствует в KEY_TO_FILE_MAPPING
+  4. Субключ 'whey' из kvas_gost_recipes.json отсутствует в KEY_TO_FILE_MAPPING
+  5. Субключ 'kvas_drinks' из retro_recipes.json отсутствует в KEY_TO_FILE_MAPPING
+  6. Субключ 'cherry_feijoa_activity' из retro_recipes.json отсутствует в KEY_TO_FILE_MAPPING
+  7. Субключ 'nut_cereal_flavor' из flavor_data.json отсутствует в KEY_TO_FILE_MAPPING
+  8. Субключ 'alcohol_flavor' из flavor_data.json отсутствует в KEY_TO_FILE_MAPPING
+  9. Субключ 'kolokolchik' из retro_recipes.json отсутствует в KEY_TO_FILE_MAPPING
+  10. Субключ 'vanilla_creamy_aroma' из flavor_data.json отсутствует в KEY_TO_FILE_MAPPING
+  11. Субключ 'cola' из retro_recipes.json отсутствует в KEY_TO_FILE_MAPPING
+  12. Субключ 'choco_coffee_bakery_aroma' из flavor_data.json отсутствует в KEY_TO_FILE_MAPPING
+  13. Субключ 'ferments' из various_data.json отсутствует в KEY_TO_FILE_MAPPING
+  14. Субключ 'grape_flavor' из flavor_data.json отсутствует в KEY_TO_FILE_MAPPING
+  15. Субключ 'citrus_aroma' из flavor_data.json отсутствует в KEY_TO_FILE_MAPPING
+  16. Субключ 'fruit_aroma' из flavor_data.json отсутствует в KEY_TO_FILE_MAPPING
+  17. Субключ 'buratino_cream_soda' из retro_recipes.json отсутствует в KEY_TO_FILE_MAPPING
+  18. Субключ 'fruit_powders' из various_data.json отсутствует в KEY_TO_FILE_MAPPING
+  19. Субключ 'probiotic_cultures' из various_data.json отсутствует в KEY_TO_FILE_MAPPING
+  20. Субключ 'citrus': маппинг указывает на energy_recipes.json, но реально в retro_recipes.json
+  21. Субключ 'berry': маппинг указывает на vegetable_extract_recipes.json, но реально в jelly_recipes.json
+  22. Enum 'final_drink_preparation' (используется 33 раз в juce_recipes.json.tropical.process_stages, juce_recipes.json.apple_pear_peach.process_stages, juce_recipes.json.forest_berries.process_stages и еще 30) не имеет universal pattern
+  23. Enum 'syrup_preparation' (используется 33 раз в juce_recipes.json.tropical.process_stages, juce_recipes.json.apple_pear_peach.process_stages, juce_recipes.json.forest_berries.process_stages и еще 30) не имеет universal pattern
+  24. Enum 'двухстадийный_процесс' (используется 9 раз в juce_recipes.json.tropical.process_stages, club_recipes.json.mojito.process_stages, club_recipes.json.sangria.process_stages и еще 6) не имеет universal pattern
+  25. Enum '11.01' (используется 9 раз в flavor_data.json.retro_classic_drink_flavors.product_code, flavor_data.json.natural.product_code, flavor_data.json.grape_berry_flavors.product_code и еще 6) не имеет universal pattern
+  26. Enum 'стандартная' (используется 7 раз в colorant_data.json.synthetic_powder_colorants.dosage, juce_recipes.json.forest_berries.variants, juce_recipes.json.orange_drinks.variants и еще 4) не имеет universal pattern
+  27. Enum 'усиленная' (используется 6 раз в juce_recipes.json.forest_berries.variants, juce_recipes.json.orange_drinks.variants, drink_snaps_recipes.json.berry.variants и еще 3) не имеет universal pattern
+  28. Enum '11.02' (используется 6 раз в flavor_data.json.retro_classic_drink_flavors.product_code, flavor_data.json.natural.product_code, flavor_data.json.citrus_aromas.product_code и еще 3) не имеет universal pattern
+  29. Enum 'напиток_безалкогольный' (используется 6 раз в juce_recipes.json.tropical.recipe_name, juce_recipes.json.apple_pear_peach.recipe_name, juce_recipes.json.forest_berries.recipe_name и еще 3) не имеет universal pattern
+  30. Enum 'Сладин_200_А' (используется 5 раз в juce_recipes.json.tropical.variants, juce_recipes.json.apple_pear_peach.variants, club_recipes.json.mojito.variants и еще 2) не имеет universal pattern
+  31. Enum 'клубные_коктейли' (используется 4 раз в club_recipes.json.mojito.recipe_name, club_recipes.json.sangria.recipe_name, club_recipes.json.punch_glintwein_pinacolada.recipe_name и еще 1) не имеет universal pattern
+  32. Enum '200_дм3_сироп' (используется 4 раз в juce_recipes.json.tropical.process_stages, club_recipes.json.mojito.process_stages, club_recipes.json.sangria.process_stages и еще 1) не имеет universal pattern
+  33. Enum 'intermediate_stage' (используется 4 раз в kvas_gost_recipes.json.with_spices.process_stages, kvas_gost_recipes.json.apple.process_stages, kvas_gost_recipes.json.traditional.process_stages и еще 1) не имеет universal pattern
+  34. Enum 'тропические' (используется 4 раз в flavor_data.json.fruit_aromas.product_code, juce_recipes.json.tropical.recipe_name, club_recipes.json.punch_glintwein_pinacolada.recipe_name и еще 1) не имеет universal pattern
+  35. Enum '1000_дм3_напиток' (используется 4 раз в juce_recipes.json.tropical.process_stages, club_recipes.json.mojito.process_stages, club_recipes.json.sangria.process_stages и еще 1) не имеет universal pattern
+  36. Enum 'классическая_технология' (используется 4 раз в kvas_gost_recipes.json.traditional.process_stages, retro_recipes.json.tarragon.process_stages, retro_recipes.json.duchess_pear.process_stages и еще 1) не имеет universal pattern
+  37. Enum 'напиток_безалкогольный_газированный' (используется 3 раз в club_recipes.json.sangria.recipe_name, energy_recipes.json.citrus.recipe_name, energy_recipes.json.fruit.recipe_name) не имеет universal pattern
+  38. Enum 'с_растительными_экстрактами' (используется 3 раз в vegetable_extract_recipes.json.algorithms.recipe_name, vegetable_extract_recipes.json.herbal.recipe_name, vegetable_extract_recipes.json.berry.recipe_name) не имеет universal pattern
+  39. Enum 'повышенная' (используется 3 раз в colorant_data.json.synthetic_powder_colorants.dosage, jelly_recipes.json.aloe_cactus_grape.variants, vegetable_extract_recipes.json.herbal.variants) не имеет universal pattern
+  40. Enum '200' (используется 3 раз в sweeteners_data.json.sweeteners_no_aspartame.sweetness_coefficient, sweeteners_data.json.sweeteners_with_aspartame.sweetness_coefficient, sweeteners_data.json.sweeteners_sweetness_200.sweetness_coefficient) не имеет universal pattern
+  41. Enum 'ягоды' (используется 3 раз в jelly_recipes.json.berry_bird_cherry.recipe_name, kvas_gost_recipes.json.beet_berry.recipe_name, malt_recipes.json.berry.recipe_name) не имеет universal pattern
+
+⚠️  ПРЕДУПРЕЖДЕНИЯ (98):
+  1. mixture_data.json: ключ 'composition' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  2. mixture_data.json: ключ 'dosage' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  3. retro_recipes.json: ключ 'process_stages' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  4. kvas_gost_recipes.json: ключ 'process_stages' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  5. drink_snaps_recipes.json: ключ 'process_stages' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  6. energy_recipes.json: ключ 'process_stages' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  7. malt_recipes.json: ключ 'process_stages' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  8. juce_recipes.json: ключ 'process_stages' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  9. club_recipes.json: ключ 'process_stages' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  10. jelly_recipes.json: ключ 'process_stages' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  11. vegetable_extract_recipes.json: ключ 'process_stages' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  12. cold_tea_recipes.json: ключ 'process_stages' описан в DRINKS_KEYS_MAPPING, но отсутствует в JSON
+  13. Субключ 'vanilla_creamy_aromas' в KEY_TO_FILE_MAPPING указывает на flavor_data.json, но не найден в JSON
+  14. Субключ 'stabilizers_emulsifiers' в KEY_TO_FILE_MAPPING указывает на various_data.json, но не найден в JSON
+  15. Субключ 'grape_berry_flavors' в KEY_TO_FILE_MAPPING указывает на flavor_data.json, но не найден в JSON
+  16. Субключ 'functional_additives' в KEY_TO_FILE_MAPPING указывает на various_data.json, но не найден в JSON
+  17. Субключ 'natural_extracts' в KEY_TO_FILE_MAPPING указывает на various_data.json, но не найден в JSON
+  18. Субключ 'citrus_aromas' в KEY_TO_FILE_MAPPING указывает на flavor_data.json, но не найден в JSON
+  19. Субключ 'herbal_floral_flavors' в KEY_TO_FILE_MAPPING указывает на flavor_data.json, но не найден в JSON
+  20. Субключ 'alcohol_flavors' в KEY_TO_FILE_MAPPING указывает на flavor_data.json, но не найден в JSON
+  21. Субключ 'special_ingredients' в KEY_TO_FILE_MAPPING указывает на various_data.json, но не найден в JSON
+  22. Субключ 'vitamins_minerals' в KEY_TO_FILE_MAPPING указывает на various_data.json, но не найден в JSON
+  23. Субключ 'chocolate_coffee_bakery_aromas' в KEY_TO_FILE_MAPPING указывает на flavor_data.json, но не найден в JSON
+  24. Субключ 'nut_cereal_flavors' в KEY_TO_FILE_MAPPING указывает на flavor_data.json, но не найден в JSON
+  25. Субключ 'fruit_aromas' в KEY_TO_FILE_MAPPING указывает на flavor_data.json, но не найден в JSON
+  26. drink_snaps_recipes.json: субключ 'berry' в DRINKS_ENUM_MAPPING не найден в JSON
+  27. energy_recipes.json: субключ 'fruit' в DRINKS_ENUM_MAPPING не найден в JSON
+  28. malt_recipes.json: субключ 'herbal' в DRINKS_ENUM_MAPPING не найден в JSON
+  29. malt_recipes.json: субключ 'berry' в DRINKS_ENUM_MAPPING не найден в JSON
+  30. jelly_recipes.json: субключ 'berry' в DRINKS_ENUM_MAPPING не найден в JSON
+  31. Enum 'ретро_напиток' (используется 3 раз) не имеет universal pattern
+  32. Enum 'без_углеводов' (используется 3 раз) не имеет universal pattern
+  33. Enum '1_ккал' (используется 3 раз) не имеет universal pattern
+  34. Enum 'солодовый_напиток' (используется 3 раз) не имеет universal pattern
+  35. Enum 'интенсивная' (используется 3 раз) не имеет universal pattern
+  36. Enum 'специальная_технология_снап' (используется 3 раз) не имеет universal pattern
+  37. Enum 'ГОСТ' (используется 3 раз) не имеет universal pattern
+  38. Enum 'сахар' (используется 3 раз) не имеет universal pattern
+  39. Enum 'краситель' (используется 3 раз) не имеет universal pattern
+  40. Enum 'с_аспартамом' (используется 2 раз) не имеет universal pattern
+  41. Enum 'мальтодекстрин' (используется 2 раз) не имеет universal pattern
+  42. Enum 'традиционное_брожение' (используется 2 раз) не имеет universal pattern
+  43. Enum 'желтый' (используется 2 раз) не имеет universal pattern
+  44. Enum 'лимонная_кислота' (используется 2 раз) не имеет universal pattern
+  45. Enum 'холодные_чаи' (используется 2 раз) не имеет universal pattern
+  46. Enum 'мягкая' (используется 2 раз) не имеет universal pattern
+  47. Enum 'комбинированный' (используется 2 раз) не имеет universal pattern
+  48. Enum 'дюшес' (используется 2 раз) не имеет universal pattern
+  49. Enum 'напиток_чайный_холодный' (используется 2 раз) не имеет universal pattern
+  50. Enum 'ацесульфам_E950' (используется 2 раз) не имеет universal pattern
+  51. Enum '200_раз' (используется 2 раз) не имеет universal pattern
+  52. Enum '36_ккал' (используется 2 раз) не имеет universal pattern
+  53. Enum 'wellness_напитки' (используется 2 раз) не имеет universal pattern
+  54. Enum 'дрожжи' (используется 2 раз) не имеет universal pattern
+  55. Enum 'растительные_экстракты' (используется 2 раз) не имеет universal pattern
+  56. Enum 'натуральная' (используется 2 раз) не имеет universal pattern
+  57. Enum 'закваска' (используется 2 раз) не имеет universal pattern
+  58. Enum 'классические_ретро' (используется 2 раз) не имеет universal pattern
+  59. Enum 'желе_напитки' (используется 2 раз) не имеет universal pattern
+  60. Enum 'премиум_составы' (используется 2 раз) не имеет universal pattern
+  61. Enum 'ягодная_экстракция' (используется 2 раз) не имеет universal pattern
+  62. Enum 'ароматические_травы' (используется 2 раз) не имеет universal pattern
+  63. Enum 'соковый_напиток' (используется 2 раз) не имеет universal pattern
+  64. Enum 'хлебобулочные' (используется 2 раз) не имеет universal pattern
+  65. Enum 'цикламат_E952' (используется 2 раз) не имеет universal pattern
+  66. Enum 'карамель' (используется 2 раз) не имеет universal pattern
+  67. Enum 'энергетические_напитки' (используется 2 раз) не имеет universal pattern
+  68. Enum 'мальтозная_основа' (используется 2 раз) не имеет universal pattern
+  69. Enum 'К' (используется 2 раз) не имеет universal pattern
+  70. Enum '9г_углеводов' (используется 2 раз) не имеет universal pattern
+  71. Enum 'антислеживающий_агент_E551' (используется 2 раз) не имеет universal pattern
+  72. Enum 'желирование' (используется 2 раз) не имеет universal pattern
+  73. Enum '40_ккал' (используется 2 раз) не имеет universal pattern
+  74. Enum 'сахарин_E954' (используется 2 раз) не имеет universal pattern
+  75. Enum 'косточковые' (используется 2 раз) не имеет universal pattern
+  76. Enum '3.5%_сока' (используется 2 раз) не имеет universal pattern
+  77. Enum '10.01' (используется 2 раз) не имеет universal pattern
+  78. Enum 'коричневый' (используется 2 раз) не имеет universal pattern
+  79. Enum 'E202' (используется 2 раз) не имеет universal pattern
+  80. Enum 'ваниль' (используется 2 раз) не имеет universal pattern
+  81. Enum '250_раз' (используется 2 раз) не имеет universal pattern
+  82. Enum 'семечковые' (используется 2 раз) не имеет universal pattern
+  83. Enum 'ягодные_смеси' (используется 2 раз) не имеет universal pattern
+  84. Enum 'E211' (используется 2 раз) не имеет universal pattern
+  85. Enum 'с_преобладанием_ягод' (используется 2 раз) не имеет universal pattern
+  86. Enum '11.04' (используется 2 раз) не имеет universal pattern
+  87. Enum 'цветочные' (используется 2 раз) не имеет universal pattern
+  88. Enum 'натуральные_сиропы' (используется 2 раз) не имеет universal pattern
+  89. Enum 'craft_концепты' (используется 2 раз) не имеет universal pattern
+  90. Enum '10г_углеводов' (используется 2 раз) не имеет universal pattern
+  91. Enum 'гранат' (используется 2 раз) не имеет universal pattern
+  92. Enum 'подсластитель_комбинированный' (используется 2 раз) не имеет universal pattern
+  93. Enum 'неотам_E961' (используется 2 раз) не имеет universal pattern
+  94. Enum '250' (используется 2 раз) не имеет universal pattern
+  95. Enum 'комплексные' (используется 2 раз) не имеет universal pattern
+  96. Enum 'E330' (используется 2 раз) не имеет universal pattern
+  97. Enum 'лечебные_травы' (используется 2 раз) не имеет universal pattern
+  98. Enum 'функциональные_добавки' (используется 2 раз) не имеет universal pattern
+
+ℹ️  ИНФОРМАЦИЯ (10):
+  1. Universal pattern '20' не используется в enums (возможно, полезный синоним)
+  2. Universal pattern 'E960' не используется в enums (возможно, полезный синоним)
+  3. Universal pattern 'E968' не используется в enums (возможно, полезный синоним)
+  4. Universal pattern 'FOS_55L' не используется в enums (возможно, полезный синоним)
+  5. Universal pattern 'Green_Lines' не используется в enums (возможно, полезный синоним)
+  6. Universal pattern 'SOYUZSNAB' не используется в enums (возможно, полезный синоним)
+  7. Universal pattern 'fruitberry' не используется в enums (возможно, полезный синоним)
+  8. Universal pattern 'ЛЮКС_15' не используется в enums (возможно, полезный синоним)
+  9. Universal pattern 'ЛЮКС_8' не используется в enums (возможно, полезный синоним)
+  10. Universal pattern 'антиокислитель' не используется в enums (возможно, полезный синоним)
+
+💀 МНОЖЕСТВЕННЫЕ КРИТИЧЕСКИЕ ОШИБКИ
+Общая оценка качества: КРИТИЧЕСКОЕ СОСТОЯНИЕ
+Всего ошибок: 41, предупреждений: 98
