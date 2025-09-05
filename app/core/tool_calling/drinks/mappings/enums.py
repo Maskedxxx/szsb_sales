@@ -97,6 +97,11 @@ DRINKS_ENUM_MAPPING = {
                 "code_formats": ["11.01.208_ЕС", "11.02.302", "11.02.206_К", "11.02.751_TR"],
                 "code_categories": ["11.01", "11.02"],
                 "code_types": ["ЕС", "К", "TR"]
+            },
+            "property": {
+                "nostalgic_qualities": ["классический_вкус", "аутентичные_рецепты", "советская_классика"],
+                "flavor_intensity": ["мягкие", "насыщенные", "сбалансированные"],
+                "application_benefits": ["высокое_разбавление", "стабильность_вкуса", "экономичность"]
             }
         },
         "natural": {  # Субключ для натуральных ароматизаторов
@@ -113,9 +118,14 @@ DRINKS_ENUM_MAPPING = {
                 "code_categories": ["11.01", "11.02", "11.04", "10.01"],
                 "code_formats": ["цифры_точка_цифры", "буквенные_суффиксы"],
                 "code_suffixes": ["N", "B", "P", "К", "S"]
+            },
+            "property": {
+                "natural_benefits": ["натуральное_происхождение", "органическая_сертификация", "без_синтетики"],
+                "processing_properties": ["концентрированные", "термостабильные", "сохраняют_аромат_при_разбавлении"],
+                "quality_indicators": ["премиум_качество", "высокая_чистота", "мультисенсорность"]
             }
         },
-        "citrus_aromas": {  # Субключ для цитрусовых ароматов
+        "citrus_aroma": {  # Субключ для цитрусовых ароматов
             "name_product": {
                 "citrus_types": ["апельсин", "лимон", "грейпфрут", "лайм", "бергамот"],
                 "flavor_effects": ["clouding_эффект", "помутнение"],
@@ -125,9 +135,14 @@ DRINKS_ENUM_MAPPING = {
             "product_code": {
                 "code_categories": ["10.02", "11.02", "11.04"],
                 "code_types": ["стандартные_коды", "специальные_коды"]
+            },
+            "property": {
+                "special_effects": ["эти_продукты_имеют_замутнитель_жидкостей", "помутнение_напитков"],
+                "processing_properties": ["термостабильные", "концентрированные", "стойкие_к_окислению"],
+                "functional_benefits": ["природные_антиоксиданты", "витамин_C", "полифенолы"]
             }
         },
-        "grape_berry_flavors": {  # Субключ для виноградно-ягодных вкусов
+        "grape_flavor": {  # Субключ для виноградных вкусов
             "name_product": {
                 "grape_varieties": ["виноград", "изабелла", "мускат"],
                 "berry_types": ["барбарис", "брусника", "клюква"],
@@ -139,7 +154,7 @@ DRINKS_ENUM_MAPPING = {
                 "grape_codes": ["специальные_виноградные"]
             }
         },
-        "fruit_aromas": {  # Субключ для фруктовых ароматов
+        "fruit_aroma": {  # Субключ для фруктовых ароматов
             "name_product": {
                 "tropical_fruits": ["ананас", "манго", "маракуйя"],
                 "stone_fruits": ["абрикос", "персик"],
@@ -152,7 +167,7 @@ DRINKS_ENUM_MAPPING = {
                 "fruit_specific_codes": ["тропические", "косточковые", "семечковые"]
             }
         },
-        "vanilla_creamy_aromas": {  # Субключ для ванильно-сливочных ароматов
+        "vanilla_creamy_aroma": {  # Субключ для ванильно-сливочных ароматов
             "name_product": {
                 "vanilla_types": ["ваниль", "ванильный"],
                 "creamy_types": ["сливочный", "кремовый"],
@@ -163,59 +178,11 @@ DRINKS_ENUM_MAPPING = {
             "product_code": {
                 "code_categories": ["11.01", "11.02"],
                 "dessert_codes": ["ванильные", "сливочные"]
-            }
-        },
-        "chocolate_coffee_bakery_aromas": {  # Субключ для шоколадно-кофейно-хлебобулочных ароматов
-            "name_product": {
-                "chocolate_types": ["шоколад", "какао", "молочный_шоколад"],
-                "coffee_types": ["кофе", "эспрессо", "капучино"],
-                "bakery_types": ["хлебобулочные", "выпечка"],
-                "flavor_intensity": ["богатые", "премиум"],
-                "brands": ["DEL_AR"]
             },
-            "product_code": {
-                "code_categories": ["11.01", "11.02"],
-                "premium_codes": ["шоколадные", "кофейные", "хлебобулочные"]
-            }
-        },
-        "alcohol_flavors": {  # Субключ для алкогольных вкусов
-            "name_product": {
-                "alcohol_types": ["виски", "амаретто", "ром", "коньяк"],
-                "spirit_categories": ["крепкие_напитки", "ликеры"],
-                "flavor_applications": ["безалкогольные_аналоги", "экспериментальные"],
-                "brands": ["DEL_AR"]
-            },
-            "product_code": {
-                "code_categories": ["11.01"],
-                "alcohol_codes": ["крепкий_алкоголь", "ликерные"]
-            }
-        },
-        "herbal_floral_flavors": {  # Субключ для травяно-цветочных ароматов
-            "name_product": {
-                "herbal_types": ["алоэ", "базилик", "матча", "мята"],
-                "floral_types": ["цветочные", "лаванда", "роза"],
-                "functional_types": ["здоровые", "функциональные"],
-                "application_types": ["wellness_напитки", "craft_концепты"],
-                "brands": ["DEL_AR"]
-            },
-            "product_code": {
-                "code_categories": ["11.01", "11.02"],
-                "functional_codes": ["травяные", "цветочные"]
-            }
-        },
-        "nut_cereal_flavors": {  # Субключ для орехово-злаковых ароматов
-            "name_product": {
-                "nut_types": ["миндаль", "орех", "фундук"],
-                "cereal_types": ["злаковые", "овсяные"],
-                "sweet_types": ["мед", "медовый"],
-                "seasonal_profile": ["осенне_зимние"],
-                "application_types": ["craft_концепты"],
-                "flavor_characteristics": ["теплые", "слегка_терпкие"],
-                "brands": ["DEL_AR"]
-            },
-            "product_code": {
-                "code_categories": ["11.01"],
-                "seasonal_codes": ["ореховые", "медовые"]
+            "property": {
+                "sensory_qualities": ["мягкие_округлые_нотки", "десертный_профиль", "сладкие_нюансы"],
+                "application_versatility": ["универсальные", "комбинируемые", "базовые_ароматы"],
+                "consumer_appeal": ["популярные", "классические", "любимые_вкусы"]
             }
         },
         "juice_bases": {  # Субключ для соковых основ
@@ -228,6 +195,11 @@ DRINKS_ENUM_MAPPING = {
             "product_code": {
                 "code_categories": ["специальные_соковые"],
                 "juice_codes": ["концентрированные", "комплексные"]
+            },
+            "property": {
+                "technological_advantages": ["комплексность_аромат_и_вкус", "технологическая_эффективность", "экономия_на_сырье"],
+                "quality_benefits": ["комплексный_профиль", "полнота_вкуса", "натуральность"],
+                "processing_stability": ["стабильность_при_разбавлении", "сохранение_свойств", "концентрат_высокого_качества"]
             }
         },
         "herbal_flavor": {  # Субключ для травяных ароматизаторов
@@ -240,30 +212,6 @@ DRINKS_ENUM_MAPPING = {
             "product_code": {
                 "code_categories": ["11.01", "11.02"],
                 "herbal_codes": ["травяные_ароматизаторы"]
-            }
-        },
-        "vanilla_creamy_aroma": {  # Субключ для ванильно-сливочных ароматов
-            "name_product": {
-                "vanilla_types": ["ваниль", "ванильный_крем"],
-                "creamy_types": ["сливочный", "кремовый", "молочный"],
-                "dessert_profiles": ["ванильно_сливочный", "кремовый_аромат"],
-                "brands": ["DEL_AR"]
-            },
-            "product_code": {
-                "code_categories": ["11.01", "11.02"],
-                "dessert_codes": ["ванильные_ароматы", "сливочные_ароматы"]
-            }
-        },
-        "grape_flavor": {  # Субключ для виноградных вкусов
-            "name_product": {
-                "grape_varieties": ["виноград", "изабелла", "мускат"],
-                "flavor_intensity": ["натуральный_виноградный", "интенсивный_виноградный"],
-                "grape_types": ["темный_виноград", "белый_виноград"],
-                "brands": ["DEL_AR"]
-            },
-            "product_code": {
-                "code_categories": ["11.01"],
-                "grape_codes": ["виноградные_ароматизаторы"]
             }
         },
         "nut_cereal_flavor": {  # Субключ для орехово-злаковых ароматизаторов
@@ -288,31 +236,6 @@ DRINKS_ENUM_MAPPING = {
             "product_code": {
                 "code_categories": ["11.01"],
                 "alcohol_codes": ["алкогольные_ароматизаторы"]
-            }
-        },
-        "fruit_aroma": {  # Субключ для фруктовых ароматов
-            "name_product": {
-                "fruit_types": ["яблоко", "груша", "персик", "абрикос", "манго", "ананас"],
-                "tropical_fruits": ["тропические", "экзотические"],
-                "stone_fruits": ["косточковые"],
-                "pome_fruits": ["семечковые"],
-                "brands": ["DEL_AR"]
-            },
-            "product_code": {
-                "code_categories": ["11.01", "10.01"],
-                "fruit_codes": ["фруктовые_ароматы"]
-            }
-        },
-        "citrus_aroma": {  # Субключ для цитрусовых ароматов
-            "name_product": {
-                "citrus_types": ["лимон", "апельсин", "грейпфрут", "лайм", "бергамот"],
-                "citrus_effects": ["clouding_эффект", "помутнение"],
-                "flavor_characteristics": ["натуральный", "эмульсионный"],
-                "brands": ["DEL_AR"]
-            },
-            "product_code": {
-                "code_categories": ["10.02", "11.02", "11.04"],
-                "citrus_codes": ["цитрусовые_ароматы"]
             }
         },
         "choco_coffee_bakery_aroma": {  # Субключ для шоколадно-кофейно-хлебобулочных ароматов
@@ -1133,6 +1056,11 @@ DRINKS_ENUM_MAPPING = {
                 "chemical_names": ["лимонная_кислота", "бензоат_натрия"],
                 "functional_categories": ["консерванты", "кислоты", "регуляторы_кислотности"]
             },
+            "composition": {
+                "base_components": ["лимонная_кислота_моногидрат", "бензоат_натрия", "сорбат_калия"],
+                "purity_levels": ["пищевая", "фармацевтическая", "техническая"],
+                "chemical_forms": ["моногидрат", "безводный", "кристаллический"]
+            },
             "has_E_code": {
                 "e_codes": ["E330", "E211", "E202"],
                 "safety_classification": ["разрешенные_добавки"],
@@ -1144,77 +1072,16 @@ DRINKS_ENUM_MAPPING = {
                 "application_flexibility": ["по_потребности"]
             }
         },
-        "stabilizers_emulsifiers": {  # Субключ для стабилизаторов и эмульгаторов
-            "name_product": {
-                "additive_types": ["стабилизатор", "эмульгатор"],
-                "functional_categories": ["стабилизаторы", "эмульгаторы", "текстурообразователи"]
-            },
-            "has_E_code": {
-                "e_codes": ["стабилизирующие_E_коды"],
-                "functional_e_codes": ["эмульгирующие_добавки"]
-            },
-            "dosage": {
-                "dosage_ranges": ["технологические_нормы"],
-                "application_specificity": ["по_технологии"]
-            }
-        },
-        "functional_additives": {  # Субключ для функциональных добавок
-            "name_product": {
-                "additive_types": ["функциональные_добавки"],
-                "health_categories": ["нутрицевтики", "функциональные_ингредиенты"]
-            },
-            "has_E_code": {
-                "regulatory_codes": ["специальные_функциональные_коды"]
-            },
-            "dosage": {
-                "dosage_ranges": ["функциональные_дозировки"],
-                "efficacy_levels": ["терапевтические", "профилактические"]
-            }
-        },
-        "vitamins_minerals": {  # Субключ для витаминов и минералов
-            "name_product": {
-                "nutrient_types": ["витамины", "минералы", "микроэлементы"],
-                "fortification_agents": ["витаминные_комплексы"]
-            },
-            "has_E_code": {
-                "vitamin_codes": ["витаминные_E_коды"]
-            },
-            "dosage": {
-                "dosage_ranges": ["витаминные_нормы"],
-                "rda_compliance": ["суточные_нормы"]
-            }
-        },
-        "natural_extracts": {  # Субключ для натуральных экстрактов
-            "name_product": {
-                "extract_types": ["натуральные_экстракты", "растительные_экстракты"],
-                "source_materials": ["растительное_сырье"]
-            },
-            "has_E_code": {
-                "natural_codes": ["коды_натуральных_экстрактов"]
-            },
-            "dosage": {
-                "dosage_ranges": ["экстракционные_нормы"],
-                "concentration_levels": ["стандартизированные_экстракты"]
-            }
-        },
-        "special_ingredients": {  # Субключ для специальных ингредиентов
-            "name_product": {
-                "specialty_types": ["специальные_ингредиенты", "инновационные_добавки"],
-                "application_specific": ["специализированные_компоненты"]
-            },
-            "has_E_code": {
-                "special_codes": ["специальные_E_коды"]
-            },
-            "dosage": {
-                "dosage_ranges": ["специальные_дозировки"],
-                "application_specific_rates": ["по_назначению"]
-            }
-        },
         "oxygen_cocktail": {  # Субключ для кислородных коктейлей
             "name_product": {
                 "cocktail_types": ["кислородный_коктейль", "функциональный_напиток"],
                 "oxygen_enriched": ["обогащенный_кислородом"],
                 "wellness_category": ["wellness_напитки"]
+            },
+            "composition": {
+                "oxygen_systems": ["стабилизированный_кислород", "кислородные_комплексы", "озонированная_вода"],
+                "foam_agents": ["натуральный_лецитин", "растительная_камедь", "пищевой_желатин"],
+                "enrichment_levels": ["стандартное_обогащение", "повышенное_обогащение", "терапевтическое"]
             },
             "has_E_code": {
                 "functional_codes": ["функциональные_добавки"]
@@ -1230,6 +1097,11 @@ DRINKS_ENUM_MAPPING = {
                 "plant_sources": ["соевый", "овсяный", "миндальный", "кокосовый"],
                 "functional_category": ["растительные_альтернативы"]
             },
+            "composition": {
+                "plant_proteins": ["соевые_белки", "ореховые_белки", "злаковые_белки"],
+                "plant_fats": ["кокосовое_масло", "миндальное_масло", "подсолнечное_масло"],
+                "processing_aids": ["мальтодекстрин", "фосфолипиды", "стабилизаторы"]
+            },
             "has_E_code": {
                 "plant_codes": ["растительные_добавки"]
             },
@@ -1243,6 +1115,11 @@ DRINKS_ENUM_MAPPING = {
                 "powder_types": ["фруктовый_порошок", "сублимированные_фрукты"],
                 "fruit_sources": ["ягодные", "цитрусовые", "тропические", "косточковые"],
                 "processing_types": ["сублимационная_сушка", "распылительная_сушка"]
+            },
+            "composition": {
+                "fruit_solids": ["натуральные_фруктовые_соки", "концентрированные_пюре", "сухие_экстракты"],
+                "carriers": ["мальтодекстрин", "крахмал", "декстроза"],
+                "preservation_agents": ["антиоксиданты", "стабилизаторы_цвета", "консерванты"]
             },
             "has_E_code": {
                 "fruit_codes": ["натуральные_фруктовые"]
@@ -1258,6 +1135,11 @@ DRINKS_ENUM_MAPPING = {
                 "application_areas": ["брожение", "гидролиз", "осветление"],
                 "enzyme_sources": ["микробиальные", "растительные"]
             },
+            "composition": {
+                "enzyme_classes": ["амилазы", "протеазы", "липазы", "целлюлазы"],
+                "enzyme_carriers": ["микрокристаллическая_целлюлоза", "мальтодекстрин", "лактоза"],
+                "stabilizers": ["соли_кальция", "буферные_системы", "консерванты"]
+            },
             "has_E_code": {
                 "enzyme_codes": ["ферментные_препараты"]
             },
@@ -1271,6 +1153,11 @@ DRINKS_ENUM_MAPPING = {
                 "culture_types": ["пробиотические_культуры", "живые_культуры"],
                 "strain_varieties": ["лактобактерии", "бифидобактерии", "молочнокислые"],
                 "functional_benefits": ["пищеварение", "иммунитет", "микрофлора"]
+            },
+            "composition": {
+                "bacterial_strains": ["Lactobacillus_acidophilus", "Bifidobacterium_longum", "Lactobacillus_casei", "Streptococcus_thermophilus"],
+                "growth_media": ["молочная_сыворотка", "мальт_экстракт", "дрожжевой_экстракт"],
+                "cryoprotectants": ["сукроза", "лактоза", "трихалоза", "глицерин"]
             },
             "has_E_code": {
                 "probiotic_codes": ["пробиотические_добавки"]
