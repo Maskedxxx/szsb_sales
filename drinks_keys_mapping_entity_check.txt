@@ -1,0 +1,63 @@
+DRINKS product_keys vs data check
+colorant_data.json: OK
+   name_product: 21 вхождений
+   composition: 21 вхождений
+   dosage: 21 вхождений
+   color: 21 вхождений
+flavor_data.json: OK
+   name_product: 208 вхождений
+   product_code: 208 вхождений
+sweeteners_data.json: OK
+   name_product: 23 вхождений
+   sweetness_coefficient: 23 вхождений
+   composition: 23 вхождений
+juce_recipes.json: FAIL
+   recipe_name: 17 вхождений
+   variants: 17 вхождений
+   process_stages: 0 вхождений
+club_recipes.json: FAIL
+   recipe_name: 10 вхождений
+   variants: 10 вхождений
+   process_stages: 0 вхождений
+energy_recipes.json: FAIL
+   recipe_name: 4 вхождений
+   variants: 4 вхождений
+   process_stages: 0 вхождений
+cold_tea_recipes.json: FAIL
+   recipe_name: 4 вхождений
+   variants: 4 вхождений
+   process_stages: 0 вхождений
+drink_snaps_recipes.json: FAIL
+   recipe_name: 10 вхождений
+   variants: 10 вхождений
+   process_stages: 0 вхождений
+jelly_recipes.json: FAIL
+   recipe_name: 10 вхождений
+   variants: 10 вхождений
+   process_stages: 0 вхождений
+kvas_gost_recipes.json: FAIL
+   recipe_name: 10 вхождений
+   variants: 10 вхождений
+   process_stages: 0 вхождений
+malt_recipes.json: FAIL
+   recipe_name: 8 вхождений
+   variants: 8 вхождений
+   process_stages: 0 вхождений
+retro_recipes.json: FAIL
+   recipe_name: 36 вхождений
+   variants: 36 вхождений
+   process_stages: 0 вхождений
+vegetable_extract_recipes.json: FAIL
+   recipe_name: 12 вхождений
+   variants: 12 вхождений
+   process_stages: 0 вхождений
+mixture_data.json: OK
+   name_product: 12 вхождений
+   composition: 7 вхождений
+   dosage: 7 вхождений
+various_data.json: OK
+   name_product: 14 вхождений
+   has_E_code: 8 вхождений
+   dosage: 12 вхождений
+
+ИТОГО: файлов проверено 15, проблемных 10
