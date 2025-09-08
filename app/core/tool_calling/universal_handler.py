@@ -35,6 +35,7 @@ class IndustryMappingsLoader:
         "04": "milk",      # Молочная
         "00": "selo",      # Сельнозпродукция
         "03": "fat_and_oil",  # Масложировая отрасль
+        "09": "drinks",    # Напитки
     }
     
     @staticmethod
