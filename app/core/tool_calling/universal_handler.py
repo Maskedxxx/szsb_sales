@@ -166,6 +166,14 @@ class UniversalIndustryHandler(BaseToolHandler):
             if hasattr(response, 'choices') and response.choices:
                 message = response.choices[0].message
                 if hasattr(message, 'tool_calls') and message.tool_calls:
+                    # Если модель вернула несколько tool-calls, трактуем это как запрос на полный список
+                    # и пропускаем вызов инструмента (fallback к неотфильтрованным данным)
+                    try:
+                        if len(message.tool_calls) > 1:
+                            self.logger.info("Обнаружено >1 tool-call — пропускаем инструмент и оставляем весь список")
+                            return FilterParameters(tool_name="", parameters={})
+                    except Exception:
+                        pass
                     tool_call = message.tool_calls[0]
                     tool_name = tool_call.function.name
                     tool_params = json.loads(tool_call.function.arguments)
