@@ -35,6 +35,7 @@ class IndustryMappingsLoader:
         "04": "milk",      # Молочная
         "00": "selo",      # Сельнозпродукция
         "03": "fat_and_oil",  # Масложировая отрасль
+        "09": "drinks",    # Напитки
     }
     
     @staticmethod
@@ -144,7 +145,7 @@ class UniversalIndustryHandler(BaseToolHandler):
             return FilterParameters(tool_name="", parameters={})
             
         try:
-            # Строгий системный промпт (как в Milk)
+            # Строгий системный промпт с правилами безопасного вызова
             system_prompt = self._get_strict_system_prompt()
             
             # Подготавливаем инструменты для LLM
@@ -165,15 +166,46 @@ class UniversalIndustryHandler(BaseToolHandler):
             if hasattr(response, 'choices') and response.choices:
                 message = response.choices[0].message
                 if hasattr(message, 'tool_calls') and message.tool_calls:
+                    # Если модель вернула несколько tool-calls, трактуем это как запрос на полный список
+                    # и пропускаем вызов инструмента (fallback к неотфильтрованным данным)
+                    try:
+                        if len(message.tool_calls) > 1:
+                            self.logger.info("Обнаружено >1 tool-call — пропускаем инструмент и оставляем весь список")
+                            return FilterParameters(tool_name="", parameters={})
+                    except Exception:
+                        pass
                     tool_call = message.tool_calls[0]
                     tool_name = tool_call.function.name
                     tool_params = json.loads(tool_call.function.arguments)
-                    
-                    # Убираем null значения для чистоты
-                    clean_params = {k: v for k, v in tool_params.items() if v is not None and str(v).strip()}
-                    
-                    return FilterParameters(tool_name=tool_name, parameters=clean_params)
-            
+
+                    # Список допустимых enum-значений по каждому полю из схемы
+                    allowed_by_field: Dict[str, set] = {}
+                    try:
+                        if schemas:
+                            props = schemas[0]["function"]["parameters"].get("properties", {})
+                            for field, meta in props.items():
+                                enums = meta.get("enum", [])
+                                allowed_by_field[field] = {e for e in enums if e is not None}
+                    except Exception:
+                        allowed_by_field = {}
+
+                    # Нормализуем параметры: убираем пустые/None и значения вне enum
+                    normalized: Dict[str, Any] = {}
+                    for k, v in (tool_params or {}).items():
+                        if v is None:
+                            continue
+                        sval = str(v).strip()
+                        if not sval:
+                            continue
+                        allowed = allowed_by_field.get(k)
+                        if allowed is not None and sval not in allowed:
+                            # Значение вне допустимого enum — пропускаем
+                            continue
+                        normalized[k] = sval
+
+                    if normalized:
+                        return FilterParameters(tool_name=tool_name, parameters=normalized)
+
             self.logger.warning("LLM не вернул tool call")
             return FilterParameters(tool_name="", parameters={})
             
@@ -346,17 +378,21 @@ class UniversalIndustryHandler(BaseToolHandler):
         }
     
     def _get_strict_system_prompt(self) -> str:
-        """Возвращает строгий системный промпт (как в Milk)."""
+        """Возвращает строгий системный промпт c явными правилами для безопасного вызова инструмента."""
         industry_name = IndustryMappingsLoader.INDUSTRY_MAPPING[self.subsector_id]
         
-        return f"""Ты - эксперт по анализу запросов пользователей для системы {industry_name}.
-Твоя задача - проанализировать запрос и выбрать подходящий инструмент для фильтрации продуктов.
+        return f"""Ты — эксперт по анализу запросов пользователей для системы {industry_name}.
+Твоя задача — при необходимости отфильтровать продукты с помощью предоставленного инструмента.
 
-ВАЖНО: Ты ДОЛЖЕН вызвать инструмент ТОЛЬКО ОДИН РАЗ. Никогда не делай несколько вызовов инструмента.
-Используй предоставленный инструмент для точной фильтрации продуктов по критериям из запроса.
-Если в запросе несколько критериев, выбери самый важный для начальной фильтрации.
+Правила вызова инструмента:
+- Необязательный вызов: вызывай инструмент только если есть ХОТЯ БЫ ОДИН параметр, которому однозначно соответствует одно из допустимых значений (enum) из схемы.
+- Ровно один вызов: если вызываешь — только один раз.
+- Привязка к запросу: выбирай значение ТОЛЬКО если оно явно встречается в тексте запроса (или его очевидный синоним/вариант написания из домена). Если в запросе нет явного упоминания конкретного значения из enum — ставь null.
+- Никаких подмен: Если явного нужного значения в enum нет — оставь null.
+- Выбор значений: для каждого параметра выбирай строго одно допустимое значение из enum или null, если параметр не применим.
+- Никаких догадок: если подходящих значений нет, не подбирай «на глаз», укажи null для таких параметров. Если все параметры null — НЕ вызывай инструмент вообще.
 
-Обязательно выбери только ОДНО значение для каждого параметра или null если параметр не нужен."""
+Учитывай смысл запроса и выбирай только те параметры, которые действительно помогают фильтровать результаты по запросу пользователя."""
     
     def _convert_schema_to_llm_tool(self, schema: ToolSchema) -> Dict:
         """Конвертирует схему в формат для LLM."""
