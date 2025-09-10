@@ -13,11 +13,6 @@ MEAT_KEYS_MAPPING = {
                 "filter_impact": "Позволяет искать по названию продукта, бренду (ГОСАРОМ®, DEL'AR®) и типу добавки",
                 "data_type": "string"
             },
-            "description": {
-                "description": "Описание добавки и ее состава",
-                "filter_impact": "Позволяет фильтровать по ингредиентам, составу и характеристикам смеси",
-                "data_type": "string"
-            },
             "application": {
                 "description": "Область применения добавки",
                 "filter_impact": "Позволяет фильтровать по типу колбасных изделий и ценовому сегменту",
@@ -58,20 +53,10 @@ MEAT_KEYS_MAPPING = {
                 "filter_impact": "Позволяет фильтровать по типу микроорганизмов и штаммов",
                 "data_type": "array"
             },
-            "dosage_text": {
-                "description": "Рекомендуемая дозировка применения",
-                "filter_impact": "Позволяет фильтровать по дозировке и концентрации",
-                "data_type": "string"
-            },
             "advantages": {
                 "description": "Технологические преимущества использования",
                 "filter_impact": "Позволяет фильтровать по функциональным свойствам и эффектам",
                 "data_type": "array"
-            },
-            "description": {
-                "description": "Описание продукта",
-                "filter_impact": "Позволяет фильтровать по характеристикам и свойствам продукта",
-                "data_type": "string"
             },
             "is_halal": {
                 "description": "Халяльная сертификация",
@@ -88,16 +73,6 @@ MEAT_KEYS_MAPPING = {
                 "filter_impact": "Позволяет искать по типу начинки, вкусу и бренду продукта",
                 "data_type": "string"
             },
-            "description": {
-                "description": "Описание продукта и его характеристик",
-                "filter_impact": "Позволяет фильтровать по составу, свойствам и особенностям начинки",
-                "data_type": "string"
-            },
-            "packaging_info": {
-                "description": "Информация об упаковке продукта",
-                "filter_impact": "Позволяет фильтровать по типу и размеру упаковки (только для сыров)",
-                "data_type": "string"
-            }
         }
     },
     "flavorings.json": {
@@ -153,16 +128,6 @@ MEAT_KEYS_MAPPING = {
                 "filter_impact": "Позволяет искать по названию продукта, бренду (DEL'AR®, DENFAI®, Millgri®) и типу смеси",
                 "data_type": "string"
             },
-            "description": {
-                "description": "Описание продукта и его характеристик",
-                "filter_impact": "Позволяет фильтровать по составу, свойствам и назначению смеси",
-                "data_type": "string"
-            },
-            "dosage_text": {
-                "description": "Рекомендуемая дозировка и пропорции применения",
-                "filter_impact": "Позволяет фильтровать по дозировке (кг смеси на л воды, г на г сырья)",
-                "data_type": "string"
-            },
             "flavor_profile": {
                 "description": "Профиль вкуса и аромата панировочных смесей",
                 "filter_impact": "Позволяет фильтровать по вкусовым характеристикам и составу специй",
@@ -188,24 +153,9 @@ MEAT_KEYS_MAPPING = {
                 "filter_impact": "Позволяет искать по названию продукта и бренду (AiBi®, DEL'AR®, DENFAI®, Esco®)",
                 "data_type": "string"
             },
-            "description": {
-                "description": "Описание продукта и его свойств",
-                "filter_impact": "Позволяет фильтровать по характеристикам и назначению продукта",
-                "data_type": "string"
-            },
-            "dosage_text": {
-                "description": "Текстовая инструкция по дозировке",
-                "filter_impact": "Позволяет фильтровать по способу применения и концентрации",
-                "data_type": "string"
-            },
             "dosage_percentage": {
                 "description": "Дозировка в процентном выражении",
                 "filter_impact": "Позволяет фильтровать по уровню концентрации в процентах",
-                "data_type": "string"
-            },
-            "recommendations": {
-                "description": "Рекомендации по применению продукта",
-                "filter_impact": "Позволяет фильтровать по условиям применения и составу",
                 "data_type": "string"
             },
             "application": {
@@ -231,16 +181,6 @@ MEAT_KEYS_MAPPING = {
             "name": {
                 "description": "Название технологического средства",
                 "filter_impact": "Позволяет искать по названию продукта и типу технологического решения",
-                "data_type": "string"
-            },
-            "description": {
-                "description": "Описание продукта и его технологических свойств",
-                "filter_impact": "Позволяет фильтровать по характеристикам и назначению средства",
-                "data_type": "string"
-            },
-            "dosage_text": {
-                "description": "Текстовая инструкция по дозировке и применению",
-                "filter_impact": "Позволяет фильтровать по способу применения и рецептурным соотношениям",
                 "data_type": "string"
             },
             "dosage": {
@@ -278,11 +218,6 @@ MEAT_KEYS_MAPPING = {
                 "filter_impact": "Позволяет искать по названию продукта и бренду (DEL'AR®)",
                 "data_type": "string"
             },
-            "description": {
-                "description": "Описание состава и характеристик смеси",
-                "filter_impact": "Позволяет фильтровать по составу специй и свойствам продукта",
-                "data_type": "string"
-            },
             "application": {
                 "description": "Область применения и ценовые сегменты",
                 "filter_impact": "Позволяет фильтровать по типу полуфабрикатов и ценовой категории",
@@ -302,11 +237,6 @@ MEAT_KEYS_MAPPING = {
                 "description": "Структурированная дозировка с минимальными и максимальными значениями",
                 "filter_impact": "Позволяет фильтровать по диапазону дозировок (г/кг)",
                 "data_type": "object"
-            },
-            "dosage_text": {
-                "description": "Текстовая инструкция по дозировке",
-                "filter_impact": "Позволяет фильтровать по способу применения и концентрации",
-                "data_type": "string"
             },
             "is_halal": {
                 "description": "Халяльная сертификация продукта",
@@ -328,24 +258,9 @@ MEAT_KEYS_MAPPING = {
                 "filter_impact": "Позволяет искать по названию и бренду (Гелеон®, DEL'AR®, Golden Line®, Startline®, Denmilk®, Miligri®)",
                 "data_type": "string"
             },
-            "description": {
-                "description": "Описание применения и технологических свойств",
-                "filter_impact": "Позволяет фильтровать по функциональному назначению и характеристикам",
-                "data_type": "string"
-            },
-            "dosage_text": {
-                "description": "Инструкция по дозировке и способу применения",
-                "filter_impact": "Позволяет фильтровать по концентрации и технологии использования",
-                "data_type": "string"
-            },
             "application": {
                 "description": "Конкретная область применения системы",
                 "filter_impact": "Позволяет фильтровать по типу производственного процесса",
-                "data_type": "string"
-            },
-            "composition_and_dosage": {
-                "description": "Состав и дозировка для сложных систем",
-                "filter_impact": "Позволяет фильтровать по составу компонентов и рецептуре",
                 "data_type": "string"
             },
             "flavor_profile": {
