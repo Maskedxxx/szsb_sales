@@ -549,11 +549,17 @@ MEAT_ENUM_MAPPING = {
         "stabilizers": {
             "name": {
                 "product_types": ["стабилизаторы"]
+            },
+            "is_halal": {
+                "halal_status": ["халяль", "не_халяль", "не_указано"]
             }
         },
         "thermostable_fillings": {
             "name": {
                 "product_types": ["термостабильные_начинки"]
+            },
+            "is_halal": {
+                "halal_status": ["халяль", "не_халяль", "не_указано"]
             }
         }
     }
