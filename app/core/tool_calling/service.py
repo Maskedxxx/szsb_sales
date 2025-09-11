@@ -69,6 +69,16 @@ class ToolService:
             self.registry.register_handler("09", handler_drinks)
             self.logger.info("Универсальный Drinks хендлер зарегистрирован")
             
+            # Регистрируем универсальный хендлер для Semi-finished
+            handler_semi_finished = UniversalIndustryHandler("02", self.llm_service)
+            self.registry.register_handler("02", handler_semi_finished)
+            self.logger.info("Универсальный Semi-finished хендлер зарегистрирован")
+            
+            # Регистрируем универсальный хендлер для Meat
+            handler_meat = UniversalIndustryHandler("08", self.llm_service)
+            self.registry.register_handler("08", handler_meat)
+            self.logger.info("Универсальный Meat хендлер зарегистрирован")
+            
             # В будущем: добавление новых отраслей сводится к одной строке:
             # handler_bakery = UniversalIndustryHandler("07", self.llm_service)
             # self.registry.register_handler("07", handler_bakery)
