@@ -528,8 +528,10 @@ class HandlerRegistry:
     def __init__(self):
         self.supported_industries = {
             "01": "horeca",
-            "02": "milk", 
-            "05": "drinks"  # <-- Добавляем новую отрасль
+            "02": "semi_finished",
+            "04": "milk",
+            "08": "meat",
+            "09": "drinks"  # <-- Добавляем новую отрасль
         }
 ```
 
