@@ -243,7 +243,7 @@ MEAT_ENUM_MAPPING = {
                 "brands": ["del_ar", "densoy"]
             },
             "is_e_free": {
-                "e_additives": ["содержит_e_добавки"]
+                "e_additives": ["содержит_e_добавки", "без_E_добавок"]
             }
         },
         "soup_mixes": {

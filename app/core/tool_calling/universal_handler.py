@@ -32,9 +32,11 @@ class IndustryMappingsLoader:
     
     INDUSTRY_MAPPING = {
         "01": "horeca",    # HoReCa
+        "02": "semi_finished", # Полуфабрикаты отрасль
         "04": "milk",      # Молочная
         "00": "selo",      # Сельнозпродукция
         "03": "fat_and_oil",  # Масложировая отрасль
+        "08": "meat",      # Мясная отрасль
         "09": "drinks",    # Напитки
     }
     
