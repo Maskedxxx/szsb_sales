@@ -1,0 +1,1 @@
+# Ice cream industry mappings package

@@ -1,0 +1,1 @@
+# Ice cream industry mappings module for Tool Calling
