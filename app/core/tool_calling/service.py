@@ -84,6 +84,11 @@ class ToolService:
             self.registry.register_handler("07", handler_bakery)
             self.logger.info("Универсальный Bakery хендлер зарегистрирован")
             
+            # Регистрируем универсальный хендлер для Ice Cream
+            handler_ice_cream = UniversalIndustryHandler("05", self.llm_service)
+            self.registry.register_handler("05", handler_ice_cream)
+            self.logger.info("Универсальный Ice Cream хендлер зарегистрирован")
+            
         except Exception as e:
             self.logger.error(f"Ошибка регистрации универсальных хендлеров: {e}")
             self.logger.warning("Будет использован fallback режим")
