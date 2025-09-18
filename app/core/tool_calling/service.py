@@ -79,9 +79,10 @@ class ToolService:
             self.registry.register_handler("08", handler_meat)
             self.logger.info("Универсальный Meat хендлер зарегистрирован")
             
-            # В будущем: добавление новых отраслей сводится к одной строке:
-            # handler_bakery = UniversalIndustryHandler("07", self.llm_service)
-            # self.registry.register_handler("07", handler_bakery)
+            # Регистрируем универсальный хендлер для Bakery
+            handler_bakery = UniversalIndustryHandler("07", self.llm_service)
+            self.registry.register_handler("07", handler_bakery)
+            self.logger.info("Универсальный Bakery хендлер зарегистрирован")
             
         except Exception as e:
             self.logger.error(f"Ошибка регистрации универсальных хендлеров: {e}")
